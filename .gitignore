@@ -1,0 +1,8 @@
+# Private files
+.*
+!.gitignore
+
+# Binary
+bin/
+
+# Others
