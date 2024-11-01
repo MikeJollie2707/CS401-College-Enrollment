@@ -1,3 +1,5 @@
+package objects;
+
 import java.util.*;
 public class University {
     private String id;

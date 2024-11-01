@@ -1,3 +1,5 @@
+package objects;
+
 import java.sql.Time;
 
 public class ScheduleEntry {
