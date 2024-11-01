@@ -1,6 +1,9 @@
 package objects;
 
 import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
 public class University {
     private String id;
     private String name;
@@ -20,8 +23,12 @@ public class University {
         return courses;
     }
 
-    public List<Course> getCoursesByFilter(filter course boolean) {
-
+    public List<Course> getCoursesByFilter(Predicate<Course> filter) {
+        List<Course> courses = catalog.values()
+                .stream()
+                .filter(filter)
+                .collect(Collectors.toList());
+        return courses;
     }
 
     public Course getCourseByID(String courseID) {
