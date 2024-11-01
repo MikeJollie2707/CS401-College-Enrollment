@@ -25,16 +25,12 @@ public class University {
     }
 
     public Course getCourseByID(String courseID) {
-        if (catalog.isEmpty()){
+        if (catalog.isEmpty()) {
             return null;
         }
-        for (int i = 0; i < catalog.size(); i++) {
-            if (catalog.get(i).getID().equals(courseID)) {
-                return catalog.get(i);
-            }
-        }
-        return null;
+        return catalog.get(courseID);
     }
+
     public void addCourse(Course course) {
         catalog.put(course.getID(), course);
     }
@@ -55,12 +51,13 @@ public class University {
     }
 
     public void addStudent(Student student) {
-        students.put(student.getName(), student);
+        students.put(student.getID(), student);
     }
 
     public void addInstructor(Instructor instructor) {
-        instructors.put(instructor.getName(), instructor);
+        instructors.put(instructor.getID(), instructor);
     }
+
     public String getName() {
         return name;
     }
