@@ -3,6 +3,7 @@ package objects;
 import java.util.*;
 
 public class Course {
+    private static int _id = 0;
     private String id;
     private String prefix;
     private String number;
@@ -11,6 +12,9 @@ public class Course {
     private List<Section> sections;
 
     public Course(String prefix, String number, String description) {
+        id = String.format("course_%d", _id);
+        ++_id;
+
         this.prefix = prefix;
         this.number = number;
         this.description = description;
@@ -19,6 +23,7 @@ public class Course {
     public void insertPrereq(Course course) {
         prerequisites.add(course);
     }
+
     public void delPrereq(String courseID) {
         for (int i = 0; i < prerequisites.size(); i++) {
             if (prerequisites.get(i).getID().equals(courseID)) {
@@ -27,9 +32,11 @@ public class Course {
             }
         }
     }
+
     public void insertSection(Section section) {
         sections.add(section);
     }
+
     public void delSection(String sectionID) {
         for (int i = 0; i < sections.size(); i++) {
             if (sections.get(i).getID().equals(sectionID)) {

@@ -5,6 +5,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class University {
+    private static int _id = 0;
     private String id;
     private String name;
     private String location;
@@ -14,12 +15,20 @@ public class University {
     private Map<String, Instructor> instructors;
 
     public University(String name, String location) {
+        id = String.format("uni_%d", _id);
+        ++_id;
+
         this.name = name;
         this.location = location;
+
+        admins = new ArrayList<>();
+        catalog = new HashMap<>();
+        students = new HashMap<>();
+        instructors = new HashMap<>();
     }
 
     public List<Course> getAllCourses() {
-        List<Course> courses = new ArrayList<Course>(catalog.values());
+        List<Course> courses = new ArrayList<>(catalog.values());
         return courses;
     }
 
@@ -43,7 +52,7 @@ public class University {
     }
 
     public void delCourse(String courseID) {
-        catalog.remove(getCourseByID(courseID));
+        catalog.remove(getCourseByID(courseID).getID());
     }
 
     public void editCourse(Course course) {
