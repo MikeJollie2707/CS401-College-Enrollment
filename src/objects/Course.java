@@ -8,7 +8,7 @@ public class Course {
     private String prefix;
     private String number;
     private String description;
-    private List<String> prerequisites;
+    private Set<String> prerequisites;
     private List<Section> sections;
 
     public Course(String prefix, String number, String description) {
@@ -19,7 +19,7 @@ public class Course {
         this.number = number;
         this.description = description;
 
-        prerequisites = new ArrayList<>();
+        prerequisites = new HashSet<>();
         sections = new ArrayList<>();
     }
 
@@ -28,9 +28,9 @@ public class Course {
     }
 
     public void delPrereq(String courseID) {
-        for (int i = 0; i < prerequisites.size(); i++) {
-            if (prerequisites.get(i).equals(courseID)) {
-                prerequisites.remove(i);
+        for (var prereq: prerequisites) {
+            if (prereq.equals(courseID)) {
+                prerequisites.remove(prereq);
                 return;
             }
         }
@@ -65,7 +65,7 @@ public class Course {
         return description;
     }
 
-    public List<String> getPrerequisites() {
+    public Set<String> getPrerequisites() {
         return prerequisites;
     }
 
