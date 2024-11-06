@@ -52,8 +52,9 @@ public class Section implements Serializable {
             }
         }
     }
+
     public boolean isFull() {
-        return (max_capacity + max_wait) == enrolled.size() + waitlisted.size();
+        return (enrolled.size() + waitlisted.size()) >= (max_capacity + max_wait);
     }
 
     public boolean isActive() {
@@ -100,7 +101,7 @@ public class Section implements Serializable {
         this.number = num;
     }
 
-    public void setActiveState(Boolean state) {
+    public void setActiveState(boolean state) {
         this.active = state;
     }
 
