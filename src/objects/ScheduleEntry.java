@@ -1,9 +1,10 @@
 package objects;
 
+import java.io.Serializable;
 import java.time.DayOfWeek;
 import java.time.OffsetTime;
 
-public class ScheduleEntry {
+public class ScheduleEntry implements Serializable {
     private String location;
     private boolean is_sync;
     private DayOfWeek day_of_week;
@@ -15,6 +16,11 @@ public class ScheduleEntry {
         this.location = location;
         this.is_sync = is_sync;
         this.day_of_week = day_of_week;
+
+        if (end_time.isBefore(start_time) && end_time.isEqual(start_time)) {
+            throw new IllegalArgumentException("'end_time' must be strictly after 'start_time'");
+        }
+
         this.start_time = start_time;
         this.end_time = end_time;
     }

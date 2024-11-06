@@ -1,10 +1,11 @@
 package objects;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class University {
+public class University implements Serializable {
     private static int _id = 0;
     private String id;
     private String name;
@@ -40,6 +41,12 @@ public class University {
         return courses;
     }
 
+    /**
+     * Return a course in the catalog by its ID.
+     * 
+     * @param courseID The course's ID to search.
+     * @return The requested Course or null if not found.
+     */
     public Course getCourseByID(String courseID) {
         if (catalog.isEmpty()) {
             return null;
@@ -48,18 +55,34 @@ public class University {
     }
 
     public void addCourse(Course course) {
-        catalog.put(course.getID(), course);
+        if (catalog.containsKey(course.getID())) {
+            // TODO: Raise error.
+            return;
+        }
+
+        if (!isCycle(course, course.getPrerequisites())) {
+            catalog.put(course.getID(), course);
+        }
     }
 
     public void delCourse(String courseID) {
         catalog.remove(getCourseByID(courseID).getID());
     }
 
-    public void editCourse(Course course) {
-        Course newCourse = getCourseByID(course.getID());
-        newCourse.setDescription(course.getDescription());
-        newCourse.setNumber(course.getNumber());
-        newCourse.setPrefix(course.getPrefix());
+    public void editCourse(Course newCourse) {
+        Course oldCourse = getCourseByID(newCourse.getID());
+        if (oldCourse == null) {
+            // TODO: Raise error
+            return;
+        }
+
+        Set<String> newPrereqs = newCourse.getPrerequisites();
+        // Check if new prereqs cause cycle.
+        if (!isCycle(oldCourse, newPrereqs)) {
+            // NOTE: Check for existing prefix+number?
+            catalog.put(oldCourse.getID(), newCourse);
+        }
+
     }
 
     public void addAdmin(Administrator admin) {
@@ -100,5 +123,49 @@ public class University {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    /**
+     * Check whether the given course would create a cycle for a given list of
+     * prerequisites.
+     * 
+     * @param course  The course to check.
+     * @param prereqs The list of course ID. This is usually
+     *                {@code course.getPrerequisites()}.
+     * @return true if there is a cycle, false otherwise.
+     */
+    private boolean isCycle(Course course, Set<String> prereqs) {
+        if (prereqs == null || prereqs.size() == 0) {
+            return false;
+        }
+
+        // bfs cuz a course typically doesn't have a lot of prereq
+        // and a prereq may span unexpectedly deep.
+        Set<String> nextPrereqs = new HashSet<>();
+        for (var prereqID : prereqs) {
+            /**
+             * This is before course existent check bcuz of sth like
+             * course0 prereq is course1 and course1 is prereq of course0
+             * Then you add course0 and course1 to catalog in that order.
+             * If course existent check is before this check, it'll skip and add
+             * course1 to catalog, which shouldn't happen (only course0 is allowed).
+             */
+            if (course.getID().equals(prereqID)) {
+                return true;
+            }
+
+            Course prereqCourse = getCourseByID(prereqID);
+            if (prereqCourse == null) {
+                // Remove prereqID from the prereqs somehow?
+                // Use a different loop type to do the removal.
+                continue;
+            }
+
+            for (var nextPrereq : prereqCourse.getPrerequisites()) {
+                nextPrereqs.add(nextPrereq);
+            }
+        }
+
+        return isCycle(course, nextPrereqs);
     }
 }

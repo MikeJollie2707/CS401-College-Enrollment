@@ -1,14 +1,15 @@
 package objects;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class Course {
+public class Course implements Serializable {
     private static int _id = 0;
     private String id;
     private String prefix;
     private String number;
     private String description;
-    private List<Course> prerequisites;
+    private Set<String> prerequisites;
     private List<Section> sections;
 
     public Course(String prefix, String number, String description) {
@@ -18,16 +19,19 @@ public class Course {
         this.prefix = prefix;
         this.number = number;
         this.description = description;
+
+        prerequisites = new HashSet<>();
+        sections = new ArrayList<>();
     }
 
     public void insertPrereq(Course course) {
-        prerequisites.add(course);
+        prerequisites.add(course.getID());
     }
 
     public void delPrereq(String courseID) {
-        for (int i = 0; i < prerequisites.size(); i++) {
-            if (prerequisites.get(i).getID().equals(courseID)) {
-                prerequisites.remove(i);
+        for (var prereq: prerequisites) {
+            if (prereq.equals(courseID)) {
+                prerequisites.remove(prereq);
                 return;
             }
         }
@@ -62,7 +66,7 @@ public class Course {
         return description;
     }
 
-    public List<Course> getPrerequisites() {
+    public Set<String> getPrerequisites() {
         return prerequisites;
     }
 

@@ -1,8 +1,9 @@
 package objects;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Section {
+public class Section implements Serializable {
     private String id;
     private Course course;
     private String number;
@@ -32,10 +33,13 @@ public class Section {
         }
         return EnrollStatus.UNSUCCESSFUL;
     }
+
     public void dropStudent(String studentID) {
         for (int i = 0; i < enrolled.size(); i++) {
             if (enrolled.get(i).getID().equals(studentID)) {
                 enrolled.remove(i);
+                enrolled.get(i).drop(getID());
+                moveToEnroll();
                 return;
             }
         }
@@ -43,12 +47,14 @@ public class Section {
         for (int i = 0; i < waitlisted.size(); i++) {
             if (waitlisted.get(i).getID().equals(studentID)) {
                 waitlisted.remove(i);
+                waitlisted.get(i).drop(getID());
                 return;
             }
         }
     }
+
     public boolean isFull() {
-        return (max_capacity + max_wait) == enrolled.size() + waitlisted.size();
+        return (enrolled.size() + waitlisted.size()) >= (max_capacity + max_wait);
     }
 
     public boolean isActive() {
@@ -95,15 +101,62 @@ public class Section {
         this.number = num;
     }
 
-    public void setActiveState(Boolean state) {
+    public void setActiveState(boolean state) {
         this.active = state;
     }
 
+    /**
+     * Set the max capacity of this course to the specified value.
+     * <p>
+     * If the provided value is smaller than the current enroll list, the method
+     * will drop as many students as possible (starting from last place) to reach
+     * the new value.
+     * <p>
+     * If the provided value is larger than the current enroll list, the method will
+     * move as many students as possible from the waitlist (starting from the first
+     * place) to reach the new value.
+     * 
+     * @param cap The new course capacity.
+     */
     public void setMaxCapacity(int cap) {
+        if (cap <= 0) {
+            // TODO: Do something about this.
+
+        }
+
+        if (cap < enrolled.size()) {
+            while (cap < enrolled.size()) {
+                Student student = enrolled.removeLast();
+                waitlisted.addFirst(student);
+            }
+            setMaxWaitSize(max_wait);
+        } else if (cap > enrolled.size()) {
+            while (cap > enrolled.size()) {
+                moveToEnroll();
+            }
+        }
+
         this.max_capacity = cap;
     }
 
+    /**
+     * Set the max waitlist size to the specified value and drop students that
+     * exceed this value.
+     * <p>
+     * If wait < waitlisted.size(), this method will drop students from the last
+     * student to the most current.
+     * 
+     * @param wait A positive value indicating the max size of the waitlist.
+     */
     public void setMaxWaitSize(int wait) {
+        if (wait <= 0) {
+            // TODO: Do something about this.
+        }
+
+        while (wait < waitlisted.size()) {
+            waitlisted.removeLast();
+        }
+
         this.max_wait = wait;
     }
 
@@ -113,5 +166,24 @@ public class Section {
 
     public void setSchedule(ScheduleEntry[] schedule) {
         this.schedule = schedule;
+    }
+
+    /**
+     * Attempt to shift a student from the first place in waitlist to the enrollment
+     * list.
+     * <p>
+     * This method does nothing if there's no one in the waitlist or if the
+     * enrollment list is already full.
+     */
+    private void moveToEnroll() {
+        if (waitlisted.size() == 0) {
+            return;
+        }
+        if (enrolled.size() >= max_capacity) {
+            return;
+        }
+
+        Student student = waitlisted.removeFirst();
+        enrolled.addLast(student);
     }
 }

@@ -1,8 +1,9 @@
 package objects;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Instructor {
+public class Instructor implements Serializable {
     private static int _id = 0;
     private String id;
     private Account account;
