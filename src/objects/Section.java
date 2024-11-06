@@ -1,8 +1,9 @@
 package objects;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Section {
+public class Section implements Serializable {
     private String id;
     private Course course;
     private String number;
