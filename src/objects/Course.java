@@ -8,7 +8,7 @@ public class Course {
     private String prefix;
     private String number;
     private String description;
-    private List<Course> prerequisites;
+    private List<String> prerequisites;
     private List<Section> sections;
 
     public Course(String prefix, String number, String description) {
@@ -18,15 +18,18 @@ public class Course {
         this.prefix = prefix;
         this.number = number;
         this.description = description;
+
+        prerequisites = new ArrayList<>();
+        sections = new ArrayList<>();
     }
 
     public void insertPrereq(Course course) {
-        prerequisites.add(course);
+        prerequisites.add(course.getID());
     }
 
     public void delPrereq(String courseID) {
         for (int i = 0; i < prerequisites.size(); i++) {
-            if (prerequisites.get(i).getID().equals(courseID)) {
+            if (prerequisites.get(i).equals(courseID)) {
                 prerequisites.remove(i);
                 return;
             }
@@ -62,7 +65,7 @@ public class Course {
         return description;
     }
 
-    public List<Course> getPrerequisites() {
+    public List<String> getPrerequisites() {
         return prerequisites;
     }
 
