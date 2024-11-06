@@ -1,8 +1,9 @@
 package objects;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class Course {
+public class Course implements Serializable {
     private static int _id = 0;
     private String id;
     private String prefix;

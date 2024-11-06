@@ -1,10 +1,11 @@
 package objects;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class University {
+public class University implements Serializable {
     private static int _id = 0;
     private String id;
     private String name;

@@ -1,9 +1,10 @@
 package objects;
 
+import java.io.Serializable;
 import java.time.DayOfWeek;
 import java.time.OffsetTime;
 
-public class ScheduleEntry {
+public class ScheduleEntry implements Serializable {
     private String location;
     private boolean is_sync;
     private DayOfWeek day_of_week;

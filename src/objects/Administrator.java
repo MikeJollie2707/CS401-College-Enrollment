@@ -1,6 +1,8 @@
 package objects;
 
-public class Administrator {
+import java.io.Serializable;
+
+public class Administrator implements Serializable {
     private static int _id = 0;
 
     private String id;
