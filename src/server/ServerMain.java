@@ -10,6 +10,9 @@ import java.util.HashMap;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
+import objects.Account;
+import objects.Administrator;
+import objects.Student;
 import objects.University;
 
 public class ServerMain {
@@ -20,6 +23,13 @@ public class ServerMain {
             System.out.println(String.format("Listening on %s:%d", localhost.getHostAddress(), 7777));
 
             University[] universities = loadInfoFromFile("unis.txt");
+
+            // Fake setup
+            // TODO: Remove later.
+            for (int i = 0; i < universities.length; ++i) {
+                universities[i].addAdmin(new Administrator("Admin", new Account("admin", "123456")));
+                universities[i].addStudent(new Student("Steve", new Account("steve", "iamsteve")));
+            }
 
             while (true) {
                 Socket socket = ss.accept();
@@ -61,6 +71,6 @@ public class ServerMain {
         } catch (IOException err) {
             err.printStackTrace();
         }
-        return null;
+        return new University[0];
     }
 }
