@@ -57,7 +57,7 @@ public class ClientHandler implements Runnable {
                                 Account acc = student.getAccount();
                                 if (acc.verify(body.getLoginID(), body.getPassword())) {
                                     isSessionExist = true;
-                                    // Start session.
+                                    new StudentSessionHandler(socket, istream, ostream, uni, student).run();
                                     break;
                                 }
                             }
@@ -67,7 +67,7 @@ public class ClientHandler implements Runnable {
                                     // Instructor may not have account.
                                     if (acc != null && acc.verify(body.getLoginID(), body.getPassword())) {
                                         isSessionExist = true;
-                                        // Start session.
+                                        new InstructorSessionHandler(socket, istream, ostream, uni, instructor).run();
                                         break;
                                     }
                                 }
