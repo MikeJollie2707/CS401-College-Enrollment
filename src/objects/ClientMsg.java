@@ -26,4 +26,12 @@ public class ClientMsg implements Serializable {
     public boolean isEndpoint(String method, String resource) {
         return this.method.equals(method) && this.resource.equals(resource);
     }
+
+    public String getMethod() {
+        return method;
+    }
+
+    public String getResource() {
+        return resource;
+    }
 }
