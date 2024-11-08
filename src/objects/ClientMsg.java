@@ -5,6 +5,8 @@ import java.io.Serializable;
 public class ClientMsg implements Serializable {
     private final String method;
     private final String resource;
+    // It's possible to maybe remove this field
+    // since the server knows who it's talking to anyway.
     private String authorID;
     private Serializable body;
 
