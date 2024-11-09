@@ -25,11 +25,29 @@ public class Section implements Serializable {
     }
 
     public EnrollStatus enrollStudent(Student student) {
+        /**
+         * Check if the student already enrolled/waitlisted.
+         * It's more convenient to return non-error value cuz if there's error,
+         * we'd need to guess what is the error, so make it consistent.
+         */
+        for (var enrolledStudent : enrolled) {
+            if (student.getID().equals(enrolledStudent.getID())) {
+                return EnrollStatus.ENROLLED;
+            }
+        }
+        for (var waitlistedStudent : waitlisted) {
+            if (student.getID().equals(waitlistedStudent.getID())) {
+                return EnrollStatus.WAITLISTED;
+            }
+        }
+
         if (enrolled.size() < max_capacity) {
             enrolled.add(student);
+            student.enroll(this);
             return EnrollStatus.ENROLLED;
         } else if (waitlisted.size() < max_wait) {
             waitlisted.add(student);
+            student.enroll(this);
             return EnrollStatus.WAITLISTED;
         }
         return EnrollStatus.UNSUCCESSFUL;
