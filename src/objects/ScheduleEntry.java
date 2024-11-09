@@ -25,11 +25,8 @@ public class ScheduleEntry implements Serializable {
         this.end_time = end_time;
     }
 
-    public OffsetTime[] getTime() {
-        OffsetTime[] temp = new OffsetTime[2];
-        temp[0] = start_time;
-        temp[1] = end_time;
-        return temp;
+    public Tuple getTime() {
+        return new Tuple(start_time, end_time);
     }
 
     public String getLocation() {
