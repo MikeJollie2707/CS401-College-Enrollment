@@ -25,19 +25,19 @@ public class ScheduleEntry implements Serializable {
         this.end_time = end_time;
     }
 
-    public Tuple getTime() {
+    public synchronized Tuple getTime() {
         return new Tuple(start_time, end_time);
     }
 
-    public String getLocation() {
+    public synchronized String getLocation() {
         return location;
     }
 
-    public DayOfWeek getDayOfWeek() {
+    public synchronized DayOfWeek getDayOfWeek() {
         return day_of_week;
     }
 
-    public boolean isSync() {
+    public synchronized boolean isSync() {
         return is_sync;
     }
 }

@@ -29,12 +29,12 @@ public class University implements Serializable {
         instructors = new HashMap<>();
     }
 
-    public List<Course> getAllCourses() {
+    public synchronized List<Course> getAllCourses() {
         List<Course> courses = new ArrayList<>(catalog.values());
         return courses;
     }
 
-    public List<Course> getCoursesByFilter(Predicate<Course> filter) {
+    public synchronized List<Course> getCoursesByFilter(Predicate<Course> filter) {
         List<Course> courses = catalog.values()
                 .stream()
                 .filter(filter)
@@ -48,39 +48,35 @@ public class University implements Serializable {
      * @param courseID The course's ID to search.
      * @return The requested Course or null if not found.
      */
-    public Course getCourseByID(String courseID) {
+    public synchronized Course getCourseByID(String courseID) {
         if (catalog.isEmpty()) {
             return null;
         }
         return catalog.get(courseID);
     }
 
-    public void addCourse(Course course) {
+    public synchronized void addCourse(Course course) {
         if (catalog.containsKey(course.getID())) {
-        	
-       
-        	System.err.println("Error: Course with this ID already exists.");
+            System.err.println("Error: Course with this ID already exists.");
             return;
         }
 
         if (!isCycle(course, course.getPrerequisites())) {
             catalog.put(course.getID(), course);
-        }
-        else
-        {
-        	System.err.println("Error: Adding The Course WILL Create a Prerequisite Cycle.");
+        } else {
+            System.err.println("Error: Adding The Course WILL Create a Prerequisite Cycle.");
         }
     }
 
-    public void delCourse(String courseID) {
+    public synchronized void delCourse(String courseID) {
         catalog.remove(getCourseByID(courseID).getID());
     }
 
-    public void editCourse(Course newCourse) {
+    public synchronized void editCourse(Course newCourse) {
         Course oldCourse = getCourseByID(newCourse.getID());
         if (oldCourse == null) {
-    
-        	System.err.println("Error: Course is not found in the catalog.");
+
+            System.err.println("Error: Course is not found in the catalog.");
             return;
         }
 
@@ -89,51 +85,49 @@ public class University implements Serializable {
         if (!isCycle(oldCourse, newPrereqs)) {
             // NOTE: Check for existing prefix+number
             catalog.put(oldCourse.getID(), newCourse);
-        }
-        else
-        {
-        	System.err.println("Error: Updating the Course will create a Prerequisite Cycle.");
+        } else {
+            System.err.println("Error: Updating the Course will create a Prerequisite Cycle.");
         }
 
     }
 
-    public void addAdmin(Administrator admin) {
+    public synchronized void addAdmin(Administrator admin) {
         admins.add(admin);
     }
 
-    public void addStudent(Student student) {
+    public synchronized void addStudent(Student student) {
         students.put(student.getID(), student);
     }
 
-    public void addInstructor(Instructor instructor) {
+    public synchronized void addInstructor(Instructor instructor) {
         instructors.put(instructor.getID(), instructor);
     }
 
-    public String getName() {
+    public synchronized String getName() {
         return name;
     }
 
-    public String getLocation() {
+    public synchronized String getLocation() {
         return location;
     }
 
-    public List<Administrator> getAdmins() {
+    public synchronized List<Administrator> getAdmins() {
         return admins;
     }
 
-    public Map<String, Student> getStudents() {
+    public synchronized Map<String, Student> getStudents() {
         return students;
     }
 
-    public Map<String, Instructor> getInstructors() {
+    public synchronized Map<String, Instructor> getInstructors() {
         return instructors;
     }
 
-    public void setName(String name) {
+    public synchronized void setName(String name) {
         this.name = name;
     }
 
-    public void setLocation(String location) {
+    public synchronized void setLocation(String location) {
         this.location = location;
     }
 
@@ -146,7 +140,7 @@ public class University implements Serializable {
      *                {@code course.getPrerequisites()}.
      * @return true if there is a cycle, false otherwise.
      */
-    private boolean isCycle(Course course, Set<String> prereqs) {
+    private synchronized boolean isCycle(Course course, Set<String> prereqs) {
         if (prereqs == null || prereqs.size() == 0) {
             return false;
         }
@@ -155,29 +149,24 @@ public class University implements Serializable {
         // and a prereq may span unexpectedly deep.
         Set<String> nextPrereqs = new HashSet<>();
         Queue<String> queue = new LinkedList<>(prereqs);
-        
-        while(!queue.isEmpty())
-        {
-        	String prereqID = queue.poll();
-        	if (prereqID.equals(course.getID()))
-        	{
-        		return true;
-        	}
-        	
-        	if (!nextPrereqs.contains(prereqID))
-        	{
-        		nextPrereqs.add(prereqID);
-        		Course prereqCourse = getCourseByID(prereqID);
-        		
-        		if (prereqCourse != null)
-        		{
-        			queue.addAll(prereqCourse.getPrerequisites());
-        		}
-        	}
+
+        while (!queue.isEmpty()) {
+            String prereqID = queue.poll();
+            if (prereqID.equals(course.getID())) {
+                return true;
+            }
+
+            if (!nextPrereqs.contains(prereqID)) {
+                nextPrereqs.add(prereqID);
+                Course prereqCourse = getCourseByID(prereqID);
+
+                if (prereqCourse != null) {
+                    queue.addAll(prereqCourse.getPrerequisites());
+                }
+            }
         }
-        
+
         return false;
-        
-       
+
     }
 }

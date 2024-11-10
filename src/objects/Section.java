@@ -24,7 +24,7 @@ public class Section implements Serializable {
         this.instructor = instructor;
     }
 
-    public EnrollStatus enrollStudent(Student student) {
+    public synchronized EnrollStatus enrollStudent(Student student) {
         /**
          * Check if the student already enrolled/waitlisted.
          * It's more convenient to return non-error value cuz if there's error,
@@ -53,7 +53,7 @@ public class Section implements Serializable {
         return EnrollStatus.UNSUCCESSFUL;
     }
 
-    public void dropStudent(String studentID) {
+    public synchronized void dropStudent(String studentID) {
         for (int i = 0; i < enrolled.size(); i++) {
             if (enrolled.get(i).getID().equals(studentID)) {
                 enrolled.remove(i);
@@ -72,55 +72,55 @@ public class Section implements Serializable {
         }
     }
 
-    public boolean isFull() {
+    public synchronized boolean isFull() {
         return (enrolled.size() + waitlisted.size()) >= (max_capacity + max_wait);
     }
 
-    public boolean isActive() {
+    public synchronized boolean isActive() {
         return active;
     }
 
-    public String getID() {
+    public synchronized String getID() {
         return id;
     }
 
-    public Course getCourse() {
+    public synchronized Course getCourse() {
         return course;
     }
 
-    public String getNumber() {
+    public synchronized String getNumber() {
         return number;
     }
 
-    public int getMaxCapacity() {
+    public synchronized int getMaxCapacity() {
         return max_capacity;
     }
 
-    public int getMaxWaitlistSize() {
+    public synchronized int getMaxWaitlistSize() {
         return max_wait;
     }
 
-    public Instructor getInstructor() {
+    public synchronized Instructor getInstructor() {
         return instructor;
     }
 
-    public List<Student> getEnrolled() {
+    public synchronized List<Student> getEnrolled() {
         return enrolled;
     }
 
-    public List<Student> getWaitlisted() {
+    public synchronized List<Student> getWaitlisted() {
         return waitlisted;
     }
 
-    public ScheduleEntry[] getSchedule() {
+    public synchronized ScheduleEntry[] getSchedule() {
         return schedule;
     }
 
-    public void setNumber(String num) {
+    public synchronized void setNumber(String num) {
         this.number = num;
     }
 
-    public void setActiveState(boolean state) {
+    public synchronized void setActiveState(boolean state) {
         this.active = state;
     }
 
@@ -137,7 +137,7 @@ public class Section implements Serializable {
      * 
      * @param cap The new course capacity.
      */
-    public void setMaxCapacity(int cap) {
+    public synchronized void setMaxCapacity(int cap) {
         if (cap <= 0) {
 
             throw new IllegalArgumentException("Capacity must be greater than zero.");
@@ -173,7 +173,7 @@ public class Section implements Serializable {
      * 
      * @param wait A positive value indicating the max size of the waitlist.
      */
-    public void setMaxWaitSize(int wait) {
+    public synchronized void setMaxWaitSize(int wait) {
         if (wait <= 0) {
             throw new IllegalArgumentException("Waitlist size must be greater than zero.");
         }
@@ -186,11 +186,11 @@ public class Section implements Serializable {
 
     }
 
-    public void setInstructor(Instructor instructor) {
+    public synchronized void setInstructor(Instructor instructor) {
         this.instructor = instructor;
     }
 
-    public void setSchedule(ScheduleEntry[] schedule) {
+    public synchronized void setSchedule(ScheduleEntry[] schedule) {
         this.schedule = schedule;
     }
 
@@ -201,7 +201,7 @@ public class Section implements Serializable {
      * This method does nothing if there's no one in the waitlist or if the
      * enrollment list is already full.
      */
-    private void moveToEnroll() {
+    private synchronized void moveToEnroll() {
         if (!waitlisted.isEmpty() && enrolled.size() < max_capacity) {
             Student student = waitlisted.removeFirst();
             enrolled.add(student);

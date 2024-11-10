@@ -17,15 +17,15 @@ public class Administrator implements Serializable {
         this.account = account;
     }
 
-    public String getID() {
+    public synchronized String getID() {
         return id;
     }
 
-    public Account getAccount() {
+    public synchronized Account getAccount() {
         return account;
     }
 
-    public String getName() {
+    public synchronized String getName() {
         return name;
     }
 

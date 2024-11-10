@@ -24,11 +24,11 @@ public class Course implements Serializable {
         sections = new ArrayList<>();
     }
 
-    public void insertPrereq(Course course) {
+    public synchronized void insertPrereq(Course course) {
         prerequisites.add(course.getID());
     }
 
-    public void delPrereq(String courseID) {
+    public synchronized void delPrereq(String courseID) {
         for (var prereq: prerequisites) {
             if (prereq.equals(courseID)) {
                 prerequisites.remove(prereq);
@@ -37,11 +37,11 @@ public class Course implements Serializable {
         }
     }
 
-    public void insertSection(Section section) {
+    public synchronized void insertSection(Section section) {
         sections.add(section);
     }
 
-    public void delSection(String sectionID) {
+    public synchronized void delSection(String sectionID) {
         for (int i = 0; i < sections.size(); i++) {
             if (sections.get(i).getID().equals(sectionID)) {
                 sections.remove(i);
@@ -50,39 +50,39 @@ public class Course implements Serializable {
         }
     }
 
-    public String getID() {
+    public synchronized String getID() {
         return id;
     }
 
-    public String getPrefix() {
+    public synchronized String getPrefix() {
         return prefix;
     }
 
-    public String getNumber() {
+    public synchronized String getNumber() {
         return number;
     }
 
-    public String getDescription() {
+    public synchronized String getDescription() {
         return description;
     }
 
-    public Set<String> getPrerequisites() {
+    public synchronized Set<String> getPrerequisites() {
         return prerequisites;
     }
 
-    public List<Section> getSections() {
+    public synchronized List<Section> getSections() {
         return sections;
     }
 
-    public void setPrefix(String prefix) {
+    public synchronized void setPrefix(String prefix) {
         this.prefix = prefix;
     }
 
-    public void setNumber(String number) {
+    public synchronized void setNumber(String number) {
         this.number = number;
     }
 
-    public void setDescription(String description) {
+    public synchronized void setDescription(String description) {
         this.description = description;
     }
 }
