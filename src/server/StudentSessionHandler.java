@@ -6,6 +6,9 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 import objects.ClientMsg;
+import objects.Course;
+import objects.EnrollStatus;
+import objects.Section;
 import objects.ServerMsg;
 import objects.Student;
 import objects.University;
@@ -84,18 +87,75 @@ public class StudentSessionHandler extends SessionHandler {
     }
 
     private ServerMsg fetchSchedule(ClientMsg req) {
-        return null;
+        // Maybe return ArrayList instead? Idk it's currently easier this way.
+        var enrolling = student.getCurrentSchedule().toArray(new Section[0]);
+        return ServerMsg.asOK(enrolling);
     }
 
     private ServerMsg enroll(ClientMsg req) {
-        return null;
+        try {
+            Section clientSection = (Section) req.getBody();
+            Course clientCourse = clientSection.getCourse();
+            Course course = university.getCourseByID(clientCourse.getID());
+            if (course == null) {
+                return ServerMsg.asERR(String.format("Course ID '%s' not found.", clientCourse.getID()));
+            }
+
+            // TODO: Check for prerequisites.
+
+            Section section = null;
+            for (var s : course.getSections()) {
+                if (clientSection.getID().equals(s.getID())) {
+                    section = s;
+                    break;
+                }
+            }
+            if (section == null) {
+                return ServerMsg.asERR(String.format("Section ID '%s' not found.", clientSection.getID()));
+            }
+
+            EnrollStatus status = section.enrollStudent(student);
+            // NOTE: Not sure if this should be considered an ERR message or an OK message.
+            // Up to client to decide how to handle errors.
+            if (status == EnrollStatus.UNSUCCESSFUL) {
+                return ServerMsg.asERR("Unable to enroll.");
+            }
+
+            return ServerMsg.asOK(status);
+        } catch (ClassCastException err) {
+            return ServerMsg.asERR(String.format("%s", err.getMessage()));
+        }
     }
 
     private ServerMsg drop(ClientMsg req) {
-        return null;
+        try {
+            Section clientSection = (Section) req.getBody();
+            Course clientCourse = clientSection.getCourse();
+            Course course = university.getCourseByID(clientCourse.getID());
+            if (course == null) {
+                return ServerMsg.asERR(String.format("Course ID '%s' not found.", clientCourse.getID()));
+            }
+
+            Section section = null;
+            for (var s : course.getSections()) {
+                if (clientSection.getID().equals(s.getID())) {
+                    section = s;
+                    break;
+                }
+            }
+            if (section == null) {
+                return ServerMsg.asERR(String.format("Section ID '%s' not found.", clientSection.getID()));
+            }
+
+            section.dropStudent(student.getID());
+            return ServerMsg.asOK("");
+        } catch (ClassCastException err) {
+            return ServerMsg.asERR(String.format("%s", err.getMessage()));
+        }
     }
 
     private ServerMsg fetchPastEnrollment(ClientMsg req) {
-        return null;
+        var pastEnrollments = student.getPastEnrollments().toArray(new Section[0]);
+        return ServerMsg.asOK(pastEnrollments);
     }
 }
