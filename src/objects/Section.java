@@ -121,23 +121,26 @@ public class Section implements Serializable {
      */
     public void setMaxCapacity(int cap) {
         if (cap <= 0) {
-      
-        	throw new IllegalArgumentException("Capacity must be greater than zero.");
-        }
 
-      
+            throw new IllegalArgumentException("Capacity must be greater than zero.");
+        }
 
         this.max_capacity = cap;
-        
-     // If the new capacity is less than the current number of enrolled students, move excess students to waitlist
+
+        // If the new capacity is less than the current number of enrolled students,
+        // move excess students to waitlist
         while (enrolled.size() > max_capacity) {
             Student removedStudent = enrolled.removeLast();
-            if (waitlisted.size() < max_wait) {
-                waitlisted.addFirst(removedStudent);
-            }
+            waitlisted.addFirst(removedStudent);
         }
+        // Force remove trailing students.
+        // After the above loop, it's possible some of the last enrolled students
+        // moved to the top of the waitlist, so we drop the students that are last on
+        // the waitlist.
+        setMaxWaitSize(max_wait);
 
-        // If there is space in the enrollment list, move students from waitlist to enrolled
+        // If there is space in the enrollment list, move students from waitlist to
+        // enrolled
         while (enrolled.size() < max_capacity && !waitlisted.isEmpty()) {
             moveToEnroll();
         }
@@ -154,17 +157,15 @@ public class Section implements Serializable {
      */
     public void setMaxWaitSize(int wait) {
         if (wait <= 0) {
-         
-        	throw new IllegalArgumentException("Waitlist size must be greater than zero.");
+            throw new IllegalArgumentException("Waitlist size must be greater than zero.");
         }
-        
+
         this.max_wait = wait;
-        
+
         while (wait < waitlisted.size()) {
             waitlisted.removeLast();
         }
 
-     
     }
 
     public void setInstructor(Instructor instructor) {
@@ -183,9 +184,9 @@ public class Section implements Serializable {
      * enrollment list is already full.
      */
     private void moveToEnroll() {
-    	 if (!waitlisted.isEmpty() && enrolled.size() < max_capacity) {
-             Student student = waitlisted.removeFirst();
-             enrolled.add(student);
-         }
+        if (!waitlisted.isEmpty() && enrolled.size() < max_capacity) {
+            Student student = waitlisted.removeFirst();
+            enrolled.add(student);
+        }
     }
 }
