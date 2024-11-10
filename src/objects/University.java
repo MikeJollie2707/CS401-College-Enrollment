@@ -57,14 +57,14 @@ public class University implements Serializable {
 
     public synchronized void addCourse(Course course) {
         if (catalog.containsKey(course.getID())) {
-            System.err.println("Error: Course with this ID already exists.");
-            return;
+            throw new RuntimeException("Error: Course with this ID already exists.");
         }
 
         if (!isCycle(course, course.getPrerequisites())) {
             catalog.put(course.getID(), course);
         } else {
-            System.err.println("Error: Adding The Course WILL Create a Prerequisite Cycle.");
+            throw new RuntimeException(
+                    String.format("Error: Adding course '%s' will create a prerequisite cycle.", course.getID()));
         }
     }
 
@@ -75,9 +75,7 @@ public class University implements Serializable {
     public synchronized void editCourse(Course newCourse) {
         Course oldCourse = getCourseByID(newCourse.getID());
         if (oldCourse == null) {
-
-            System.err.println("Error: Course is not found in the catalog.");
-            return;
+            throw new RuntimeException("Error: Course is not found in the catalog.");
         }
 
         Set<String> newPrereqs = newCourse.getPrerequisites();
@@ -86,7 +84,8 @@ public class University implements Serializable {
             // NOTE: Check for existing prefix+number
             catalog.put(oldCourse.getID(), newCourse);
         } else {
-            System.err.println("Error: Updating the Course will create a Prerequisite Cycle.");
+            throw new RuntimeException(
+                    String.format("Error: Updating course '%s' will create a prerequisite cycle.", newCourse.getID()));
         }
 
     }
@@ -147,7 +146,7 @@ public class University implements Serializable {
 
         // bfs cuz a course typically doesn't have a lot of prereq
         // and a prereq may span unexpectedly deep.
-        Set<String> nextPrereqs = new HashSet<>();
+        Set<String> checkedPrereqs = new HashSet<>();
         Queue<String> queue = new LinkedList<>(prereqs);
 
         while (!queue.isEmpty()) {
@@ -156,8 +155,8 @@ public class University implements Serializable {
                 return true;
             }
 
-            if (!nextPrereqs.contains(prereqID)) {
-                nextPrereqs.add(prereqID);
+            if (!checkedPrereqs.contains(prereqID)) {
+                checkedPrereqs.add(prereqID);
                 Course prereqCourse = getCourseByID(prereqID);
 
                 if (prereqCourse != null) {
