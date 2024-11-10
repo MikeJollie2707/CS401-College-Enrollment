@@ -1,3 +1,4 @@
+
 package objects;
 
 import java.io.Serializable;
@@ -56,12 +57,18 @@ public class University implements Serializable {
 
     public void addCourse(Course course) {
         if (catalog.containsKey(course.getID())) {
-            // TODO: Raise error.
+        	
+       
+        	System.err.println("Error: Course with this ID already exists.");
             return;
         }
 
         if (!isCycle(course, course.getPrerequisites())) {
             catalog.put(course.getID(), course);
+        }
+        else
+        {
+        	System.err.println("Error: Adding The Course WILL Create a Prerequisite Cycle.");
         }
     }
 
@@ -72,15 +79,20 @@ public class University implements Serializable {
     public void editCourse(Course newCourse) {
         Course oldCourse = getCourseByID(newCourse.getID());
         if (oldCourse == null) {
-            // TODO: Raise error
+    
+        	System.err.println("Error: Course is not found in the catalog.");
             return;
         }
 
         Set<String> newPrereqs = newCourse.getPrerequisites();
         // Check if new prereqs cause cycle.
         if (!isCycle(oldCourse, newPrereqs)) {
-            // NOTE: Check for existing prefix+number?
+            // NOTE: Check for existing prefix+number
             catalog.put(oldCourse.getID(), newCourse);
+        }
+        else
+        {
+        	System.err.println("Error: Updating the Course will create a Prerequisite Cycle.");
         }
 
     }
@@ -142,30 +154,30 @@ public class University implements Serializable {
         // bfs cuz a course typically doesn't have a lot of prereq
         // and a prereq may span unexpectedly deep.
         Set<String> nextPrereqs = new HashSet<>();
-        for (var prereqID : prereqs) {
-            /**
-             * This is before course existent check bcuz of sth like
-             * course0 prereq is course1 and course1 is prereq of course0
-             * Then you add course0 and course1 to catalog in that order.
-             * If course existent check is before this check, it'll skip and add
-             * course1 to catalog, which shouldn't happen (only course0 is allowed).
-             */
-            if (course.getID().equals(prereqID)) {
-                return true;
-            }
-
-            Course prereqCourse = getCourseByID(prereqID);
-            if (prereqCourse == null) {
-                // Remove prereqID from the prereqs somehow?
-                // Use a different loop type to do the removal.
-                continue;
-            }
-
-            for (var nextPrereq : prereqCourse.getPrerequisites()) {
-                nextPrereqs.add(nextPrereq);
-            }
+        Queue<String> queue = new LinkedList<>(prereqs);
+        
+        while(!queue.isEmpty())
+        {
+        	String prereqID = queue.poll();
+        	if (prereqID.equals(course.getID()))
+        	{
+        		return true;
+        	}
+        	
+        	if (!nextPrereqs.contains(prereqID))
+        	{
+        		nextPrereqs.add(prereqID);
+        		Course prereqCourse = getCourseByID(prereqID);
+        		
+        		if (prereqCourse != null)
+        		{
+        			queue.addAll(prereqCourse.getPrerequisites());
+        		}
+        	}
         }
-
-        return isCycle(course, nextPrereqs);
+        
+        return false;
+        
+       
     }
 }
