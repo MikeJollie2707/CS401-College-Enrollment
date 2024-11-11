@@ -19,7 +19,7 @@ public class GUI {
     private Socket socket;
     private ObjectOutputStream ostream;
     private ObjectInputStream istream;
-    
+
     public GUI(Socket socket, ObjectOutputStream ostream, ObjectInputStream istream) {
         this.socket = socket;
         this.ostream = ostream;
