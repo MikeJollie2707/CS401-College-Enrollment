@@ -41,9 +41,7 @@ public class StudentSessionHandler extends SessionHandler {
                     }
                 }
 
-                if (req.isEndpoint("CREATE", "message")) {
-                    resp = capitalizeMessage(req);
-                } else if (req.isEndpoint("GET", "courses")) {
+                if (req.isEndpoint("GET", "courses")) {
                     resp = fetchCourses(req);
                 } else if (req.isEndpoint("GET", "schedule")) {
                     resp = fetchSchedule(req);
@@ -67,27 +65,39 @@ public class StudentSessionHandler extends SessionHandler {
         }
     }
 
-    // NOTE: Mock service, will delete later.
-    private ServerMsg capitalizeMessage(ClientMsg req) {
-        String message = (String) req.getBody();
-        return ServerMsg.asOK(message.toUpperCase());
-    }
-
     private ServerMsg logout(ClientMsg req) {
         return ServerMsg.asOK("logout");
     }
 
-    private ServerMsg fetchCourses(ClientMsg req) {
+    /**
+     * The handler for {@code GET courses} requests.
+     * 
+     * @param req
+     * @return
+     */
+    private synchronized ServerMsg fetchCourses(ClientMsg req) {
         return null;
     }
 
-    private ServerMsg fetchSchedule(ClientMsg req) {
+    /**
+     * The handler for {@code GET schedule} requests.
+     * 
+     * @param req
+     * @return
+     */
+    private synchronized ServerMsg fetchSchedule(ClientMsg req) {
         // Maybe return ArrayList instead? Idk it's currently easier this way.
         var enrolling = student.getCurrentSchedule().toArray(new Section[0]);
         return ServerMsg.asOK(enrolling);
     }
 
-    private ServerMsg enroll(ClientMsg req) {
+    /**
+     * The handler for {@code CREATE enroll} requests.
+     * 
+     * @param req The client's request.
+     * @return
+     */
+    private synchronized ServerMsg enroll(ClientMsg req) {
         try {
             Section clientSection = (Section) req.getBody();
             Course clientCourse = clientSection.getCourse();
@@ -170,7 +180,13 @@ public class StudentSessionHandler extends SessionHandler {
         }
     }
 
-    private ServerMsg drop(ClientMsg req) {
+    /**
+     * The handler for {@code CREATE drop} requests.
+     * 
+     * @param req The client's request.
+     * @return
+     */
+    private synchronized ServerMsg drop(ClientMsg req) {
         try {
             Section clientSection = (Section) req.getBody();
             Course clientCourse = clientSection.getCourse();
@@ -197,7 +213,13 @@ public class StudentSessionHandler extends SessionHandler {
         }
     }
 
-    private ServerMsg fetchPastEnrollment(ClientMsg req) {
+    /**
+     * The handler for {@code GET past-enrollments} requests.
+     * 
+     * @param req The client's request.
+     * @return
+     */
+    private synchronized ServerMsg fetchPastEnrollment(ClientMsg req) {
         var pastEnrollments = student.getPastEnrollments().toArray(new Section[0]);
         return ServerMsg.asOK(pastEnrollments);
     }
