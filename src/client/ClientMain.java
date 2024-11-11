@@ -16,7 +16,7 @@ public class ClientMain {
 
             // Put the JFrame on EDT.
             SwingUtilities.invokeLater(() -> {
-                new MainFrame(socket, ostream, istream);
+                new GUI(socket, ostream, istream);
             });
         } catch (IOException err) {
             System.err.println("Failed to create socket.");
