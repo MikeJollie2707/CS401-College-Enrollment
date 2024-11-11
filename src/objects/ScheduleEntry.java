@@ -40,4 +40,23 @@ public class ScheduleEntry implements Serializable {
     public synchronized boolean isSync() {
         return is_sync;
     }
+
+    /**
+     * Whether or not the two schedule entries has any time overlap.
+     * 
+     * @param first
+     * @param second
+     * @return true if one of the entry start before the other entry ends, false
+     *         otherwise.
+     */
+    public static boolean isOverlap(ScheduleEntry first, ScheduleEntry second) {
+        if (first.getDayOfWeek() != second.getDayOfWeek()) {
+            return false;
+        }
+        if (first.getTime().getStart().isAfter(second.getTime().getEnd()) ||
+                second.getTime().getStart().isAfter(first.getTime().getEnd())) {
+            return false;
+        }
+        return true;
+    }
 }
