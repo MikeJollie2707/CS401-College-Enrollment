@@ -56,8 +56,8 @@ public class Section implements Serializable {
     public synchronized void dropStudent(String studentID) {
         for (int i = 0; i < enrolled.size(); i++) {
             if (enrolled.get(i).getID().equals(studentID)) {
-                enrolled.remove(i);
                 enrolled.get(i).drop(getID());
+                enrolled.remove(i);
                 moveToEnroll();
                 return;
             }
@@ -65,8 +65,8 @@ public class Section implements Serializable {
 
         for (int i = 0; i < waitlisted.size(); i++) {
             if (waitlisted.get(i).getID().equals(studentID)) {
-                waitlisted.remove(i);
                 waitlisted.get(i).drop(getID());
+                waitlisted.remove(i);
                 return;
             }
         }
