@@ -25,6 +25,7 @@ public class GUI {
         this.ostream = ostream;
         this.istream = istream;
         frame = new JFrame("College Enrollment System");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1000, 750);
         mainPanel = new JPanel();
         optionsPanel = new JPanel();
