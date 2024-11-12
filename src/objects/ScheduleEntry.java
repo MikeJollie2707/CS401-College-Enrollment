@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.time.DayOfWeek;
 import java.time.OffsetTime;
 
+/**
+ * A serializable class to represent one instance of section "meeting".
+ */
 public class ScheduleEntry implements Serializable {
     private String location;
     private boolean is_sync;
@@ -11,6 +14,19 @@ public class ScheduleEntry implements Serializable {
     private OffsetTime start_time;
     private OffsetTime end_time;
 
+    /**
+     * Construct a {@code ScheduleEntry}.
+     * 
+     * @param location    The location of this sestion.
+     * @param is_sync     Whether this sestion is synchronous (true) or asynchronous
+     *                    (false).
+     * @param day_of_week The day of week for this session.
+     * @param start_time  The start time of this session.
+     * @param end_time    The end time of this session.
+     * @throws NullPointerException     If any parameters are null.
+     * @throws IllegalArgumentException If {@code end_time} is before or at
+     *                                  {@code start_time}.
+     */
     public ScheduleEntry(String location, boolean is_sync, DayOfWeek day_of_week, OffsetTime start_time,
             OffsetTime end_time) {
         this.location = location;
@@ -25,6 +41,11 @@ public class ScheduleEntry implements Serializable {
         this.end_time = end_time;
     }
 
+    /**
+     * Return a 2-tuple for the start and end time.
+     * 
+     * @return A 2-tuple for the start and end time.
+     */
     public synchronized Tuple getTime() {
         return new Tuple(start_time, end_time);
     }
@@ -44,12 +65,11 @@ public class ScheduleEntry implements Serializable {
     /**
      * Whether or not the two schedule entries has any time overlap.
      * 
-     * @param first
-     * @param second
+     * @param other
      * @return true if one of the entry start before the other entry ends, false
      *         otherwise.
      */
-    public boolean isOverlap(ScheduleEntry other) {
+    public synchronized boolean isOverlap(ScheduleEntry other) {
         // If one of them is async, it doesn't have conflict.
         if (!this.isSync() || !other.isSync()) {
             return false;

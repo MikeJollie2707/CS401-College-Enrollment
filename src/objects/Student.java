@@ -4,6 +4,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A serializable class to represent the university student(s) that use the
+ * software.
+ */
 public class Student implements Serializable {
     private static int _id = 0;
 
@@ -13,6 +17,13 @@ public class Student implements Serializable {
     private List<Section> past_enrollments;
     private List<Section> enrolling;
 
+    /**
+     * Construct an {@code Student} with the provided name and account.
+     * 
+     * @param name    The name (not null).
+     * @param account The account (not null).
+     * @throws NullPointerException If any parameters are null.
+     */
     public Student(String name, Account account) {
         id = String.format("student_%d", _id);
         ++_id;

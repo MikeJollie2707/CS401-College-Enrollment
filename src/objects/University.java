@@ -6,6 +6,9 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+/**
+ * A serializable class storing every info about the university.
+ */
 public class University implements Serializable {
     private static int _id = 0;
     private String id;
@@ -16,6 +19,12 @@ public class University implements Serializable {
     private Map<String, Student> students;
     private Map<String, Instructor> instructors;
 
+    /**
+     * Construct a {@code University}.
+     * 
+     * @param name     The name of the university.
+     * @param location The address of the university.
+     */
     public University(String name, String location) {
         id = String.format("uni_%d", _id);
         ++_id;
@@ -29,11 +38,23 @@ public class University implements Serializable {
         instructors = new HashMap<>();
     }
 
+    /**
+     * Get all courses in the university catalog.
+     * 
+     * @return All courses in the university catalog.
+     */
     public synchronized List<Course> getAllCourses() {
         List<Course> courses = new ArrayList<>(catalog.values());
         return courses;
     }
 
+    /**
+     * Get all courses in the university catalog that passes the provided filter.
+     * 
+     * @param filter A function of the form {@code (c: Course) -> boolean}.
+     * @return All matching courses in the university catalog.
+     * @throws NullPointerException If {@code filter} is null.
+     */
     public synchronized List<Course> getCoursesByFilter(Predicate<Course> filter) {
         List<Course> courses = catalog.values()
                 .stream()
@@ -46,7 +67,7 @@ public class University implements Serializable {
      * Return a course in the catalog by its ID.
      * 
      * @param courseID The course's ID to search.
-     * @return The requested Course or null if not found.
+     * @return The requested {@code Course} or null if not found.
      */
     public synchronized Course getCourseByID(String courseID) {
         if (catalog.isEmpty()) {
@@ -55,6 +76,14 @@ public class University implements Serializable {
         return catalog.get(courseID);
     }
 
+    /**
+     * Add a course to the university.
+     * 
+     * @param course The course to add.
+     * @throws NullPointerException If {@code course} is null.
+     * @throws RuntimeException     If the course already existed OR if the course
+     *                              would cause a prerequisite cycle if added.
+     */
     public synchronized void addCourse(Course course) {
         if (catalog.containsKey(course.getID())) {
             throw new RuntimeException("Error: Course with this ID already exists.");
@@ -68,10 +97,27 @@ public class University implements Serializable {
         }
     }
 
+    /**
+     * Remove a course from the university.
+     * 
+     * @param courseID The course's ID to remove.
+     * @throws NullPointerException If {@code courseID} is null.
+     */
     public synchronized void delCourse(String courseID) {
         catalog.remove(getCourseByID(courseID).getID());
     }
 
+    /**
+     * Update an existing course with the new provided course.
+     * <p>
+     * Aside from course ID (which is used to look up), all remaining values
+     * will be updated.
+     * 
+     * @param newCourse The new course to update.
+     * @throws NullPointerException If {@code newCourse} is null.
+     * @throws RuntimeException     If the course doesn't exist OR if the new course
+     *                              would cause a prerequisite cycle.
+     */
     public synchronized void editCourse(Course newCourse) {
         Course oldCourse = getCourseByID(newCourse.getID());
         if (oldCourse == null) {
@@ -90,14 +136,32 @@ public class University implements Serializable {
 
     }
 
+    /**
+     * Add an admin.
+     * 
+     * @param admin
+     * @throws NullPointerException If {@code admin} is null.
+     */
     public synchronized void addAdmin(Administrator admin) {
         admins.add(admin);
     }
 
+    /**
+     * Add a student.
+     * 
+     * @param student
+     * @throws NullPointerException If {@code student} is null.
+     */
     public synchronized void addStudent(Student student) {
         students.put(student.getID(), student);
     }
 
+    /**
+     * Add an instructor.
+     * 
+     * @param instructor
+     * @throws NullPointerException If {@code instructor} is null.
+     */
     public synchronized void addInstructor(Instructor instructor) {
         instructors.put(instructor.getID(), instructor);
     }

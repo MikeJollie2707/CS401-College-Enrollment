@@ -4,6 +4,9 @@ package objects;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * A serializable class that represents a course's section.
+ */
 public class Section implements Serializable {
     private String id;
     private Course course;
@@ -16,6 +19,17 @@ public class Section implements Serializable {
     private List<Student> waitlisted;
     private ScheduleEntry[] schedule;
 
+    /**
+     * Construct a {@code Section}
+     * 
+     * @param course       The course this section belongs to.
+     * @param number       The section's number.
+     * @param max_capacity The max capacity of this section.
+     * @param max_wait     The max waitlist size of this section.
+     * @param instructor   The instructor for this section.
+     * @throws NullPointerException     If any parameters are null.
+     * @throws InvalidArgumentException If {@code max_capacity} is not positive.
+     */
     public Section(Course course, String number, int max_capacity, int max_wait, Instructor instructor) {
         this.course = course;
         this.number = number;
@@ -24,6 +38,16 @@ public class Section implements Serializable {
         this.instructor = instructor;
     }
 
+    /**
+     * Enroll a student into this section. If the student is already in the section,
+     * returns their status.
+     * 
+     * @param student The student to enroll.
+     * @return {@code ENROLLED} if the student is enrolled, {@code WAITLISTED} if
+     *         the student is put on the waitlist, or {@code UNSUCCESSFUL} if the
+     *         section is full.
+     * @throws NullPointerException If {@code student} is null.
+     */
     public synchronized EnrollStatus enrollStudent(Student student) {
         /**
          * Check if the student already enrolled/waitlisted.
@@ -53,6 +77,13 @@ public class Section implements Serializable {
         return EnrollStatus.UNSUCCESSFUL;
     }
 
+    /**
+     * Drop a student from this section. If the drop is successful, automatically
+     * update the waitlist and capacity if needed.
+     * 
+     * @param studentID The student's ID to drop.
+     * @throws NullPointerException If {@code studentID} is null.
+     */
     public synchronized void dropStudent(String studentID) {
         for (int i = 0; i < enrolled.size(); i++) {
             if (enrolled.get(i).getID().equals(studentID)) {
@@ -72,6 +103,11 @@ public class Section implements Serializable {
         }
     }
 
+    /**
+     * Return whether the section is absolutely full.
+     * 
+     * @return Whether the capacity and waitlist size is reached.
+     */
     public synchronized boolean isFull() {
         return (enrolled.size() + waitlisted.size()) >= (max_capacity + max_wait);
     }
@@ -136,6 +172,7 @@ public class Section implements Serializable {
      * place) to reach the new value.
      * 
      * @param cap The new course capacity.
+     * @throws IllegalArgumentException If {@code cap} is not positive.
      */
     public synchronized void setMaxCapacity(int cap) {
         if (cap <= 0) {
@@ -168,10 +205,11 @@ public class Section implements Serializable {
      * Set the max waitlist size to the specified value and drop students that
      * exceed this value.
      * <p>
-     * If wait < waitlisted.size(), this method will drop students from the last
-     * student to the most current.
+     * If {@code wait < waitlisted.size()}, this method will drop students from the
+     * last student to the most current.
      * 
      * @param wait A positive value indicating the max size of the waitlist.
+     * @throws IllegalArgumentException If {@code wait} is not positive.
      */
     public synchronized void setMaxWaitSize(int wait) {
         if (wait <= 0) {

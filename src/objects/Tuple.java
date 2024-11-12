@@ -2,6 +2,9 @@ package objects;
 
 import java.time.OffsetTime;
 
+/**
+ * A 2-tuple storing a time range.
+ */
 public class Tuple {
     private final OffsetTime start;
     private final OffsetTime end;
