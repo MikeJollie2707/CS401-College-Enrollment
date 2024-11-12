@@ -49,12 +49,16 @@ public class ScheduleEntry implements Serializable {
      * @return true if one of the entry start before the other entry ends, false
      *         otherwise.
      */
-    public static boolean isOverlap(ScheduleEntry first, ScheduleEntry second) {
-        if (first.getDayOfWeek() != second.getDayOfWeek()) {
+    public boolean isOverlap(ScheduleEntry other) {
+        // If one of them is async, it doesn't have conflict.
+        if (!this.isSync() || !other.isSync()) {
             return false;
         }
-        if (first.getTime().getStart().isAfter(second.getTime().getEnd()) ||
-                second.getTime().getStart().isAfter(first.getTime().getEnd())) {
+        if (this.getDayOfWeek() != other.getDayOfWeek()) {
+            return false;
+        }
+        if (this.getTime().getStart().isAfter(other.getTime().getEnd()) ||
+                other.getTime().getStart().isAfter(this.getTime().getEnd())) {
             return false;
         }
         return true;

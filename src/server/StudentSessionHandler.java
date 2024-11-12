@@ -161,7 +161,7 @@ public class StudentSessionHandler extends SessionHandler {
                 ScheduleEntry[] schedule = otherSection.getSchedule();
                 for (var otherEntry : schedule) {
                     for (var entry : section.getSchedule()) {
-                        if (ScheduleEntry.isOverlap(entry, otherEntry)) {
+                        if (entry.isOverlap(otherEntry)) {
                             return ServerMsg.asERR(String.format("Unable to enroll: Conflict with section ID '%s'.",
                                     otherSection.getID()));
                         }
