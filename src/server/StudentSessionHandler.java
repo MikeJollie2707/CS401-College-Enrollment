@@ -214,7 +214,7 @@ public class StudentSessionHandler extends SessionHandler {
     }
 
     /**
-     * The handler for {@code GET past-enrollments} requests.
+     * The handler for {@code GET past-enroll} requests.
      * 
      * @param req The client's request.
      * @return
