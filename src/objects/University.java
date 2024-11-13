@@ -6,6 +6,9 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+/**
+ * A serializable class storing every info about the university.
+ */
 public class University implements Serializable {
     private static int _id = 0;
     private String id;
@@ -16,6 +19,12 @@ public class University implements Serializable {
     private Map<String, Student> students;
     private Map<String, Instructor> instructors;
 
+    /**
+     * Construct a {@code University}.
+     * 
+     * @param name     The name of the university.
+     * @param location The address of the university.
+     */
     public University(String name, String location) {
         id = String.format("uni_%d", _id);
         ++_id;
@@ -29,12 +38,24 @@ public class University implements Serializable {
         instructors = new HashMap<>();
     }
 
-    public List<Course> getAllCourses() {
+    /**
+     * Get all courses in the university catalog.
+     * 
+     * @return All courses in the university catalog.
+     */
+    public synchronized List<Course> getAllCourses() {
         List<Course> courses = new ArrayList<>(catalog.values());
         return courses;
     }
 
-    public List<Course> getCoursesByFilter(Predicate<Course> filter) {
+    /**
+     * Get all courses in the university catalog that passes the provided filter.
+     * 
+     * @param filter A function of the form {@code (c: Course) -> boolean}.
+     * @return All matching courses in the university catalog.
+     * @throws NullPointerException If {@code filter} is null.
+     */
+    public synchronized List<Course> getCoursesByFilter(Predicate<Course> filter) {
         List<Course> courses = catalog.values()
                 .stream()
                 .filter(filter)
@@ -46,42 +67,61 @@ public class University implements Serializable {
      * Return a course in the catalog by its ID.
      * 
      * @param courseID The course's ID to search.
-     * @return The requested Course or null if not found.
+     * @return The requested {@code Course} or null if not found.
      */
-    public Course getCourseByID(String courseID) {
+    public synchronized Course getCourseByID(String courseID) {
         if (catalog.isEmpty()) {
             return null;
         }
         return catalog.get(courseID);
     }
 
-    public void addCourse(Course course) {
+    /**
+     * Add a course to the university.
+     * 
+     * @param course The course to add.
+     * @throws NullPointerException If {@code course} is null.
+     * @throws RuntimeException     If the course already existed OR if the course
+     *                              would cause a prerequisite cycle if added.
+     */
+    public synchronized void addCourse(Course course) {
         if (catalog.containsKey(course.getID())) {
-        	
-       
-        	System.err.println("Error: Course with this ID already exists.");
-            return;
+            throw new RuntimeException("Error: Course with this ID already exists.");
         }
 
         if (!isCycle(course, course.getPrerequisites())) {
             catalog.put(course.getID(), course);
-        }
-        else
-        {
-        	System.err.println("Error: Adding The Course WILL Create a Prerequisite Cycle.");
+        } else {
+            throw new RuntimeException(
+                    String.format("Error: Adding course '%s' will create a prerequisite cycle.", course.getID()));
         }
     }
 
-    public void delCourse(String courseID) {
+    /**
+     * Remove a course from the university.
+     * 
+     * @param courseID The course's ID to remove.
+     * @throws NullPointerException If {@code courseID} is null.
+     */
+    public synchronized void delCourse(String courseID) {
         catalog.remove(getCourseByID(courseID).getID());
     }
 
-    public void editCourse(Course newCourse) {
+    /**
+     * Update an existing course with the new provided course.
+     * <p>
+     * Aside from course ID (which is used to look up), all remaining values
+     * will be updated.
+     * 
+     * @param newCourse The new course to update.
+     * @throws NullPointerException If {@code newCourse} is null.
+     * @throws RuntimeException     If the course doesn't exist OR if the new course
+     *                              would cause a prerequisite cycle.
+     */
+    public synchronized void editCourse(Course newCourse) {
         Course oldCourse = getCourseByID(newCourse.getID());
         if (oldCourse == null) {
-    
-        	System.err.println("Error: Course is not found in the catalog.");
-            return;
+            throw new RuntimeException("Error: Course is not found in the catalog.");
         }
 
         Set<String> newPrereqs = newCourse.getPrerequisites();
@@ -89,51 +129,68 @@ public class University implements Serializable {
         if (!isCycle(oldCourse, newPrereqs)) {
             // NOTE: Check for existing prefix+number
             catalog.put(oldCourse.getID(), newCourse);
-        }
-        else
-        {
-        	System.err.println("Error: Updating the Course will create a Prerequisite Cycle.");
+        } else {
+            throw new RuntimeException(
+                    String.format("Error: Updating course '%s' will create a prerequisite cycle.", newCourse.getID()));
         }
 
     }
 
-    public void addAdmin(Administrator admin) {
+    /**
+     * Add an admin.
+     * 
+     * @param admin
+     * @throws NullPointerException If {@code admin} is null.
+     */
+    public synchronized void addAdmin(Administrator admin) {
         admins.add(admin);
     }
 
-    public void addStudent(Student student) {
+    /**
+     * Add a student.
+     * 
+     * @param student
+     * @throws NullPointerException If {@code student} is null.
+     */
+    public synchronized void addStudent(Student student) {
         students.put(student.getID(), student);
     }
 
-    public void addInstructor(Instructor instructor) {
+    /**
+     * Add an instructor.
+     * 
+     * @param instructor
+     * @throws NullPointerException If {@code instructor} is null.
+     */
+    public synchronized void addInstructor(Instructor instructor) {
         instructors.put(instructor.getID(), instructor);
     }
 
-    public String getName() {
+    public synchronized String getName() {
         return name;
     }
 
-    public String getLocation() {
+    public synchronized String getLocation() {
         return location;
     }
 
-    public List<Administrator> getAdmins() {
+    public synchronized List<Administrator> getAdmins() {
         return admins;
     }
 
-    public Map<String, Student> getStudents() {
+    public synchronized Map<String, Student> getStudents() {
         return students;
     }
 
-    public Map<String, Instructor> getInstructors() {
+    public synchronized Map<String, Instructor> getInstructors() {
         return instructors;
     }
 
-    public void setName(String name) {
+    public synchronized void setName(String name) {
         this.name = name;
     }
 
-    public void setLocation(String location) {
+    public synchronized void setLocation(String location) {
         this.location = location;
     }
 
@@ -146,38 +203,33 @@ public class University implements Serializable {
      *                {@code course.getPrerequisites()}.
      * @return true if there is a cycle, false otherwise.
      */
-    private boolean isCycle(Course course, Set<String> prereqs) {
+    private synchronized boolean isCycle(Course course, Set<String> prereqs) {
         if (prereqs == null || prereqs.size() == 0) {
             return false;
         }
 
         // bfs cuz a course typically doesn't have a lot of prereq
         // and a prereq may span unexpectedly deep.
-        Set<String> nextPrereqs = new HashSet<>();
+        Set<String> checkedPrereqs = new HashSet<>();
         Queue<String> queue = new LinkedList<>(prereqs);
-        
-        while(!queue.isEmpty())
-        {
-        	String prereqID = queue.poll();
-        	if (prereqID.equals(course.getID()))
-        	{
-        		return true;
-        	}
-        	
-        	if (!nextPrereqs.contains(prereqID))
-        	{
-        		nextPrereqs.add(prereqID);
-        		Course prereqCourse = getCourseByID(prereqID);
-        		
-        		if (prereqCourse != null)
-        		{
-        			queue.addAll(prereqCourse.getPrerequisites());
-        		}
-        	}
+
+        while (!queue.isEmpty()) {
+            String prereqID = queue.poll();
+            if (prereqID.equals(course.getID())) {
+                return true;
+            }
+
+            if (!checkedPrereqs.contains(prereqID)) {
+                checkedPrereqs.add(prereqID);
+                Course prereqCourse = getCourseByID(prereqID);
+
+                if (prereqCourse != null) {
+                    queue.addAll(prereqCourse.getPrerequisites());
+                }
+            }
         }
-        
+
         return false;
-        
-       
+
     }
 }

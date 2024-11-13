@@ -4,6 +4,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A serializable class to represent the university student(s) that use the
+ * software.
+ */
 public class Student implements Serializable {
     private static int _id = 0;
 
@@ -13,6 +17,13 @@ public class Student implements Serializable {
     private List<Section> past_enrollments;
     private List<Section> enrolling;
 
+    /**
+     * Construct an {@code Student} with the provided name and account.
+     * 
+     * @param name    The name (not null).
+     * @param account The account (not null).
+     * @throws NullPointerException If any parameters are null.
+     */
     public Student(String name, Account account) {
         id = String.format("student_%d", _id);
         ++_id;
@@ -25,27 +36,27 @@ public class Student implements Serializable {
         enrolling = new ArrayList<>();
     }
 
-    public String getID() {
+    public synchronized String getID() {
         return id;
     }
 
-    public Account getAccount() {
+    public synchronized Account getAccount() {
         return account;
     }
 
-    public String getName() {
+    public synchronized String getName() {
         return name;
     }
 
-    public List<Section> getPastEnrollments() {
+    public synchronized List<Section> getPastEnrollments() {
         return past_enrollments;
     }
 
-    public List<Section> getCurrentSchedule() {
+    public synchronized List<Section> getCurrentSchedule() {
         return enrolling;
     }
 
-    public void setPastEnrollments(List<Section> p) {
+    public synchronized void setPastEnrollments(List<Section> p) {
         this.past_enrollments = p;
     }
 
@@ -54,7 +65,7 @@ public class Student implements Serializable {
      * 
      * @param section The section to enroll.
      */
-    public void enroll(Section section) {
+    public synchronized void enroll(Section section) {
         enrolling.addLast(section);
     }
 
@@ -63,7 +74,7 @@ public class Student implements Serializable {
      * 
      * @param sectionID The section ID to drop.
      */
-    public void drop(String sectionID) {
+    public synchronized void drop(String sectionID) {
         for (int i = 0; i < enrolling.size(); ++i) {
             if (enrolling.get(i).getID().equals(sectionID)) {
                 enrolling.remove(i);
