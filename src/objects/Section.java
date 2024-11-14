@@ -1,8 +1,12 @@
+
 package objects;
 
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * A serializable class that represents a course's section.
+ */
 public class Section implements Serializable {
     private String id;
     private Course course;
@@ -15,6 +19,17 @@ public class Section implements Serializable {
     private List<Student> waitlisted;
     private ScheduleEntry[] schedule;
 
+    /**
+     * Construct a {@code Section}
+     * 
+     * @param course       The course this section belongs to.
+     * @param number       The section's number.
+     * @param max_capacity The max capacity of this section.
+     * @param max_wait     The max waitlist size of this section.
+     * @param instructor   The instructor for this section.
+     * @throws NullPointerException     If any parameters are null.
+     * @throws InvalidArgumentException If {@code max_capacity} is not positive.
+     */
     public Section(Course course, String number, int max_capacity, int max_wait, Instructor instructor) {
         this.course = course;
         this.number = number;
@@ -23,22 +38,57 @@ public class Section implements Serializable {
         this.instructor = instructor;
     }
 
-    public EnrollStatus enrollStudent(Student student) {
+    /**
+     * Enroll a student into this section. If the student is already in the section,
+     * returns their status.
+     * 
+     * @param student The student to enroll.
+     * @return {@code ENROLLED} if the student is enrolled, {@code WAITLISTED} if
+     *         the student is put on the waitlist, or {@code UNSUCCESSFUL} if the
+     *         section is full.
+     * @throws NullPointerException If {@code student} is null.
+     */
+    public synchronized EnrollStatus enrollStudent(Student student) {
+        /**
+         * Check if the student already enrolled/waitlisted.
+         * It's more convenient to return non-error value cuz if there's error,
+         * we'd need to guess what is the error, so make it consistent.
+         */
+        for (var enrolledStudent : enrolled) {
+            if (student.getID().equals(enrolledStudent.getID())) {
+                return EnrollStatus.ENROLLED;
+            }
+        }
+        for (var waitlistedStudent : waitlisted) {
+            if (student.getID().equals(waitlistedStudent.getID())) {
+                return EnrollStatus.WAITLISTED;
+            }
+        }
+
         if (enrolled.size() < max_capacity) {
             enrolled.add(student);
+            student.enroll(this);
             return EnrollStatus.ENROLLED;
         } else if (waitlisted.size() < max_wait) {
             waitlisted.add(student);
+            student.enroll(this);
             return EnrollStatus.WAITLISTED;
         }
         return EnrollStatus.UNSUCCESSFUL;
     }
 
-    public void dropStudent(String studentID) {
+    /**
+     * Drop a student from this section. If the drop is successful, automatically
+     * update the waitlist and capacity if needed.
+     * 
+     * @param studentID The student's ID to drop.
+     * @throws NullPointerException If {@code studentID} is null.
+     */
+    public synchronized void dropStudent(String studentID) {
         for (int i = 0; i < enrolled.size(); i++) {
             if (enrolled.get(i).getID().equals(studentID)) {
-                enrolled.remove(i);
                 enrolled.get(i).drop(getID());
+                enrolled.remove(i);
                 moveToEnroll();
                 return;
             }
@@ -46,62 +96,67 @@ public class Section implements Serializable {
 
         for (int i = 0; i < waitlisted.size(); i++) {
             if (waitlisted.get(i).getID().equals(studentID)) {
-                waitlisted.remove(i);
                 waitlisted.get(i).drop(getID());
+                waitlisted.remove(i);
                 return;
             }
         }
     }
 
-    public boolean isFull() {
+    /**
+     * Return whether the section is absolutely full.
+     * 
+     * @return Whether the capacity and waitlist size is reached.
+     */
+    public synchronized boolean isFull() {
         return (enrolled.size() + waitlisted.size()) >= (max_capacity + max_wait);
     }
 
-    public boolean isActive() {
+    public synchronized boolean isActive() {
         return active;
     }
 
-    public String getID() {
+    public synchronized String getID() {
         return id;
     }
 
-    public Course getCourse() {
+    public synchronized Course getCourse() {
         return course;
     }
 
-    public String getNumber() {
+    public synchronized String getNumber() {
         return number;
     }
 
-    public int getMaxCapacity() {
+    public synchronized int getMaxCapacity() {
         return max_capacity;
     }
 
-    public int getMaxWaitlistSize() {
+    public synchronized int getMaxWaitlistSize() {
         return max_wait;
     }
 
-    public Instructor getInstructor() {
+    public synchronized Instructor getInstructor() {
         return instructor;
     }
 
-    public List<Student> getEnrolled() {
+    public synchronized List<Student> getEnrolled() {
         return enrolled;
     }
 
-    public List<Student> getWaitlisted() {
+    public synchronized List<Student> getWaitlisted() {
         return waitlisted;
     }
 
-    public ScheduleEntry[] getSchedule() {
+    public synchronized ScheduleEntry[] getSchedule() {
         return schedule;
     }
 
-    public void setNumber(String num) {
+    public synchronized void setNumber(String num) {
         this.number = num;
     }
 
-    public void setActiveState(boolean state) {
+    public synchronized void setActiveState(boolean state) {
         this.active = state;
     }
 
@@ -117,54 +172,63 @@ public class Section implements Serializable {
      * place) to reach the new value.
      * 
      * @param cap The new course capacity.
+     * @throws IllegalArgumentException If {@code cap} is not positive.
      */
-    public void setMaxCapacity(int cap) {
+    public synchronized void setMaxCapacity(int cap) {
         if (cap <= 0) {
-            // TODO: Do something about this.
 
-        }
-
-        if (cap < enrolled.size()) {
-            while (cap < enrolled.size()) {
-                Student student = enrolled.removeLast();
-                waitlisted.addFirst(student);
-            }
-            setMaxWaitSize(max_wait);
-        } else if (cap > enrolled.size()) {
-            while (cap > enrolled.size()) {
-                moveToEnroll();
-            }
+            throw new IllegalArgumentException("Capacity must be greater than zero.");
         }
 
         this.max_capacity = cap;
+
+        // If the new capacity is less than the current number of enrolled students,
+        // move excess students to waitlist
+        while (enrolled.size() > max_capacity) {
+            Student removedStudent = enrolled.removeLast();
+            waitlisted.addFirst(removedStudent);
+        }
+        // Force remove trailing students.
+        // After the above loop, it's possible some of the last enrolled students
+        // moved to the top of the waitlist, so we drop the students that are last on
+        // the waitlist.
+        setMaxWaitSize(max_wait);
+
+        // If there is space in the enrollment list, move students from waitlist to
+        // enrolled
+        while (enrolled.size() < max_capacity && !waitlisted.isEmpty()) {
+            moveToEnroll();
+        }
     }
 
     /**
      * Set the max waitlist size to the specified value and drop students that
      * exceed this value.
      * <p>
-     * If wait < waitlisted.size(), this method will drop students from the last
-     * student to the most current.
+     * If {@code wait < waitlisted.size()}, this method will drop students from the
+     * last student to the most current.
      * 
      * @param wait A positive value indicating the max size of the waitlist.
+     * @throws IllegalArgumentException If {@code wait} is not positive.
      */
-    public void setMaxWaitSize(int wait) {
+    public synchronized void setMaxWaitSize(int wait) {
         if (wait <= 0) {
-            // TODO: Do something about this.
+            throw new IllegalArgumentException("Waitlist size must be greater than zero.");
         }
+
+        this.max_wait = wait;
 
         while (wait < waitlisted.size()) {
             waitlisted.removeLast();
         }
 
-        this.max_wait = wait;
     }
 
-    public void setInstructor(Instructor instructor) {
+    public synchronized void setInstructor(Instructor instructor) {
         this.instructor = instructor;
     }
 
-    public void setSchedule(ScheduleEntry[] schedule) {
+    public synchronized void setSchedule(ScheduleEntry[] schedule) {
         this.schedule = schedule;
     }
 
@@ -175,15 +239,10 @@ public class Section implements Serializable {
      * This method does nothing if there's no one in the waitlist or if the
      * enrollment list is already full.
      */
-    private void moveToEnroll() {
-        if (waitlisted.size() == 0) {
-            return;
+    private synchronized void moveToEnroll() {
+        if (!waitlisted.isEmpty() && enrolled.size() < max_capacity) {
+            Student student = waitlisted.removeFirst();
+            enrolled.add(student);
         }
-        if (enrolled.size() >= max_capacity) {
-            return;
-        }
-
-        Student student = waitlisted.removeFirst();
-        enrolled.addLast(student);
     }
 }

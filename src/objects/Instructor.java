@@ -3,6 +3,10 @@ package objects;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * A serializable class to represent the university instructor(s) that use the
+ * software.
+ */
 public class Instructor implements Serializable {
     private static int _id = 0;
     private String id;
@@ -10,6 +14,13 @@ public class Instructor implements Serializable {
     private String name;
     private List<Section> teaching;
 
+    /**
+     * Construct an {@code Administrator} with the provided name and account.
+     * 
+     * @param name    The name (not null).
+     * @param account The account. Can be null.
+     * @throws NullPointerException If {@code name} is null.
+     */
     public Instructor(String name, Account account) {
         id = String.format("instructor_%d", _id);
         ++_id;
@@ -18,15 +29,15 @@ public class Instructor implements Serializable {
         this.name = name;
     }
 
-    public String getID() {
+    public synchronized String getID() {
         return id;
     }
 
-    public Account getAccount() {
+    public synchronized Account getAccount() {
         return account;
     }
 
-    public String getName() {
+    public synchronized String getName() {
         return name;
     }
 }
