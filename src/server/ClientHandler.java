@@ -30,19 +30,16 @@ public class ClientHandler implements Runnable {
             try {
                 boolean isSessionExist = false;
                 ObjectInputStream istream = new ObjectInputStream(raw_istream);
-
+                
+                String[] uniNames = new String[universities.length];
+                for (int i = 0; i < uniNames.length; ++i) {
+                    uniNames[i] = universities[i].getName();
+                }
+                // sends list of uniNames to the GUI to create a JComboBox instead of typing uni name manually
+                ostream.writeObject(uniNames);
                 // Loop until the socket itself closes (gracefully or abruptly).
                 while (true) {
                     isSessionExist = false;
-
-                    // NOTE: Whether or not the client initiate the request
-                    // or the server automatically send this info, need more
-                    // discussion with whoever is maintaining the client code.
-                    String[] uniNames = new String[universities.length];
-                    for (int i = 0; i < uniNames.length; ++i) {
-                        uniNames[i] = universities[i].getName();
-                    }
-                    ostream.writeObject(ServerMsg.asOK(uniNames));
                     var req = (ClientMsg) istream.readObject();
                     if (!req.isEndpoint("CREATE", "login")) {
                         ostream.writeObject(ServerMsg.asERR(String.format("'CREATE login' expected, received '%s %s'",
