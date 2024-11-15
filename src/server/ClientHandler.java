@@ -35,14 +35,13 @@ public class ClientHandler implements Runnable {
                 while (true) {
                     isSessionExist = false;
 
-                    // NOTE: Whether or not the client initiate the request
-                    // or the server automatically send this info, need more
-                    // discussion with whoever is maintaining the client code.
+                    // In the loop for when client logging out, they still can sign in again.
                     String[] uniNames = new String[universities.length];
                     for (int i = 0; i < uniNames.length; ++i) {
                         uniNames[i] = universities[i].getName();
                     }
-                    ostream.writeObject(ServerMsg.asOK(uniNames));
+                    ostream.writeObject(uniNames);
+
                     var req = (ClientMsg) istream.readObject();
                     if (!req.isEndpoint("CREATE", "login")) {
                         ostream.writeObject(ServerMsg.asERR(String.format("'CREATE login' expected, received '%s %s'",
