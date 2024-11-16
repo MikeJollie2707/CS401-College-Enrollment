@@ -71,7 +71,7 @@ public class MainFrame {
                 SwingWorker<ServerMsg, Void> worker = new SwingWorker<ServerMsg, Void>() {
                     @Override
                     protected ServerMsg doInBackground() throws Exception {
-                        ostream.writeObject(new ClientMsg("GET", "foo", null, null));
+                        ostream.writeObject(new ClientMsg("GET", "foo", null));
                         return (ServerMsg) istream.readObject();
                     };
 
@@ -105,7 +105,7 @@ public class MainFrame {
                 SwingWorker<ServerMsg, Void> worker = new SwingWorker<ServerMsg, Void>() {
                     @Override
                     protected ServerMsg doInBackground() throws Exception {
-                        ostream.writeObject(new ClientMsg("GET", "bar", null, null));
+                        ostream.writeObject(new ClientMsg("GET", "bar", null));
                         // Artificial delay
                         // Even if there's something blocking on this function,
                         // the button still "lives" (if the button is enabled, it still react to being
