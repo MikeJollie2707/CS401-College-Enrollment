@@ -8,6 +8,7 @@ import java.util.List;
  * A serializable class that represents a course's section.
  */
 public class Section implements Serializable {
+    private static int _id = 0;
     private String id;
     private Course course;
     private String number;
@@ -38,6 +39,9 @@ public class Section implements Serializable {
         if (max_capacity <= 0 || max_wait < 0) {
             throw new IllegalArgumentException("'max_capacity' must be positive and 'max_wait' must be non-negative.");
         }
+
+        id = String.format("section_%d", _id);
+        ++_id;
 
         this.course = course;
         this.number = number;
