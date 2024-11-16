@@ -94,7 +94,7 @@ public class GUI {
                 String password = passwordBox.getText();
 
                 BodyLogin user = new BodyLogin(uni_name, loginID, password);
-                ClientMsg loginAttempt = new ClientMsg("CREATE", "login", loginID, user);
+                ClientMsg loginAttempt = new ClientMsg("CREATE", "login", user);
                 try {
                     ostream.writeObject(loginAttempt);
                     ServerMsg serverMsg = (ServerMsg) istream.readObject();
@@ -151,7 +151,7 @@ public class GUI {
                 frame.getContentPane().removeAll();
                 frame.revalidate();
                 frame.repaint();
-                ClientMsg logoutAttempt = new ClientMsg("CREATE", "logout", loggedUser.getLoginID(), loggedUser);
+                ClientMsg logoutAttempt = new ClientMsg("CREATE", "logout", loggedUser);
                 try {
                     ostream.writeObject(logoutAttempt);
                     ServerMsg serverMsg = (ServerMsg) istream.readObject();

@@ -9,9 +9,6 @@ import java.io.Serializable;
 public class ClientMsg implements Serializable {
     private final String method;
     private final String resource;
-    // It's possible to maybe remove this field
-    // since the server knows who it's talking to anyway.
-    private String authorID;
     private Serializable body;
 
     /**
@@ -20,7 +17,6 @@ public class ClientMsg implements Serializable {
      * @param method   Valid values: {@code GET}, {@code CREATE}, {@code DELETE},
      *                 {@code EDIT}.
      * @param resource The resource the client wants to take action on.
-     * @param authorID The ID of the client (ie. student's ID).
      * @param body     Additional information needed depending on {@code method} and
      *                 {@code resource}. Can be null.
      * @throws IllegalArgumentException If {@code method} is not one of the stated
@@ -28,15 +24,10 @@ public class ClientMsg implements Serializable {
      * @throws NullPointerException     If any parameters (except {@code body}) are
      *                                  null.
      */
-    public ClientMsg(String method, String resource, String authorID, Serializable body) {
+    public ClientMsg(String method, String resource, Serializable body) {
         this.method = method;
         this.resource = resource;
-        this.authorID = authorID;
         this.body = body;
-    }
-
-    public String getAuthorID() {
-        return authorID;
     }
 
     public Serializable getBody() {
