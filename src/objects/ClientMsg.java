@@ -25,6 +25,13 @@ public class ClientMsg implements Serializable {
      *                                  null.
      */
     public ClientMsg(String method, String resource, Serializable body) {
+        if (method == null || resource == null) {
+            throw new NullPointerException("'method' and 'resource' must not be null.");
+        }
+        if (!(method.equals("GET") || method.equals("CREATE") || method.equals("DELETE") || method.equals("EDIT"))) {
+            throw new IllegalArgumentException("'method' must be one of these values: GET, CREATE, DELETE, EDIT.");
+        }
+
         this.method = method;
         this.resource = resource;
         this.body = body;

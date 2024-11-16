@@ -22,6 +22,10 @@ public class Instructor implements Serializable {
      * @throws NullPointerException If {@code name} is null.
      */
     public Instructor(String name, Account account) {
+        if (name == null) {
+            throw new NullPointerException("'name' must not be null.");
+        }
+
         id = String.format("instructor_%d", _id);
         ++_id;
 

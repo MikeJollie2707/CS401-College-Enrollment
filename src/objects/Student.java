@@ -25,10 +25,13 @@ public class Student implements Serializable {
      * @throws NullPointerException If any parameters are null.
      */
     public Student(String name, Account account) {
+        if (name == null || account == null) {
+            throw new NullPointerException("Arguments for constructor must not be null.");
+        }
+
         id = String.format("student_%d", _id);
         ++_id;
 
-        // TODO: Add null check
         this.name = name;
         this.account = account;
 

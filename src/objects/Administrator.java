@@ -21,6 +21,10 @@ public class Administrator implements Serializable {
      * @throws NullPointerException If any parameters are null.
      */
     public Administrator(String name, Account account) {
+        if (name == null || account == null) {
+            throw new NullPointerException("Arguments for constructor must not be null.");
+        }
+
         id = String.format("admin_%d", _id);
         ++_id;
 

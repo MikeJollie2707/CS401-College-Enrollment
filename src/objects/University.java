@@ -24,18 +24,20 @@ public class University implements Serializable {
      * 
      * @param name     The name of the university.
      * @param location The address of the university.
+     * @throws NullPointerException If any parameters are null.
      */
     public University(String name, String location) {
         id = String.format("uni_%d", _id);
-        ++_id;
 
-        this.name = name;
-        this.location = location;
+        setName(name);
+        setLocation(location);
+        ++_id;
 
         admins = new ArrayList<>();
         catalog = new HashMap<>();
         students = new HashMap<>();
         instructors = new HashMap<>();
+
     }
 
     /**
@@ -56,6 +58,10 @@ public class University implements Serializable {
      * @throws NullPointerException If {@code filter} is null.
      */
     public synchronized List<Course> getCoursesByFilter(Predicate<Course> filter) {
+        if (filter == null) {
+            throw new NullPointerException("'filter' must not be null.");
+        }
+
         List<Course> courses = catalog.values()
                 .stream()
                 .filter(filter)
@@ -68,8 +74,13 @@ public class University implements Serializable {
      * 
      * @param courseID The course's ID to search.
      * @return The requested {@code Course} or null if not found.
+     * @throws NullPointerException If {@code courseID} is null.
      */
     public synchronized Course getCourseByID(String courseID) {
+        if (courseID == null) {
+            throw new NullPointerException("'courseID' must not be null.");
+        }
+
         if (catalog.isEmpty()) {
             return null;
         }
@@ -143,6 +154,9 @@ public class University implements Serializable {
      * @throws NullPointerException If {@code admin} is null.
      */
     public synchronized void addAdmin(Administrator admin) {
+        if (admin == null) {
+            throw new NullPointerException("'admin' must not be null.");
+        }
         admins.add(admin);
     }
 
@@ -186,11 +200,29 @@ public class University implements Serializable {
         return instructors;
     }
 
+    /**
+     * Set the name of university.
+     * 
+     * @param name The name.
+     * @throws NullPointerException If {@code name} is null.
+     */
     public synchronized void setName(String name) {
+        if (name == null) {
+            throw new NullPointerException("'name' must not be null.");
+        }
         this.name = name;
     }
 
+    /**
+     * Set the location of university.
+     * 
+     * @param location The location/physical address.
+     * @throws NullPointerException If {@code location} is null.
+     */
     public synchronized void setLocation(String location) {
+        if (location == null) {
+            throw new NullPointerException("'location' must not be null.");
+        }
         this.location = location;
     }
 

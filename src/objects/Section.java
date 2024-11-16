@@ -33,10 +33,10 @@ public class Section implements Serializable {
      */
     public Section(Course course, String number, int max_capacity, int max_wait, Instructor instructor) {
         if (course == null || number == null | instructor == null) {
-            throw new NullPointerException();
+            throw new NullPointerException("Arguments for constructor must not be null.");
         }
         if (max_capacity <= 0 || max_wait < 0) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("'max_capacity' must be positive and 'max_wait' must be non-negative.");
         }
 
         this.course = course;

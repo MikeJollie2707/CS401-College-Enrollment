@@ -29,6 +29,10 @@ public class ScheduleEntry implements Serializable {
      */
     public ScheduleEntry(String location, boolean is_sync, DayOfWeek day_of_week, OffsetTime start_time,
             OffsetTime end_time) {
+        if (location == null || day_of_week == null || start_time == null || end_time == null) {
+            throw new NullPointerException("Arguments for constructor must not be null.");
+        }
+
         this.location = location;
         this.is_sync = is_sync;
         this.day_of_week = day_of_week;
