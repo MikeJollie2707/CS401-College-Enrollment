@@ -82,8 +82,8 @@ public class StudentSessionHandler extends SessionHandler {
     /**
      * The handler for {@code GET schedule} requests.
      * 
-     * @param req
-     * @return
+     * @param req The client's request. The body is not required.
+     * @return An {@code OK ServerMsg} containing {@code Section[]}.
      */
     private synchronized ServerMsg fetchSchedule(ClientMsg req) {
         // Maybe return ArrayList instead? Idk it's currently easier this way.
@@ -94,8 +94,10 @@ public class StudentSessionHandler extends SessionHandler {
     /**
      * The handler for {@code CREATE enroll} requests.
      * 
-     * @param req The client's request.
-     * @return
+     * @param req The client's request. The body MUST be of type {@code Section}.
+     * @return If success, an {@code OK ServerMsg} containing {@code EnrollStatus}.
+     *         If failed, an {@code ERR ServerMsg} containing the reason
+     *         {@code String}.
      */
     private synchronized ServerMsg enroll(ClientMsg req) {
         try {
@@ -183,8 +185,9 @@ public class StudentSessionHandler extends SessionHandler {
     /**
      * The handler for {@code CREATE drop} requests.
      * 
-     * @param req The client's request.
-     * @return
+     * @param req The client's request. The body MUST be of type {@code Section}.
+     * @return If success, an {@code OK ServerMsg}. If failed, an
+     *         {@code ERR ServerMsg} containing the reason {@code String}.
      */
     private synchronized ServerMsg drop(ClientMsg req) {
         try {
@@ -216,8 +219,8 @@ public class StudentSessionHandler extends SessionHandler {
     /**
      * The handler for {@code GET past-enroll} requests.
      * 
-     * @param req The client's request.
-     * @return
+     * @param req The client's request. The body is not required.
+     * @return An {@code OK ServerMsg} containing {@code Section[]}.
      */
     private synchronized ServerMsg fetchPastEnrollment(ClientMsg req) {
         var pastEnrollments = student.getPastEnrollments().toArray(new Section[0]);
