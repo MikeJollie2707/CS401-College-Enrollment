@@ -5,10 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-import objects.Administrator;
-import objects.ClientMsg;
-import objects.ServerMsg;
-import objects.University;
+import objects.*;
 
 public class AdminSessionHandler extends SessionHandler {
     private Administrator admin;
@@ -101,16 +98,119 @@ public class AdminSessionHandler extends SessionHandler {
         return null;
     }
 
+    /**
+     * The handler for {@code CREATE student} requests.
+     * 
+     * @param req The client's request. The body MUST be of type {@code Student}.
+     * @return If success, an {@code OK ServerMsg} containing the added
+     *         {@code Student}. If failed, an {@code ERR ServerMsg} containing the
+     *         reason {@code String}.
+     */
     private ServerMsg createStudent(ClientMsg req) {
-        return null;
+        try {
+            Student clientStudent = (Student) req.getBody();
+            var studentMapping = university.getStudents();
+            if (studentMapping.containsKey(clientStudent.getID())) {
+                return ServerMsg.asERR(String.format("Student with ID '%s' already existed.", clientStudent.getID()));
+            }
+            Student student = new Student(clientStudent.getName(), clientStudent.getAccount());
+            university.addStudent(student);
+            return ServerMsg.asOK(student);
+        } catch (ClassCastException err) {
+            return ServerMsg.asERR(String.format("%s", err.getMessage()));
+        }
     }
 
+    /**
+     * The handler for {@code CREATE section} requests.
+     * 
+     * @param req The client's request. The body MUST be of type {@code Section}.
+     * @return If success, an {@code OK ServerMsg} containing the added
+     *         {@code Section}. If failed, an {@code ERR ServerMsg} containing the
+     *         reason {@code String}.
+     */
     private ServerMsg addSection(ClientMsg req) {
-        return null;
+        try {
+            Section clientSection = (Section) req.getBody();
+            Course clientCourse = clientSection.getCourse();
+            Course course = university.getCourseByID(clientCourse.getID());
+            if (course == null) {
+                return ServerMsg.asERR(String.format("Course ID '%s' not found.", clientCourse.getID()));
+            }
+
+            Section section = null;
+            for (var s : course.getSections()) {
+                if (clientSection.getID().equals(s.getID())) {
+                    section = s;
+                    break;
+                }
+            }
+            if (section != null) {
+                return ServerMsg.asERR(String.format("Section ID '%s' already existed.", clientSection.getID()));
+            }
+
+            Instructor clientInstructor = clientSection.getInstructor();
+            var instructorMapping = university.getInstructors();
+            if (!instructorMapping.containsKey(clientInstructor.getID())) {
+                return ServerMsg.asERR(String.format("Instructor ID '%s' not found.", clientInstructor.getID()));
+            }
+
+            Instructor instructor = instructorMapping.get(clientInstructor.getID());
+            // TODO: Check for instructor availability for this section.
+
+            section = new Section(
+                    course,
+                    clientSection.getNumber(),
+                    clientSection.getMaxCapacity(),
+                    clientSection.getMaxWaitlistSize(),
+                    instructor);
+            course.insertSection(section);
+            return ServerMsg.asOK(section);
+        } catch (ClassCastException err) {
+            return ServerMsg.asERR(String.format("%s", err.getMessage()));
+        }
     }
 
+    /**
+     * The handler for {@code EDIT section} requests.
+     * 
+     * @param req The client's request. The body MUST be of type {@code Section}.
+     * @return If success, an {@code OK ServerMsg} containing the edited
+     *         {@code Section}. If failed, an {@code ERR ServerMsg} containing the
+     *         reason {@code String}.
+     */
     private ServerMsg editSection(ClientMsg req) {
-        return null;
+        try {
+            Section clientSection = (Section) req.getBody();
+            Course clientCourse = clientSection.getCourse();
+            Course course = university.getCourseByID(clientCourse.getID());
+            if (course == null) {
+                return ServerMsg.asERR(String.format("Course ID '%s' not found.", clientCourse.getID()));
+            }
+
+            Section section = null;
+            for (var s : course.getSections()) {
+                if (clientSection.getID().equals(s.getID())) {
+                    section = s;
+                    break;
+                }
+            }
+            if (section == null) {
+                return ServerMsg.asERR(String.format("Section ID '%s' not found.", clientSection.getID()));
+            }
+
+            section.setActiveState(clientSection.isActive());
+            section.setMaxCapacity(clientSection.getMaxCapacity());
+            section.setMaxWaitSize(clientSection.getMaxWaitlistSize());
+            section.setNumber(clientSection.getNumber());
+            section.setSchedule(clientSection.getSchedule());
+
+            // TODO: Update instructor
+
+            return ServerMsg.asOK(section);
+        } catch (ClassCastException err) {
+            return ServerMsg.asERR(String.format("%s", err.getMessage()));
+        }
     }
 
     private ServerMsg delSection(ClientMsg req) {
