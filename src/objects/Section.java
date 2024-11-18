@@ -8,6 +8,7 @@ import java.util.List;
  * A serializable class that represents a course's section.
  */
 public class Section implements Serializable {
+    private static int _id = 0;
     private String id;
     private Course course;
     private String number;
@@ -28,9 +29,20 @@ public class Section implements Serializable {
      * @param max_wait     The max waitlist size of this section.
      * @param instructor   The instructor for this section.
      * @throws NullPointerException     If any parameters are null.
-     * @throws InvalidArgumentException If {@code max_capacity} is not positive.
+     * @throws IllegalArgumentException If {@code max_capacity} is not positive or
+     *                                  if {@code max_wait} is negative.
      */
     public Section(Course course, String number, int max_capacity, int max_wait, Instructor instructor) {
+        if (course == null || number == null | instructor == null) {
+            throw new NullPointerException("Arguments for constructor must not be null.");
+        }
+        if (max_capacity <= 0 || max_wait < 0) {
+            throw new IllegalArgumentException("'max_capacity' must be positive and 'max_wait' must be non-negative.");
+        }
+
+        id = String.format("section_%d", _id);
+        ++_id;
+
         this.course = course;
         this.number = number;
         this.max_capacity = max_capacity;
@@ -85,6 +97,10 @@ public class Section implements Serializable {
      * @throws NullPointerException If {@code studentID} is null.
      */
     public synchronized void dropStudent(String studentID) {
+        if (studentID == null) {
+            throw new NullPointerException();
+        }
+
         for (int i = 0; i < enrolled.size(); i++) {
             if (enrolled.get(i).getID().equals(studentID)) {
                 enrolled.get(i).drop(getID());
@@ -176,7 +192,6 @@ public class Section implements Serializable {
      */
     public synchronized void setMaxCapacity(int cap) {
         if (cap <= 0) {
-
             throw new IllegalArgumentException("Capacity must be greater than zero.");
         }
 

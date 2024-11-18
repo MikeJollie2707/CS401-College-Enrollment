@@ -25,11 +25,11 @@ public class Course implements Serializable {
      */
     public Course(String prefix, String number, String description) {
         id = String.format("course_%d", _id);
+        
+        setPrefix(prefix);
+        setNumber(number);
+        setDescription(description);
         ++_id;
-
-        this.prefix = prefix;
-        this.number = number;
-        this.description = description;
 
         prerequisites = new HashSet<>();
         sections = new ArrayList<>();
@@ -52,6 +52,9 @@ public class Course implements Serializable {
      * @throws NullPointerException If {@code courseID} is null.
      */
     public synchronized void delPrereq(String courseID) {
+        if (courseID == null) {
+            throw new NullPointerException("'courseID' must not be null.");
+        }
         prerequisites.remove(courseID);
     }
 
@@ -64,6 +67,13 @@ public class Course implements Serializable {
      *                                  to this course.
      */
     public synchronized void insertSection(Section section) {
+        if (section == null) {
+            throw new NullPointerException("'section' must not be null.");
+        }
+        if (section.getCourse() != this) {
+            throw new IllegalArgumentException("The section to be added doesn't refer to this course.");
+        }
+
         sections.add(section);
     }
 
@@ -107,15 +117,42 @@ public class Course implements Serializable {
         return sections;
     }
 
+    /**
+     * Set the prefix.
+     * 
+     * @param prefix The prefix to set.
+     * @throws NullPointerException If {@code prefix} is null.
+     */
     public synchronized void setPrefix(String prefix) {
+        if (prefix == null) {
+            throw new NullPointerException("'prefix' must not be null.");
+        }
         this.prefix = prefix;
     }
 
+    /**
+     * Set the course number.
+     * 
+     * @param number The number to set.
+     * @throws NullPointerException If {@code number} is null.
+     */
     public synchronized void setNumber(String number) {
+        if (number == null) {
+            throw new NullPointerException("'number' must not be null.");
+        }
         this.number = number;
     }
 
+    /**
+     * Set the course description.
+     * 
+     * @param description The description to set.
+     * @throws NullPointerException If {@code description} is null.
+     */
     public synchronized void setDescription(String description) {
+        if (description == null) {
+            throw new NullPointerException("'description' must not be null.");
+        }
         this.description = description;
     }
 }

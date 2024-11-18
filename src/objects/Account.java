@@ -14,8 +14,12 @@ public class Account implements Serializable {
      * 
      * @param email    The email (not null).
      * @param password The password (not null).
+     * @throws NullPointerException If any parameters are null.
      */
     public Account(String email, String password) {
+        if (email == null || password == null) {
+            throw new NullPointerException("Arguments for constructor must not be null.");
+        }
         this.email = email;
         this.password = password;
     }
