@@ -304,14 +304,29 @@ public class AdminSessionHandler extends SessionHandler {
             if (!university.getStudents().containsKey(studentID)) {
                 return ServerMsg.asERR(String.format("Student ID '%s' not found.", studentID));
             }
+            Student student = university.getStudents().get(studentID);
 
-            return ServerMsg.asOK("");
+            Section clientSection = body.getSection();
+            return Util.enroll(clientSection, student, university);
         } catch (ClassCastException err) {
             return ServerMsg.asERR(String.format("%s", err.getMessage()));
         }
     }
 
     private ServerMsg dropStudent(ClientMsg req) {
-        return null;
+        try {
+            var body = (BodyEnrollOrDropAs) req.getBody();
+            String studentID = body.getStudentID();
+
+            if (!university.getStudents().containsKey(studentID)) {
+                return ServerMsg.asERR(String.format("Student ID '%s' not found.", studentID));
+            }
+            Student student = university.getStudents().get(studentID);
+
+            Section clientSection = body.getSection();
+            return Util.drop(clientSection, student, university);
+        } catch (ClassCastException err) {
+            return ServerMsg.asERR(String.format("%s", err.getMessage()));
+        }
     }
 }
