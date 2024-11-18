@@ -10,7 +10,11 @@ public class Tuple {
     private final OffsetTime end;
 
     public Tuple(OffsetTime start, OffsetTime end) {
-        this.start = start;
+    	if (start.isAfter(end)) {
+            throw new IllegalArgumentException("Start Time can't be after End Time.");
+        }
+    	
+    	this.start = start;
         this.end = end;
     }
 
