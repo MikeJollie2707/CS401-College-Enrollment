@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.HashSet;
+import java.util.function.Predicate;
 
 import objects.*;
 
@@ -72,11 +73,56 @@ public class StudentSessionHandler extends SessionHandler {
     /**
      * The handler for {@code GET courses} requests.
      * 
-     * @param req
-     * @return
+     * @param req The client's request. The body MUST be of type
+     *            {@code BodyCourseSearch}.
+     * @return If success (even if there are no matching results), an
+     *         {@code OK ServerMsg} containing {@code Course[]} that matches the
+     *         filter. If failed, an {@code ERR ServerMsg} containing a reason
+     *         {@code String.}
      */
     private synchronized ServerMsg fetchCourses(ClientMsg req) {
-        return null;
+        try {
+            var body = (BodyCourseSearch) req.getBody();
+            final Predicate<Course> prefix_pred = (Course c) -> {
+                if (body.getCoursePrefix() != null && !body.getCoursePrefix().isBlank()) {
+                    return c.getPrefix().contains(body.getCoursePrefix());
+                }
+                return true;
+            };
+            final Predicate<Course> name_pred = (Course c) -> {
+                if (body.getCourseNumber() != null && !body.getCourseNumber().isBlank()) {
+                    return c.getNumber().contains(body.getCourseNumber());
+                }
+                return true;
+            };
+            final Predicate<Course> number_pred = (Course c) -> {
+                if (body.getCourseNumber() != null && !body.getCourseNumber().isBlank()) {
+                    return c.getNumber().contains(body.getCourseNumber());
+                }
+                return true;
+            };
+            final Predicate<Course> instructor_pred = (Course c) -> {
+                if (body.getInstructorName() != null && !body.getCoursePrefix().isBlank()) {
+                    for (var section : c.getSections()) {
+                        if (section.getInstructor().getName().contains(body.getInstructorName())) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+                return true;
+            };
+
+            var res = university.getCoursesByFilter((Course c) -> {
+                return prefix_pred.test(c) &&
+                        name_pred.test(c) &&
+                        number_pred.test(c) &&
+                        instructor_pred.test(c);
+            });
+            return ServerMsg.asOK(res.toArray(new Course[0]));
+        } catch (ClassCastException err) {
+            return ServerMsg.asERR(String.format("%s", err.getMessage()));
+        }
     }
 
     /**
