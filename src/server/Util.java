@@ -1,7 +1,9 @@
 package server;
 
 import java.util.HashSet;
+import java.util.function.Predicate;
 
+import objects.BodyCourseSearch;
 import objects.Course;
 import objects.EnrollStatus;
 import objects.ScheduleEntry;
@@ -104,6 +106,17 @@ public class Util {
         return ServerMsg.asOK(status);
     }
 
+    /**
+     * Drop a student from the provided section.
+     * 
+     * @param clientSection This must be the object provided by the client, not from
+     *                      the server.
+     * @param student       The student dropping. This must be the object from the
+     *                      server.
+     * @param university    The university. This must be the object from the server.
+     * @return If success, an {@code OK ServerMsg}. If failed, an
+     *         {@code ERR ServerMsg} containing the reason {@code String}.
+     */
     public static ServerMsg drop(Section clientSection, Student student, University university) {
         Course clientCourse = clientSection.getCourse();
         Course course = university.getCourseByID(clientCourse.getID());
@@ -124,5 +137,54 @@ public class Util {
 
         section.dropStudent(student.getID());
         return ServerMsg.asOK("");
+    }
+
+    /**
+     * Return courses based on the provided body.
+     * 
+     * @param body       The body of the client's request.
+     * @param university The university. This must be the object from the server.
+     * @return A {@code OK ServerMsg} containing 0 or more courses that fits the
+     *         filter.
+     */
+    public static ServerMsg searchCourses(BodyCourseSearch body, University university) {
+        final Predicate<Course> prefix_pred = (Course c) -> {
+            if (body.getCoursePrefix() != null && !body.getCoursePrefix().isBlank()) {
+                return c.getPrefix().contains(body.getCoursePrefix());
+            }
+            return true;
+        };
+        final Predicate<Course> name_pred = (Course c) -> {
+            if (body.getCourseName() != null && !body.getCourseName().isBlank()) {
+                // NOTE: Consider adding a name field for Course
+                return c.getDescription().contains(body.getCourseName());
+            }
+            return true;
+        };
+        final Predicate<Course> number_pred = (Course c) -> {
+            if (body.getCourseNumber() != null && !body.getCourseNumber().isBlank()) {
+                return c.getNumber().contains(body.getCourseNumber());
+            }
+            return true;
+        };
+        final Predicate<Course> instructor_pred = (Course c) -> {
+            if (body.getInstructorName() != null && !body.getCoursePrefix().isBlank()) {
+                for (var section : c.getSections()) {
+                    if (section.getInstructor().getName().contains(body.getInstructorName())) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            return true;
+        };
+
+        var res = university.getCoursesByFilter((Course c) -> {
+            return prefix_pred.test(c) &&
+                    name_pred.test(c) &&
+                    number_pred.test(c) &&
+                    instructor_pred.test(c);
+        });
+        return ServerMsg.asOK(res.toArray(new Course[0]));
     }
 }

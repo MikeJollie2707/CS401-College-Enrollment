@@ -91,7 +91,12 @@ public class AdminSessionHandler extends SessionHandler {
     }
 
     private synchronized ServerMsg fetchCourses(ClientMsg req) {
-        return null;
+        try {
+            var body = (BodyCourseSearch) req.getBody();
+            return Util.searchCourses(body, university);
+        } catch (ClassCastException err) {
+            return ServerMsg.asERR(String.format("%s", err.getMessage()));
+        }
     }
 
     private synchronized ServerMsg fetchReport(ClientMsg req) {
