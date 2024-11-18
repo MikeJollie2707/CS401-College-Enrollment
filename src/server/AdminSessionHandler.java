@@ -90,11 +90,11 @@ public class AdminSessionHandler extends SessionHandler {
         return ServerMsg.asOK("logout");
     }
 
-    private ServerMsg fetchCourses(ClientMsg req) {
+    private synchronized ServerMsg fetchCourses(ClientMsg req) {
         return null;
     }
 
-    private ServerMsg fetchReport(ClientMsg req) {
+    private synchronized ServerMsg fetchReport(ClientMsg req) {
         return null;
     }
 
@@ -106,7 +106,7 @@ public class AdminSessionHandler extends SessionHandler {
      *         {@code Student}. If failed, an {@code ERR ServerMsg} containing the
      *         reason {@code String}.
      */
-    private ServerMsg createStudent(ClientMsg req) {
+    private synchronized ServerMsg createStudent(ClientMsg req) {
         try {
             Student clientStudent = (Student) req.getBody();
             var studentMapping = university.getStudents();
@@ -129,7 +129,7 @@ public class AdminSessionHandler extends SessionHandler {
      *         {@code Section}. If failed, an {@code ERR ServerMsg} containing the
      *         reason {@code String}.
      */
-    private ServerMsg addSection(ClientMsg req) {
+    private synchronized ServerMsg addSection(ClientMsg req) {
         try {
             Section clientSection = (Section) req.getBody();
             Course clientCourse = clientSection.getCourse();
@@ -179,7 +179,7 @@ public class AdminSessionHandler extends SessionHandler {
      *         {@code Section}. If failed, an {@code ERR ServerMsg} containing the
      *         reason {@code String}.
      */
-    private ServerMsg editSection(ClientMsg req) {
+    private synchronized ServerMsg editSection(ClientMsg req) {
         try {
             Section clientSection = (Section) req.getBody();
             Course clientCourse = clientSection.getCourse();
@@ -213,24 +213,102 @@ public class AdminSessionHandler extends SessionHandler {
         }
     }
 
-    private ServerMsg delSection(ClientMsg req) {
+    private synchronized ServerMsg delSection(ClientMsg req) {
+        try {
+            Section clientSection = (Section) req.getBody();
+            Course clientCourse = clientSection.getCourse();
+            Course course = university.getCourseByID(clientCourse.getID());
+            if (course == null) {
+                return ServerMsg.asERR(String.format("Course ID '%s' not found.", clientCourse.getID()));
+            }
+
+            Section section = null;
+            for (var s : course.getSections()) {
+                if (clientSection.getID().equals(s.getID())) {
+                    section = s;
+                    break;
+                }
+            }
+            if (section == null) {
+                return ServerMsg.asERR(String.format("Section ID '%s' not found.", clientSection.getID()));
+            }
+
+            course.delSection(section.getID());
+            return ServerMsg.asOK("");
+        } catch (ClassCastException err) {
+            return ServerMsg.asERR(String.format("%s", err.getMessage()));
+        }
+    }
+
+    /**
+     * The handler for {@code CREATE course} requests.
+     * 
+     * @param req The client's request. The body MUST be of type {@code Course}.
+     * @return If success, an {@code OK ServerMsg}. If failed, an
+     *         {@code ERR ServerMsg} containing the reason {@code String}.
+     */
+    private synchronized ServerMsg addCourse(ClientMsg req) {
+        try {
+            Course clientCourse = (Course) req.getBody();
+            Course course = university.getCourseByID(clientCourse.getID());
+            if (course != null) {
+                return ServerMsg.asERR(String.format("Course ID '%s' already existed.", course.getID()));
+            }
+
+            // Don't copy over the sections.
+            course = new Course(clientCourse.getPrefix(), clientCourse.getNumber(), clientCourse.getDescription());
+            for (var prereq : clientCourse.getPrerequisites()) {
+                Course prereqCourse = university.getCourseByID(prereq);
+                if (prereqCourse == null) {
+                    // NOTE: Two options: Either skip, or return error.
+                }
+                course.insertPrereq(prereqCourse);
+            }
+            try {
+                university.addCourse(course);
+            } catch (RuntimeException err) {
+                // Existence check is done earlier so this is most likely prereq issue.
+                return ServerMsg.asERR(err.getMessage());
+            }
+
+            return ServerMsg.asOK(course);
+        } catch (ClassCastException err) {
+            return ServerMsg.asERR(String.format("%s", err.getMessage()));
+        }
+    }
+
+    private synchronized ServerMsg editCourse(ClientMsg req) {
         return null;
     }
 
-    private ServerMsg addCourse(ClientMsg req) {
-        return null;
-    }
+    private synchronized ServerMsg delCourse(ClientMsg req) {
+        try {
+            Course clientCourse = (Course) req.getBody();
+            Course course = university.getCourseByID(clientCourse.getID());
+            if (course == null) {
+                return ServerMsg.asERR(String.format("Course ID '%s' not found.", clientCourse.getID()));
+            }
 
-    private ServerMsg editCourse(ClientMsg req) {
-        return null;
-    }
-
-    private ServerMsg delCourse(ClientMsg req) {
-        return null;
+            university.delCourse(course.getID());
+            return ServerMsg.asOK("");
+        } catch (ClassCastException err) {
+            return ServerMsg.asERR(String.format("%s", err.getMessage()));
+        }
     }
 
     private ServerMsg enrollStudent(ClientMsg req) {
-        return null;
+        try {
+            var body = (BodyEnrollOrDropAs) req.getBody();
+            String studentID = body.getStudentID();
+
+            if (!university.getStudents().containsKey(studentID)) {
+                return ServerMsg.asERR(String.format("Student ID '%s' not found.", studentID));
+            }
+
+            return ServerMsg.asOK("");
+        } catch (ClassCastException err) {
+            return ServerMsg.asERR(String.format("%s", err.getMessage()));
+        }
     }
 
     private ServerMsg dropStudent(ClientMsg req) {
