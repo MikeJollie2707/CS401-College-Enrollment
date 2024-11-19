@@ -24,13 +24,6 @@ public class ServerMain {
 
             University[] universities = loadInfoFromFile("unis.txt");
 
-            // Fake setup
-            // TODO: Remove later.
-            for (int i = 0; i < universities.length; ++i) {
-                universities[i].addAdmin(new Administrator("Admin", new Account("admin", "123456")));
-                universities[i].addStudent(new Student("Steve", new Account("steve", "iamsteve")));
-            }
-
             while (true) {
                 Socket socket = ss.accept();
                 System.out.println("Client connected: " + socket.getInetAddress());
