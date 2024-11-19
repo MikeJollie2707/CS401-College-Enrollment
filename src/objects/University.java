@@ -157,6 +157,7 @@ public class University implements Serializable {
         if (admin == null) {
             throw new NullPointerException("'admin' must not be null.");
         }
+        // TODO: Check if this admin's account's email already exist.
         admins.add(admin);
     }
 
@@ -167,6 +168,7 @@ public class University implements Serializable {
      * @throws NullPointerException If {@code student} is null.
      */
     public synchronized void addStudent(Student student) {
+        // TODO: Check if this student's account's email already exist.
         students.put(student.getID(), student);
     }
 
@@ -177,6 +179,7 @@ public class University implements Serializable {
      * @throws NullPointerException If {@code instructor} is null.
      */
     public synchronized void addInstructor(Instructor instructor) {
+        // TODO: Check if this instructor's account's email already exist.
         instructors.put(instructor.getID(), instructor);
     }
 

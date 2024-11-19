@@ -36,4 +36,8 @@ public class Account implements Serializable {
     public boolean verify(String email, String password) {
         return this.email.equals(email) && this.password.equals(password);
     }
+
+    public String getEmail() {
+        return email;
+    }
 }
