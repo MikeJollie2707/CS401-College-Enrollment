@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 
 import objects.Account;
 import objects.Administrator;
+import objects.Course;
+import objects.Instructor;
 import objects.Student;
 import objects.University;
 
@@ -24,6 +26,20 @@ public class ServerMain {
 
             University[] universities = loadInfoFromFile("unis.txt");
 
+<<<<<<< Updated upstream
+=======
+            // Fake setup
+            // TODO: Remove later.
+            for (int i = 0; i < universities.length; ++i) {
+                universities[i].addAdmin(new Administrator("Admin", new Account("admin", "123456")));
+                universities[i].addStudent(new Student("Steve", new Account("steve", "iamsteve")));
+                Course course = new Course("CS", "101", "IS COMPUTER SCIENCE");
+                Course course2 = new Course("ECON", "101", "IS ECONOMICS");
+                universities[i].addCourse(course);
+                universities[i].addCourse(course2);
+            }
+
+>>>>>>> Stashed changes
             while (true) {
                 Socket socket = ss.accept();
                 System.out.println("Client connected: " + socket.getInetAddress());

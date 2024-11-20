@@ -1,7 +1,11 @@
 package objects;
-
 import java.io.Serializable;
 
+<<<<<<< Updated upstream
+import java.io.Serializable;
+
+=======
+>>>>>>> Stashed changes
 public class BodyCourseSearch implements Serializable {
     private String course_name;
     private String course_prefix;
