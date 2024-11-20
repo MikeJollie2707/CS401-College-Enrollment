@@ -24,13 +24,6 @@ public class ServerMain {
 
             University[] universities = loadInfoFromFile("unis.txt");
 
-            // Fake setup
-            // TODO: Remove later.
-            for (int i = 0; i < universities.length; ++i) {
-                universities[i].addAdmin(new Administrator("Admin", new Account("admin", "123456")));
-                universities[i].addStudent(new Student("Steve", new Account("steve", "iamsteve")));
-            }
-
             while (true) {
                 Socket socket = ss.accept();
                 System.out.println("Client connected: " + socket.getInetAddress());
@@ -47,30 +40,79 @@ public class ServerMain {
     private static University[] loadInfoFromFile(String filename) throws FileNotFoundException {
         File file = new File(filename);
         try (Scanner scanner = new Scanner(file)) {
-            // nextInt() doesn't move the scanner, yay...
-            int num = Integer.valueOf(scanner.nextLine());
+            int num = Integer.parseInt(scanner.nextLine());
             HashMap<String, University> uniMap = new HashMap<>();
+            
             for (int i = 0; i < num; ++i) {
                 String row = scanner.nextLine();
                 String[] entry = row.split(",");
-                uniMap.put(entry[0], new University(entry[0], entry[1]));
+                
+                // University Information 
+                String universityName = entry[0];
+                String location = entry[1];
+                University university = new University(universityName, location);
+                
+                // Loading more information relating to Admins
+                if (entry.length > 2) {
+                    String adminsFile = entry[2];
+                    loadAdminsFromFile(adminsFile, university);
+                }
+                // Loading more information relating to Students 
+                if (entry.length > 3) {
+                    String studentsFile = entry[3];
+                    loadStudentsFromFile(studentsFile, university);
+                }
 
-                // TODO: Additional info for universities can be provided in further columns.
-                // For now it only loads the bare minimum for the constructor.
-                // If for example, we also want to load admin+student info from file as well,
-                // one of the column can specify the filename in which it can get that kind of
-                // info.
-                // So something like "CSUEB,Carlos Bee,csueb_admins.txt,csueb_students.txt"
+                uniMap.put(universityName, university);
             }
 
-            University[] unis = uniMap.values().stream()
+            return uniMap.values().stream()
                     .collect(Collectors.toList())
-                    .toArray(new University[0]); // Weird syntax but it works, check the docs
+                    .toArray(new University[0]);
 
-            return unis;
         } catch (IOException err) {
             err.printStackTrace();
         }
         return new University[0];
+    }
+    
+ // Helper function to load Admins from file and add to University
+    private static void loadAdminsFromFile(String adminsFile, University university) {
+        File file = new File(adminsFile);
+        try (Scanner scanner = new Scanner(file)) {
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                String[] parts = line.split(",");
+                if (parts.length == 3) {
+                    String adminName = parts[0];
+                    String username = parts[1];
+                    String password = parts[2];
+                    Administrator admin = new Administrator(adminName, new Account(username, password));
+                    university.addAdmin(admin);
+                }
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("Admins file not found: " + adminsFile);
+        }
+    }
+    
+ // Helper function to load Students from file and add to University
+    private static void loadStudentsFromFile(String studentsFile, University university) {
+        File file = new File(studentsFile);
+        try (Scanner scanner = new Scanner(file)) {
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                String[] parts = line.split(",");
+                if (parts.length == 3) {
+                    String studentName = parts[0];
+                    String username = parts[1];
+                    String password = parts[2];
+                    Student student = new Student(studentName, new Account(username, password));
+                    university.addStudent(student);
+                }
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("Students file not found: " + studentsFile);
+        }
     }
 }

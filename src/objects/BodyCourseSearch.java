@@ -1,6 +1,8 @@
 package objects;
 
-public class BodyCourseSearch {
+import java.io.Serializable;
+
+public class BodyCourseSearch implements Serializable {
     private String course_name;
     private String course_prefix;
     private String course_number;
