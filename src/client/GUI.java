@@ -39,6 +39,7 @@ public class GUI {
     private CardLayout cards;
     private JPanel schedulePanel;
     private JPanel searchClassPanel;
+    private JPanel courseCatalogPanel;
     
     public GUI(Socket socket, ObjectOutputStream ostream, ObjectInputStream istream) {
         this.socket = socket;
@@ -62,19 +63,14 @@ public class GUI {
         frame.setLocationRelativeTo(null);
         mainPanel = new JPanel();
         mainPanel.setLayout(new FlowLayout());
-        // saves the universities in case the user logs out to not rely on server
-        // sending uni names every time
+        // saves the universities in case the user logs out
         saveUniversities();
         // initializeLogin() handles user log in before reaching optionsPanel
-        // example to test user log in for students: use uni_name: CSU East Bay,loginID:
-        // steve, password: iamsteve
         initializeLogin();
         frame.setVisible(true);
     }
 
     public void saveUniversities() {
-        // universities need to be saved since user can logout and don't want server to
-        // send again, select from uni menu instead of tediously typing out uni_name
         uniBox = new JComboBox<>();
         try {
             universities = (String[]) istream.readObject();
@@ -160,8 +156,7 @@ public class GUI {
 
     // if logged in: access the college enrollment system GUI
     void openMainGUI() {
-        mainPanel = new JPanel(new FlowLayout());
-        JOptionPane.showMessageDialog(mainPanel, "Logged in!!!!!!!!!!!!!");
+        mainPanel = new JPanel(new BorderLayout());
 
         JLabel templateStart = new JLabel("Please click an option to start");
         templateStart.setFont(new Font("Arial", Font.BOLD, 30));
@@ -169,18 +164,14 @@ public class GUI {
 
         cards = new CardLayout();
         optionsPanel = new JPanel(cards);
-
+        
         searchClassPanel = new JPanel();
+        schedulePanel = new JPanel();
+        courseCatalogPanel = new JPanel();
+        
         searchClassPanel.setLayout(new BorderLayout());
-
-        schedulePanel = new JPanel(new BorderLayout());
-
-        JPanel courseCatalogPanel = new JPanel();
-        // courses endpoint not done yet
-        // String[] titles = {"Course Prefix", "Course Number", "Course Description",
-        // "Course Prerequisites", "Course Credits"};
-        // Object[][] data = { {} };
-        // JTable courses = new JTable(data, titles);
+        schedulePanel.setLayout(new BorderLayout());
+        courseCatalogPanel.setLayout(new BorderLayout());
 
         optionsPanel.add(templateStart, "start");
         optionsPanel.add(schedulePanel, "schedule");
@@ -188,11 +179,13 @@ public class GUI {
         optionsPanel.add(courseCatalogPanel, "catalog");
 
         cards.show(optionsPanel, "start");
-
         initializeOptions();
         mainPanel.add(optionsPanel);
-
+        
         frame.add(mainPanel);
+        frame.revalidate();
+        frame.repaint();
+        JOptionPane.showMessageDialog(frame, "Logged in to " + loggedUser.getUniName() + "!", "Login Successful", JOptionPane.INFORMATION_MESSAGE);
         frame.revalidate();
         frame.repaint();
     }
@@ -204,16 +197,24 @@ public class GUI {
 
         JButton logout = new JButton("LOGOUT");
         logout.setBackground(Color.RED);
-        logout.setForeground(Color.WHITE);
+        logout.setForeground(Color.BLACK);
 
-        JLabel optionsLabel = new JLabel("Options: ");
+        JLabel optionsLabel = new JLabel("" +loggedUser.getUniName() + " options:");
         optionsLabel.setFont(new Font("Arial", Font.BOLD, 20));
         optionsLabel.setForeground(Color.MAGENTA);
 
         JButton scheduleButton = new JButton("My Schedule");
         JButton coursesButton = new JButton("Search Classes");
         JButton catalogButton = new JButton("Courses Catalog");
-
+        scheduleButton.setBackground(Color.BLACK);
+        coursesButton.setBackground(Color.BLACK);
+        catalogButton.setBackground(Color.BLACK);
+        
+        
+        scheduleButton.setForeground(Color.CYAN);
+        coursesButton.setForeground(Color.CYAN);
+        catalogButton.setForeground(Color.CYAN);
+        
         buttonsPanel.add(Box.createVerticalStrut(50));
         buttonsPanel.add(optionsLabel);
         buttonsPanel.add(Box.createVerticalStrut(100));
@@ -252,7 +253,11 @@ public class GUI {
 
         scheduleButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                searchClassPanel.removeAll();
                 schedulePanel.removeAll();
+                courseCatalogPanel.removeAll();
+                frame.revalidate();
+                frame.repaint();
                 createSchedule();
                 cards.show(optionsPanel, "schedule");
             }
@@ -261,6 +266,9 @@ public class GUI {
         coursesButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 searchClassPanel.removeAll();
+                schedulePanel.removeAll();
+                courseCatalogPanel.removeAll();
+                frame.revalidate();
                 frame.repaint();
                 createSearch();
                 cards.show(optionsPanel, "search");
@@ -269,10 +277,18 @@ public class GUI {
 
         catalogButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                searchClassPanel.removeAll();
+                schedulePanel.removeAll();
+                courseCatalogPanel.removeAll();
+                frame.revalidate();
+                frame.repaint();
+                createCatalog();
                 cards.show(optionsPanel, "catalog");
             }
         });
-        mainPanel.add(buttonsPanel);
+        mainPanel.add(buttonsPanel, BorderLayout.WEST);
+        frame.revalidate();
+        frame.repaint();
     }
 
     private void createSchedule() {
@@ -281,31 +297,45 @@ public class GUI {
             ostream.writeObject(scheduleAttempt);
             ServerMsg serverMsg = (ServerMsg) istream.readObject();
             if (serverMsg.isOk()) {
-                Section[] enrolledSections = (Section[]) serverMsg.getBody();
+                Section[] myCourses = (Section[]) serverMsg.getBody();
+                
+                String[] titles = {"Course Prefix", "Course Number", "Status"};
+                Object[][] data = new Object[myCourses.length][titles.length];
 
-                String[] titles = { "Course", "Section", "Description", "Instructor" };
-                Object[][] data = new Object[enrolledSections.length][titles.length];
-
-                for (int i = 0; i < enrolledSections.length; i++) {
-                    Section section = enrolledSections[i];
-                    data[i][0] = section.getCourse().getPrefix() + section.getCourse();
+                for (int i = 0; i < myCourses.length; i++) {
+                    Section section = myCourses[i];
+                    data[i][0] = section.getCourse().getPrefix();
                     data[i][1] = section.getCourse().getNumber();
-                    data[i][2] = section.getCourse().getDescription();
-                    data[i][3] = section.getInstructor();
                 }
                 JTable scheduleTable = new JTable(data, titles);
-                schedulePanel.add(new JScrollPane(scheduleTable));
-                frame.repaint();
+                scheduleTable.setDefaultEditor(Object.class, null);
+                JLabel scheduleText = new JLabel("My Schedule:");
+                scheduleText.setFont(new Font("Arial", Font.BOLD, 20));
+                scheduleText.setForeground(Color.BLUE);
+                
+                JPanel textPanel = new JPanel(new FlowLayout());
+                JPanel tablePanel = new JPanel(new FlowLayout());
+                JScrollPane scroll = new JScrollPane(scheduleTable);
+                textPanel.add(scheduleText);
+                tablePanel.add(scroll);
+                
+                schedulePanel.add(textPanel, BorderLayout.NORTH);
+                schedulePanel.add(tablePanel, BorderLayout.CENTER);
                 frame.revalidate();
+                frame.repaint();
             }
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
+        } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        } catch (ClassNotFoundException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
         }
     }
 
     private void createSearch() {
-        JPanel formPanel = new JPanel();
-        formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
+        JPanel textPanel = new JPanel();
+        textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.Y_AXIS));
 
         JLabel courseNameLabel = new JLabel("Course Name: ");
         JLabel courseNumberLabel = new JLabel("Course Number: ");
@@ -316,42 +346,46 @@ public class GUI {
         JTextField courseNumberText = new JTextField(20);
         JTextField coursePrefix = new JTextField(20);
         JTextField instructorText = new JTextField(20);
-
         JButton searchButton = new JButton("SEARCH");
-
-        formPanel.add(courseNameLabel);
-        formPanel.add(courseNameText);
-        formPanel.add(Box.createVerticalStrut(10));
-        formPanel.add(courseNumberLabel);
-        formPanel.add(courseNumberText);
-        formPanel.add(Box.createVerticalStrut(10));
-        formPanel.add(coursePrefixLabel);
-        formPanel.add(coursePrefix);
-        formPanel.add(Box.createVerticalStrut(10));
-        formPanel.add(instructorTextLabel);
-        formPanel.add(instructorText);
-        formPanel.add(Box.createVerticalStrut(10));
-        formPanel.add(searchButton);
-
-        searchClassPanel.add(formPanel, BorderLayout.NORTH);
-
+        searchButton.setBackground(Color.DARK_GRAY);
+        searchButton.setBackground(Color.PINK);
+        
+        textPanel.add(courseNameLabel);
+        textPanel.add(courseNameText);
+        textPanel.add(Box.createVerticalStrut(10));
+        textPanel.add(courseNumberLabel);
+        textPanel.add(courseNumberText);
+        textPanel.add(Box.createVerticalStrut(10));
+        textPanel.add(coursePrefixLabel);
+        textPanel.add(coursePrefix);
+        textPanel.add(Box.createVerticalStrut(10));
+        textPanel.add(instructorTextLabel);
+        textPanel.add(instructorText);
+        textPanel.add(Box.createVerticalStrut(10));
+        textPanel.add(searchButton);
+        
+        JPanel textCenter = new JPanel(new FlowLayout());
+        textCenter.add(textPanel);
+        
+        searchClassPanel.add(textCenter, BorderLayout.NORTH);
+        frame.revalidate();
+        frame.repaint();
+        
         searchButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String course_name_query = courseNameText.getText().toLowerCase();
                 String course_number_query = courseNumberText.getText().toLowerCase();
                 String course_prefix_query = coursePrefix.getText().toLowerCase();
                 String instructor_query = instructorText.getText().toLowerCase();
-                // Call a method to handle search and display results
                 searchResults(course_name_query, course_number_query, course_prefix_query, instructor_query);
+                frame.revalidate();
+                frame.repaint();
             }
         });
-        frame.revalidate();
-        frame.repaint();
     }
 
-    private void searchResults(String courseName, String courseNumber, String coursePrefix,
-            String instructorName) {
-        // the search form is our first component I added, removing everything after that to clear
+    private void searchResults(String courseName, String courseNumber, String coursePrefix, String instructorName) {
+        // the search form is the first component I added, removing everything after that to reset
         if(searchClassPanel.getComponentCount() > 1){
             for(int i = 1;i < searchClassPanel.getComponentCount(); i++) {
                 searchClassPanel.remove(i);
@@ -359,7 +393,6 @@ public class GUI {
                 frame.repaint();
             }
         }
-            
         BodyCourseSearch searchBody = new BodyCourseSearch();
         searchBody.setCourseName(courseName);
         searchBody.setCoursePrefix(coursePrefix);
@@ -373,7 +406,74 @@ public class GUI {
 
             if (serverMsg.isOk()) {
                 Course[] courses = (Course[]) serverMsg.getBody();
-                String[] columnNames = { "Course Prefix", "Course Number" };
+                String[] columnNames = {"Course Prefix", "Course Number", "Status"};
+                Object[][] data = new Object[courses.length][columnNames.length];
+                
+                for (int i = 0; i < courses.length; i++) {
+                    Course course = courses[i];
+                    data[i][0] = course.getPrefix();
+                    data[i][1] = course.getNumber();
+                    //TO DO: cannot simply add JButton to JTable
+                }
+                // second check to clean up if label and search results stay to clear
+                if(searchClassPanel.getComponentCount() > 1){
+                    for(int i = 1;i < searchClassPanel.getComponentCount(); i++) {
+                        searchClassPanel.remove(i);
+                        frame.revalidate();
+                        frame.repaint();
+                    }
+                }
+                JPanel searchLabel = new JPanel(new FlowLayout());
+                if(courses.length < 1) {
+                    JLabel notFound = new JLabel("No courses found, try other criteria");
+                    notFound.setFont(new Font("Arial", Font.BOLD, 20));
+                    notFound.setForeground(Color.BLUE);
+                    searchLabel.add(notFound);
+                    searchClassPanel.add(searchLabel, BorderLayout.CENTER);
+                }else {
+                    JLabel coursesFound = new JLabel("Courses found:");
+                    coursesFound.setFont(new Font("Arial", Font.BOLD, 20));
+                    coursesFound.setForeground(Color.BLUE);
+                    
+                    JTable courseTable = new JTable(data, columnNames);
+                    courseTable.setDefaultEditor(Object.class, null);
+                    JScrollPane scroll = new JScrollPane(courseTable);
+                    searchLabel.add(coursesFound);
+                    
+                    JPanel tablePanel = new JPanel(new FlowLayout());
+                    tablePanel.add(scroll);
+                    searchClassPanel.add(searchLabel, BorderLayout.CENTER);
+                    searchClassPanel.add(tablePanel, BorderLayout.SOUTH);
+                    frame.revalidate();
+                    frame.repaint();
+                }
+            }
+        } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        } catch (ClassNotFoundException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+    }
+    
+    private void createCatalog() {
+        courseCatalogPanel.removeAll();
+        BodyCourseSearch searchBody = new BodyCourseSearch();
+        // no filter, all courses (for now)
+        searchBody.setCourseName("");
+        searchBody.setCoursePrefix("");
+        searchBody.setCourseNumber("");
+        searchBody.setInstructorName("");
+        
+        ClientMsg searchAttempt = new ClientMsg("GET", "courses", searchBody);
+        try {
+            ostream.writeObject(searchAttempt);
+            ServerMsg serverMsg = (ServerMsg) istream.readObject();
+
+            if (serverMsg.isOk()) {
+                Course[] courses = (Course[]) serverMsg.getBody();
+                String[] columnNames = {"Course Prefix", "Course Number", "Course Prerequisites"};
                 Object[][] data = new Object[courses.length][columnNames.length];
 
                 for (int i = 0; i < courses.length; i++) {
@@ -381,29 +481,40 @@ public class GUI {
                     data[i][0] = course.getPrefix();
                     data[i][1] = course.getNumber();
                 }
+                courseCatalogPanel.removeAll();
                 if(courses.length < 1) {
-                    JLabel notFound = new JLabel("No classes found, try other criteria");
+                    JLabel notFound = new JLabel("No courses found in " + loggedUser.getUniName() +" :(");
                     notFound.setFont(new Font("Arial", Font.BOLD, 20));
                     notFound.setForeground(Color.BLUE);
-                    searchClassPanel.add(notFound, BorderLayout.CENTER);
+                    courseCatalogPanel.add(notFound, BorderLayout.CENTER);
                 }else {
-                    JLabel classesFound = new JLabel("Classes found:");
-                    classesFound.setFont(new Font("Arial", Font.BOLD, 20));
-                    classesFound.setForeground(Color.BLUE);
+                    JLabel coursesFound = new JLabel("Course Catalog of " + loggedUser.getUniName()+ ":");
+                    coursesFound.setFont(new Font("Arial", Font.BOLD, 20));
+                    coursesFound.setForeground(Color.BLUE);
                     
-                    JTable courseTable = new JTable(data, columnNames);
-                    JScrollPane scrollPane = new JScrollPane(courseTable);
-                    searchClassPanel.add(classesFound, BorderLayout.CENTER);
-                    searchClassPanel.add(scrollPane, BorderLayout.SOUTH);
+                    JTable catalogTable = new JTable(data, columnNames);
+                    catalogTable.setDefaultEditor(Object.class, null);
+                    JScrollPane scroll = new JScrollPane(catalogTable);
+                    
+                    JPanel textPanel = new JPanel(new FlowLayout());
+                    JPanel catalogPanel = new JPanel(new FlowLayout());
+                    textPanel.add(coursesFound);
+                    catalogPanel.add(scroll);
+                    
+                    courseCatalogPanel.add(textPanel, BorderLayout.NORTH);
+                    courseCatalogPanel.add(catalogPanel, BorderLayout.CENTER);
+                    frame.revalidate();
+                    frame.repaint();
                 }
             }
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
+        } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        } catch (ClassNotFoundException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
         }
-        frame.revalidate();
-        frame.repaint();
     }
-
     public boolean isLoggedIn() {
         return loggedIn;
     }

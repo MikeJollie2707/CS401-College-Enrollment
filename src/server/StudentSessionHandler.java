@@ -81,47 +81,7 @@ public class StudentSessionHandler extends SessionHandler {
     private synchronized ServerMsg fetchCourses(ClientMsg req) {
         try {
             var body = (BodyCourseSearch) req.getBody();
-<<<<<<< Updated upstream
             return Util.searchCourses(body, university);
-=======
-            final Predicate<Course> prefix_pred = (Course c) -> {
-                if (body.getCoursePrefix() != null && !body.getCoursePrefix().isBlank()) {
-                    return c.getPrefix().toLowerCase().contains(body.getCoursePrefix());
-                }
-                return true;
-            };
-            final Predicate<Course> name_pred = (Course c) -> {
-                if (body.getCourseNumber() != null && !body.getCourseNumber().isBlank()) {
-                    return c.getNumber().toLowerCase().contains(body.getCourseNumber());
-                }
-                return true;
-            };
-            final Predicate<Course> number_pred = (Course c) -> {
-                if (body.getCourseNumber() != null && !body.getCourseNumber().isBlank()) {
-                    return c.getNumber().toLowerCase().contains(body.getCourseNumber());
-                }
-                return true;
-            };
-            final Predicate<Course> instructor_pred = (Course c) -> {
-                if (body.getInstructorName() != null && !body.getInstructorName().isBlank()) {
-                    for (var section : c.getSections()) {
-                        if (section.getInstructor().getName().toLowerCase().contains(body.getInstructorName())) {
-                            return true;
-                        }
-                    }
-                    return false;
-                }
-                return true;
-            };
-
-            var res = university.getCoursesByFilter((Course c) -> {
-                return prefix_pred.test(c) &&
-                        name_pred.test(c) &&
-                        number_pred.test(c) && 
-                        instructor_pred.test(c);
-            });
-            return ServerMsg.asOK(res.toArray(new Course[0]));
->>>>>>> Stashed changes
         } catch (ClassCastException err) {
             return ServerMsg.asERR(String.format("%s", err.getMessage()));
         }

@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 import objects.Account;
 import objects.Administrator;
 import objects.Course;
-import objects.Instructor;
 import objects.Student;
 import objects.University;
 
@@ -26,20 +25,6 @@ public class ServerMain {
 
             University[] universities = loadInfoFromFile("unis.txt");
 
-<<<<<<< Updated upstream
-=======
-            // Fake setup
-            // TODO: Remove later.
-            for (int i = 0; i < universities.length; ++i) {
-                universities[i].addAdmin(new Administrator("Admin", new Account("admin", "123456")));
-                universities[i].addStudent(new Student("Steve", new Account("steve", "iamsteve")));
-                Course course = new Course("CS", "101", "IS COMPUTER SCIENCE");
-                Course course2 = new Course("ECON", "101", "IS ECONOMICS");
-                universities[i].addCourse(course);
-                universities[i].addCourse(course2);
-            }
-
->>>>>>> Stashed changes
             while (true) {
                 Socket socket = ss.accept();
                 System.out.println("Client connected: " + socket.getInetAddress());
@@ -67,7 +52,13 @@ public class ServerMain {
                 String universityName = entry[0];
                 String location = entry[1];
                 University university = new University(universityName, location);
-                
+                // DUMMY COURSES TO CHECK
+                Course course = new Course("CS", "101", "IS COMPUTER SCIENCE");
+                Course course2 = new Course("ECON", "201", "IS ECON");
+                Course course3 = new Course("MATH", "301", "IS MATH");
+                university.addCourse(course);
+                university.addCourse(course2);
+                university.addCourse(course3);
                 // Loading more information relating to Admins
                 if (entry.length > 2) {
                     String adminsFile = entry[2];

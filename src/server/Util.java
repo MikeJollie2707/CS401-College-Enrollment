@@ -150,27 +150,27 @@ public class Util {
     public static ServerMsg searchCourses(BodyCourseSearch body, University university) {
         final Predicate<Course> prefix_pred = (Course c) -> {
             if (body.getCoursePrefix() != null && !body.getCoursePrefix().isBlank()) {
-                return c.getPrefix().contains(body.getCoursePrefix());
+                return c.getPrefix().toLowerCase().contains(body.getCoursePrefix());
             }
             return true;
         };
         final Predicate<Course> name_pred = (Course c) -> {
             if (body.getCourseName() != null && !body.getCourseName().isBlank()) {
                 // NOTE: Consider adding a name field for Course
-                return c.getDescription().contains(body.getCourseName());
+                return c.getDescription().toLowerCase().contains(body.getCourseName());
             }
             return true;
         };
         final Predicate<Course> number_pred = (Course c) -> {
             if (body.getCourseNumber() != null && !body.getCourseNumber().isBlank()) {
-                return c.getNumber().contains(body.getCourseNumber());
+                return c.getNumber().toLowerCase().contains(body.getCourseNumber());
             }
             return true;
         };
         final Predicate<Course> instructor_pred = (Course c) -> {
-            if (body.getInstructorName() != null && !body.getCoursePrefix().isBlank()) {
+            if (body.getInstructorName() != null && !body.getInstructorName().isBlank()) {
                 for (var section : c.getSections()) {
-                    if (section.getInstructor().getName().contains(body.getInstructorName())) {
+                    if (section.getInstructor().getName().toLowerCase().contains(body.getInstructorName())) {
                         return true;
                     }
                 }
