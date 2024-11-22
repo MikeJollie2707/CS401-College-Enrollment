@@ -4,6 +4,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 import javax.swing.*;
+
+import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.*;
 
 import objects.BodyLogin;
@@ -42,17 +46,34 @@ public class Login extends JPanel {
     }
 
     void setupForm() {
-        Form form = new Form(this);
+        setLayout(new FlowLayout());
+        Form form = new Form(null);
+        JPanel formPanel = form.getPanel();
+        formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
+
+        JLabel loginMessage = new JLabel("Please login first!");
         JComboBox<String> uniDropdown = new JComboBox<>(uniNames);
         JTextField loginID = new JTextField(20);
         JPasswordField password = new JPasswordField(20);
         password.setEchoChar('*');
-
-        form.addEntry(new JLabel("Choose a university:"), uniDropdown, () -> (String) uniDropdown.getSelectedItem())
-                .addEntry(new JLabel("Login ID:"), loginID, () -> loginID.getText())
-                .addEntry(new JLabel("Password:"), password, () -> new String(password.getPassword()));
-
         JButton submitBtn = new JButton("Submit");
+
+        loginMessage.setFont(new Font("Arial", Font.BOLD, 30));
+        loginMessage.setForeground(Color.BLUE);
+        formPanel.add(loginMessage);
+        formPanel.add(Box.createVerticalStrut(100));
+
+        form.addEntry(new JLabel("Choose a university:"), uniDropdown, () -> (String) uniDropdown.getSelectedItem());
+        formPanel.add(Box.createVerticalStrut(10));
+
+        form.addEntry(new JLabel("Login ID:"), loginID, () -> loginID.getText());
+        formPanel.add(Box.createVerticalStrut(10));
+
+        form.addEntry(new JLabel("Password:"), password, () -> new String(password.getPassword()));
+        formPanel.add(Box.createVerticalStrut(10));
+
+        submitBtn.setBackground(Color.GREEN);
+        submitBtn.setForeground(Color.BLACK);
         submitBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 var results = form.getResults();
@@ -83,6 +104,8 @@ public class Login extends JPanel {
                 loginWorker.execute();
             };
         });
-        this.add(submitBtn);
+        formPanel.add(submitBtn);
+
+        add(formPanel);
     }
 }

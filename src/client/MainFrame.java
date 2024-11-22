@@ -29,8 +29,9 @@ public class MainFrame {
         this.istream = istream;
 
         window = new JFrame("CES");
-        window.setSize(600, 600);
+        window.setSize(1000, 750);
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        window.setLocationRelativeTo(null);
 
         window.addWindowListener(new WindowAdapter() {
             @Override
