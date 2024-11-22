@@ -14,40 +14,38 @@ import objects.BodyLogin;
 import objects.ClientMsg;
 import objects.ServerMsg;
 
-public class Login extends JPanel {
+public class GUILogin extends JPanel {
     final private ObjectOutputStream ostream;
     final private ObjectInputStream istream;
     final private MainFrame frame;
     private String[] uniNames;
 
-    public Login(ObjectOutputStream ostream, ObjectInputStream istream, MainFrame frame, String[] uniNames) {
+    public GUILogin(ObjectOutputStream ostream, ObjectInputStream istream, MainFrame frame, String[] uniNames) {
         this.ostream = ostream;
         this.istream = istream;
         this.frame = frame;
         this.uniNames = uniNames;
 
-        JPanel self = this;
-
         setupForm();
 
-        this.addComponentListener(new ComponentAdapter() {
+        addComponentListener(new ComponentAdapter() {
             @Override
             public void componentHidden(ComponentEvent e) {
-                self.removeAll();
+                removeAll();
             }
 
             @Override
             public void componentShown(ComponentEvent e) {
                 setupForm();
-                self.revalidate();
-                self.repaint();
+                revalidate();
+                repaint();
             }
         });
     }
 
     void setupForm() {
         setLayout(new FlowLayout());
-        Form form = new Form(null);
+        BuilderForm form = new BuilderForm(null);
         JPanel formPanel = form.getPanel();
         formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
 
@@ -80,6 +78,7 @@ public class Login extends JPanel {
                 String selectedUni = results.get(0);
                 String id = results.get(1);
                 String pw = results.get(2);
+
                 SwingWorker<ServerMsg, Void> loginWorker = new SwingWorker<ServerMsg, Void>() {
                     protected ServerMsg doInBackground() throws Exception {
                         ostream.writeObject(new ClientMsg("CREATE", "login", new BodyLogin(selectedUni, id, pw)));
@@ -91,7 +90,6 @@ public class Login extends JPanel {
                             var resp = get();
                             if (resp.isOk()) {
                                 System.out.println("LOGIN SUCCESS");
-                                // frame.render(1);
                                 frame.render("student");
                             } else {
                                 JOptionPane.showMessageDialog(null, "Login failed.");

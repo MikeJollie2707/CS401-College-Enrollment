@@ -13,12 +13,12 @@ import java.awt.Font;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-public class SchedulePanel extends RAIIPanel {
+public class PanelSchedule extends PanelBase {
     final private MainFrame frame;
     final private ObjectOutputStream ostream;
     final private ObjectInputStream istream;
 
-    public SchedulePanel(MainFrame frame, ObjectOutputStream ostream, ObjectInputStream istream) {
+    public PanelSchedule(MainFrame frame, ObjectOutputStream ostream, ObjectInputStream istream) {
         this.frame = frame;
         this.ostream = ostream;
         this.istream = istream;
@@ -26,7 +26,6 @@ public class SchedulePanel extends RAIIPanel {
 
     @Override
     public void onLoad() {
-        System.out.println("Working");
         SwingWorker<ServerMsg, Void> worker = new SwingWorker<ServerMsg, Void>() {
             @Override
             protected ServerMsg doInBackground() throws Exception {
@@ -38,9 +37,7 @@ public class SchedulePanel extends RAIIPanel {
             protected void done() {
                 try {
                     var resp = get();
-                    System.out.println("Finished fetching.");
                     if (resp.isOk()) {
-
                         Section[] myCourses = (Section[]) resp.getBody();
 
                         String[] titles = { "Course Prefix", "Course Number", "Status" };
@@ -67,12 +64,14 @@ public class SchedulePanel extends RAIIPanel {
                         add(tablePanel, BorderLayout.CENTER);
                         refreshPanel();
                     }
+                    frame.stopLoading();
                 } catch (Exception err) {
                     err.printStackTrace();
                 }
             }
         };
         worker.execute();
+        frame.showLoading();
     }
 
     @Override
