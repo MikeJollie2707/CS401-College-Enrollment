@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import objects.Account;
 import objects.Administrator;
+import objects.Course;
 import objects.Student;
 import objects.University;
 
@@ -51,7 +52,13 @@ public class ServerMain {
                 String universityName = entry[0];
                 String location = entry[1];
                 University university = new University(universityName, location);
-                
+                // DUMMY COURSES TO CHECK
+                Course course = new Course("CS", "101", "IS COMPUTER SCIENCE");
+                Course course2 = new Course("ECON", "201", "IS ECON");
+                Course course3 = new Course("MATH", "301", "IS MATH");
+                university.addCourse(course);
+                university.addCourse(course2);
+                university.addCourse(course3);
                 // Loading more information relating to Admins
                 if (entry.length > 2) {
                     String adminsFile = entry[2];
