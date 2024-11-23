@@ -2,6 +2,7 @@ package client;
 
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
 import javax.swing.*;
 
@@ -11,6 +12,7 @@ import java.awt.Font;
 import java.awt.event.*;
 
 import objects.BodyLogin;
+import objects.BodyLoginSuccess;
 import objects.ClientMsg;
 import objects.ServerMsg;
 
@@ -20,7 +22,7 @@ public class GUILogin extends JPanel {
     final private MainFrame frame;
     private String[] uniNames;
 
-    public GUILogin(ObjectOutputStream ostream, ObjectInputStream istream, MainFrame frame, String[] uniNames) {
+    public GUILogin(MainFrame frame, ObjectOutputStream ostream, ObjectInputStream istream, String[] uniNames) {
         this.ostream = ostream;
         this.istream = istream;
         this.frame = frame;
@@ -89,9 +91,20 @@ public class GUILogin extends JPanel {
                         try {
                             var resp = get();
                             if (resp.isOk()) {
-                                System.out.println("LOGIN SUCCESS");
-                                frame.render("student");
+                                var body = (BodyLoginSuccess) resp.getBody();
+                                String role = body.getRole();
+                                Serializable client = body.getClient();
+                                frame.setMe(client);
+                                if (role.equals("student")) {
+                                    frame.render("student");
+                                } else if (role.equals("admin")) {
+                                    frame.render("admin");
+                                } else if (role.equals("instructor")) {
+                                    frame.render("instructor");
+                                }
+                                frame.stopLoading();
                             } else {
+                                frame.stopLoading();
                                 JOptionPane.showMessageDialog(null, "Login failed.");
                             }
                         } catch (Exception err) {
@@ -100,6 +113,7 @@ public class GUILogin extends JPanel {
                     };
                 };
                 loginWorker.execute();
+                frame.showLoading();
             };
         });
         formPanel.add(submitBtn);
