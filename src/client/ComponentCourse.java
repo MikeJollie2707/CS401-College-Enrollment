@@ -16,6 +16,7 @@ public class ComponentCourse {
     }
 
     public JPanel build() {
+        // WIP
         JPanel panel = new JPanel();
         String prefix = course.getPrefix();
         String number = course.getNumber();

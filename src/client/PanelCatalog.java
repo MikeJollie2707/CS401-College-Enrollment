@@ -33,6 +33,13 @@ public class PanelCatalog extends PanelBase {
         resultPanel.setLayout(new BoxLayout(resultPanel, BoxLayout.Y_AXIS));
     }
 
+    /**
+     * Get the worker that'll do the course query.
+     * 
+     * @param body The body to be sent to server. This should be a new object every
+     *             time this worker is executed.
+     * @return
+     */
     SwingWorker<ServerMsg, Void> getSearchWorker(BodyCourseSearch body) {
         SwingWorker<ServerMsg, Void> worker = new SwingWorker<ServerMsg, Void>() {
             @Override

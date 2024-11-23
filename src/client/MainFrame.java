@@ -16,9 +16,6 @@ import java.awt.Dialog.ModalityType;
 import java.awt.event.*;
 
 public class MainFrame {
-    // final private Socket socket;
-    // final private ObjectOutputStream ostream;
-    // final private ObjectInputStream istream;
     final private JFrame window;
 
     private CardLayout cl;
@@ -27,10 +24,6 @@ public class MainFrame {
     private Serializable whoami;
 
     public MainFrame(Socket socket, ObjectOutputStream ostream, ObjectInputStream istream) {
-        // this.socket = socket;
-        // this.ostream = ostream;
-        // this.istream = istream;
-
         window = new JFrame("CES");
         window.setSize(1000, 750);
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -80,10 +73,11 @@ public class MainFrame {
                             ostream.writeObject(new ClientMsg("CREATE", "logout", null));
                             return (ServerMsg) istream.readObject();
                         }
-    
+
                         @Override
                         protected void done() {
                             render("login");
+                            setMe(null);
                             stopLoading();
                         }
                     };
@@ -101,29 +95,64 @@ public class MainFrame {
         window.setVisible(true);
     }
 
-    public void render(String mode) {
-        cl.show(viewer, mode);
+    /**
+     * Tells the frame to render a different panel.
+     * 
+     * @param sceneName Valid values: {@code login}, {@code student}, {@code admin}.
+     */
+    public void render(String sceneName) {
+        cl.show(viewer, sceneName);
     }
 
+    /**
+     * Show a loading dialog over the current frame.
+     * <p>
+     * The main purpose is to prevent the user from interacting with the rest of the
+     * GUI while some expensive operations are running.
+     */
     public void showLoading() {
         loadingDialog.setVisible(true);
     }
 
+    /**
+     * Remove the loading dialog over the current frame.
+     */
     public void stopLoading() {
-        // Without this, sometimes the dialog closes too fast and
-        // doesn't close, so...
+        /**
+         * When this method is used in other panels, oftentimes it'll not close
+         * the dialog, but the rest of the GUI still works and it doesn't block
+         * anything.
+         * 
+         * I think this is bcuz it opens and closes too fast, so it just freaks out
+         * and not closes the thing, but internally it is considered closed.
+         * So the hack here is to add this tiny delay here. And voila, it closes every
+         * time. You won't even notice it's there!
+         */
         try {
-            Thread.sleep(100);
+            Thread.sleep(10);
         } catch (InterruptedException err) {
 
         }
         loadingDialog.setVisible(false);
     }
 
+    /**
+     * Return the client. When used inside one of the {@code GUI...}, it is safe to
+     * cast
+     * to one of {@code Administrator}, {@code Student}, or {@code Instructor}.
+     * 
+     * @return The object that identifies the user that's logged in.
+     */
     public Serializable getMe() {
         return whoami;
     }
 
+    /**
+     * Set the client.
+     * 
+     * @param me The object that identifies the user that's logged in. When the user
+     *           is logged out, this should be null.
+     */
     public void setMe(Serializable me) {
         whoami = me;
     }

@@ -10,17 +10,10 @@ import java.util.LinkedHashMap;
 import javax.swing.*;
 
 public class GUIStudent extends JPanel {
-    // final private MainFrame frame;
-    // final private ObjectOutputStream ostream;
-    // final private ObjectInputStream istream;
-
     private JButton logoutBtn;
     private LinkedHashMap<String, PanelBase> panelMap;
 
     public GUIStudent(MainFrame frame, ObjectOutputStream ostream, ObjectInputStream istream, JButton logoutBtn) {
-        // this.frame = frame;
-        // this.ostream = ostream;
-        // this.istream = istream;
         this.logoutBtn = logoutBtn;
 
         panelMap = new LinkedHashMap<>();
