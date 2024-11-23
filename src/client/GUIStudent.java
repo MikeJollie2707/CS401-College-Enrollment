@@ -26,24 +26,21 @@ public class GUIStudent extends JPanel {
 
     void setupView() {
         BuilderRadioPanel radio = new BuilderRadioPanel();
-        JPanel options = radio.getOptions();
-        options.setLayout(new BoxLayout(options, BoxLayout.Y_AXIS));
+        JPanel sidebar = radio.getOptions();
+        sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
 
-        ArrayList<JButton> buttons = new ArrayList<>();
         for (var sceneName : panelMap.sequencedKeySet()) {
-            buttons.add(radio.add(sceneName, panelMap.get(sceneName)));
-            options.add(Box.createVerticalStrut(10));
-        }
-        options.add(logoutBtn);
-
-        for (var btn : buttons) {
+            JButton btn = radio.add(sceneName, panelMap.get(sceneName));
             btn.setBackground(Color.BLACK);
             btn.setForeground(Color.CYAN);
+
+            sidebar.add(Box.createVerticalStrut(10));
         }
+        sidebar.add(logoutBtn);
 
         JPanel viewer = radio.buildView();
 
-        this.add(options, BorderLayout.WEST);
+        this.add(sidebar, BorderLayout.WEST);
         this.add(viewer);
     }
 
