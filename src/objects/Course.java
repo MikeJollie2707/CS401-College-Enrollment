@@ -7,8 +7,6 @@ import java.util.*;
  * A serializable class that represents a course.
  */
 public class Course implements Serializable {
-    private static int _id = 0;
-    private String id;
     private String prefix;
     private String number;
     private String description;
@@ -24,12 +22,9 @@ public class Course implements Serializable {
      * @throws NullPointerException If any parameters are null.
      */
     public Course(String prefix, String number, String description) {
-        id = String.format("course_%d", _id);
-        
         setPrefix(prefix);
         setNumber(number);
         setDescription(description);
-        ++_id;
 
         prerequisites = new HashSet<>();
         sections = new ArrayList<>();
@@ -94,7 +89,7 @@ public class Course implements Serializable {
     }
 
     public synchronized String getID() {
-        return id;
+        return String.format("%s %s", prefix, number);
     }
 
     public synchronized String getPrefix() {

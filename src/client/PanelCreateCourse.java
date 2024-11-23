@@ -82,7 +82,7 @@ public class PanelCreateCourse extends PanelBase {
                         var cs = (Course[]) resp.getBody();
                         courses = Arrays.stream(cs)
                                 .map((Course c) -> {
-                                    return String.format("%s %s", c.getPrefix(), c.getNumber());
+                                    return c.getID();
                                 })
                                 .collect(Collectors.toList())
                                 .toArray(new String[0]);
