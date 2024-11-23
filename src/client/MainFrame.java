@@ -3,6 +3,7 @@ package client;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.Socket;
 
 import javax.swing.*;
@@ -23,6 +24,7 @@ public class MainFrame {
     private CardLayout cl;
     private JPanel viewer;
     private JDialog loadingDialog;
+    private Serializable whoami;
 
     public MainFrame(Socket socket, ObjectOutputStream ostream, ObjectInputStream istream) {
         // this.socket = socket;
@@ -65,30 +67,35 @@ public class MainFrame {
             err.printStackTrace();
         }
 
-        JButton logoutBtn = new JButton("Logout");
-        logoutBtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                SwingWorker<ServerMsg, Void> logoutWorker = new SwingWorker<ServerMsg, Void>() {
-                    @Override
-                    protected ServerMsg doInBackground() throws Exception {
-                        ostream.writeObject(new ClientMsg("CREATE", "logout", null));
-                        return (ServerMsg) istream.readObject();
-                    }
+        // Can't use one button because a panel will "consume" that button.
+        JButton[] logoutBtns = new JButton[3];
+        for (int i = 0; i < 3; ++i) {
+            logoutBtns[i] = new JButton("Logout");
+            logoutBtns[i].addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    SwingWorker<ServerMsg, Void> logoutWorker = new SwingWorker<ServerMsg, Void>() {
+                        @Override
+                        protected ServerMsg doInBackground() throws Exception {
+                            ostream.writeObject(new ClientMsg("CREATE", "logout", null));
+                            return (ServerMsg) istream.readObject();
+                        }
+    
+                        @Override
+                        protected void done() {
+                            render("login");
+                            stopLoading();
+                        }
+                    };
+                    logoutWorker.execute();
+                    showLoading();
+                }
+            });
+        }
 
-                    @Override
-                    protected void done() {
-                        render("login");
-                        stopLoading();
-                    }
-                };
-                logoutWorker.execute();
-                showLoading();
-            }
-        });
-
-        viewer.add(new GUILogin(ostream, istream, this, uniNames), "login");
-        viewer.add(new GUIAdmin(this, ostream, istream, logoutBtn), "student");
+        viewer.add(new GUILogin(this, ostream, istream, uniNames), "login");
+        viewer.add(new GUIAdmin(this, ostream, istream, logoutBtns[0]), "admin");
+        viewer.add(new GUIStudent(this, ostream, istream, logoutBtns[1]), "student");
 
         window.add(viewer);
         window.setVisible(true);
@@ -97,10 +104,6 @@ public class MainFrame {
     public void render(String mode) {
         cl.show(viewer, mode);
     }
-
-    // public JFrame getFrame() {
-    //     return window;
-    // }
 
     public void showLoading() {
         loadingDialog.setVisible(true);
@@ -115,5 +118,13 @@ public class MainFrame {
 
         }
         loadingDialog.setVisible(false);
+    }
+
+    public Serializable getMe() {
+        return whoami;
+    }
+
+    public void setMe(Serializable me) {
+        whoami = me;
     }
 }
