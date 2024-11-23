@@ -134,8 +134,10 @@ public class PanelCreateCourse extends PanelBase {
                 Course course = new Course(prefix, number, description);
                 String[] parts = prereqs.split("\n");
                 for (var part : parts) {
-                    String[] prereqInfo = part.split(" ");
-                    course.insertPrereq(new Course(prereqInfo[0], prereqInfo[1], ""));
+                    if (!part.isBlank()) {
+                        String[] prereqInfo = part.split(" ");
+                        course.insertPrereq(new Course(prereqInfo[0], prereqInfo[1], ""));
+                    }
                 }
 
                 var worker = createCourseWorker(course);
