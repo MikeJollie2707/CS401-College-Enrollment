@@ -1,3 +1,3 @@
 2
-CSU East Bay,Somewhere on Earth,csueb_admin.txt,csueb_student.txt
+CSU East Bay,Somewhere on Earth,csueb_admin.txt,csueb_student.txt,courses.txt
 Some other uni,Another place

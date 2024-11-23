@@ -261,7 +261,8 @@ public class AdminSessionHandler extends SessionHandler {
             }
 
             // Don't copy over the sections.
-            course = new Course(clientCourse.getPrefix(), clientCourse.getNumber(), clientCourse.getDescription());
+            course = new Course(clientCourse.getPrefix(), clientCourse.getNumber(),
+                    clientCourse.getDescription());
             for (var prereq : clientCourse.getPrerequisites()) {
                 Course prereqCourse = university.getCourseByID(prereq);
                 if (prereqCourse == null) {
