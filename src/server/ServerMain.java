@@ -52,13 +52,7 @@ public class ServerMain {
                 String universityName = entry[0];
                 String location = entry[1];
                 University university = new University(universityName, location);
-                // DUMMY COURSES TO CHECK
-                Course course = new Course("CS", "101", "IS COMPUTER SCIENCE");
-                Course course2 = new Course("ECON", "201", "IS ECON");
-                Course course3 = new Course("MATH", "301", "IS MATH");
-                university.addCourse(course);
-                university.addCourse(course2);
-                university.addCourse(course3);
+                
                 // Loading more information relating to Admins
                 if (entry.length > 2) {
                     String adminsFile = entry[2];
@@ -68,6 +62,10 @@ public class ServerMain {
                 if (entry.length > 3) {
                     String studentsFile = entry[3];
                     loadStudentsFromFile(studentsFile, university);
+                }
+                if (entry.length > 4) {
+                    String coursesFile = entry[4];
+                    loadCoursesFromFile(coursesFile, university);
                 }
 
                 uniMap.put(universityName, university);
@@ -120,6 +118,37 @@ public class ServerMain {
             }
         } catch (FileNotFoundException e) {
             System.out.println("Students file not found: " + studentsFile);
+        }
+    }
+
+    private static void loadCoursesFromFile(String coursesFile, University university) {
+        File file = new File(coursesFile);
+        try (Scanner scanner = new Scanner(file)) {
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                String[] parts = line.split(",", 4);
+                String coursePrefix = parts[0];
+                String courseNumber = parts[1];
+                String courseDesc = parts[2];
+                Course course = new Course(coursePrefix, courseNumber, courseDesc);
+                if (parts.length == 4) {
+                    String[] prerequisites = parts[3].split(",");
+                    for (var prereq : prerequisites) {
+                        String[] spl = prereq.split(" ", 2);
+                        String prereqPrefix = spl[0];
+                        String prereqNumber = spl[1];
+                        var found = university.getCoursesByFilter((Course c) -> {
+                            return c.getPrefix().equals(prereqPrefix) && c.getNumber().equals(prereqNumber);
+                        });
+                        if (found.size() > 0) {
+                            course.insertPrereq(found.get(0));
+                        }
+                    }
+                }
+                university.addCourse(course);
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("Students file not found: " + coursesFile);
         }
     }
 }

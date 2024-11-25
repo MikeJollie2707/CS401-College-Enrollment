@@ -21,7 +21,7 @@ public class AdminSessionHandler extends SessionHandler {
         try {
             // NOTE: Temporary, may return some more info like admin name and stuff.
             // Probably will just send the entire Admin object tbh but will see how it goes.
-            ostream.writeObject(ServerMsg.asOK(admin.getID()));
+            ostream.writeObject(ServerMsg.asOK(new BodyLoginSuccess("admin", admin)));
             while (true) {
                 ClientMsg req = null;
                 ServerMsg resp = null;
@@ -261,7 +261,8 @@ public class AdminSessionHandler extends SessionHandler {
             }
 
             // Don't copy over the sections.
-            course = new Course(clientCourse.getPrefix(), clientCourse.getNumber(), clientCourse.getDescription());
+            course = new Course(clientCourse.getPrefix(), clientCourse.getNumber(),
+                    clientCourse.getDescription());
             for (var prereq : clientCourse.getPrerequisites()) {
                 Course prereqCourse = university.getCourseByID(prereq);
                 if (prereqCourse == null) {

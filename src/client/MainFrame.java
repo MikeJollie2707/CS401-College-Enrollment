@@ -3,6 +3,7 @@ package client;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.Socket;
 
 import javax.swing.*;
@@ -10,23 +11,23 @@ import javax.swing.*;
 import objects.ClientMsg;
 import objects.ServerMsg;
 
-import java.awt.Color;
+import java.awt.CardLayout;
+import java.awt.Dialog.ModalityType;
 import java.awt.event.*;
 
 public class MainFrame {
-    final private Socket socket;
-    final private ObjectOutputStream ostream;
-    final private ObjectInputStream istream;
     final private JFrame window;
 
-    public MainFrame(Socket socket, ObjectOutputStream ostream, ObjectInputStream istream) {
-        this.socket = socket;
-        this.ostream = ostream;
-        this.istream = istream;
+    private CardLayout cl;
+    private JPanel viewer;
+    private JDialog loadingDialog;
+    private Serializable whoami;
 
+    public MainFrame(Socket socket, ObjectOutputStream ostream, ObjectInputStream istream) {
         window = new JFrame("CES");
-        window.setSize(600, 600);
+        window.setSize(1000, 750);
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        window.setLocationRelativeTo(null);
 
         window.addWindowListener(new WindowAdapter() {
             @Override
@@ -40,102 +41,119 @@ public class MainFrame {
             };
         });
 
-        foo();
+        // TODO: Decorate this thing so it doesn't just display a white window.
+        loadingDialog = new JDialog(window, "Loading...", ModalityType.DOCUMENT_MODAL);
+        loadingDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+        loadingDialog.setSize(300, 300);
+        loadingDialog.setLocationRelativeTo(null);
 
+        cl = new CardLayout();
+        viewer = new JPanel(cl);
+
+        String[] uniNames = null;
+        try {
+            var names = (String[]) istream.readObject();
+            uniNames = names;
+        } catch (ClassNotFoundException err) {
+            err.printStackTrace();
+        } catch (IOException err) {
+            err.printStackTrace();
+        }
+
+        // Can't use one button because a panel will "consume" that button.
+        JButton[] logoutBtns = new JButton[3];
+        for (int i = 0; i < 3; ++i) {
+            logoutBtns[i] = new JButton("Logout");
+            logoutBtns[i].addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    SwingWorker<ServerMsg, Void> logoutWorker = new SwingWorker<ServerMsg, Void>() {
+                        @Override
+                        protected ServerMsg doInBackground() throws Exception {
+                            ostream.writeObject(new ClientMsg("CREATE", "logout", null));
+                            return (ServerMsg) istream.readObject();
+                        }
+
+                        @Override
+                        protected void done() {
+                            render("login");
+                            setMe(null);
+                            stopLoading();
+                        }
+                    };
+                    logoutWorker.execute();
+                    showLoading();
+                }
+            });
+        }
+
+        viewer.add(new GUILogin(this, ostream, istream, uniNames), "login");
+        viewer.add(new GUIAdmin(this, ostream, istream, logoutBtns[0]), "admin");
+        viewer.add(new GUIStudent(this, ostream, istream, logoutBtns[1]), "student");
+
+        window.add(viewer);
         window.setVisible(true);
     }
 
-    // Use SwingWorker to do connection stuff
-    // A common occurrence is hitting a button -> make a request
-    // which is implemented as btn.addActionListener()
-    // Inside the action listener, create a SwingWorker and execute it.
+    /**
+     * Tells the frame to render a different panel.
+     * 
+     * @param sceneName Valid values: {@code login}, {@code student}, {@code admin}.
+     */
+    public void render(String sceneName) {
+        cl.show(viewer, sceneName);
+    }
 
-    // SwingWorker has 2 methods of interest to override: doInBackground() and
-    // done()
-    // doInBackground() is exclusively used for networking, done() is exclusively
-    // used for lightweight stuff like updating UI (mixing them up will freeze the
-    // GUI).
+    /**
+     * Show a loading dialog over the current frame.
+     * <p>
+     * The main purpose is to prevent the user from interacting with the rest of the
+     * GUI while some expensive operations are running.
+     */
+    public void showLoading() {
+        loadingDialog.setVisible(true);
+    }
 
-    // Example (remove in Implementation phase):
-    private void foo() {
-        JPanel panel = new JPanel();
-        JButton success_btn = new JButton("Success Click");
-        JButton fail_btn = new JButton("Fail Click");
+    /**
+     * Remove the loading dialog over the current frame.
+     */
+    public void stopLoading() {
+        /**
+         * When this method is used in other panels, oftentimes it'll not close
+         * the dialog, but the rest of the GUI still works and it doesn't block
+         * anything.
+         * 
+         * I think this is bcuz it opens and closes too fast, so it just freaks out
+         * and not closes the thing, but internally it is considered closed.
+         * So the hack here is to add this tiny delay here. And voila, it closes every
+         * time. You won't even notice it's there!
+         */
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException err) {
 
-        success_btn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                success_btn.setEnabled(false);
-                fail_btn.setEnabled(false);
+        }
+        loadingDialog.setVisible(false);
+    }
 
-                SwingWorker<ServerMsg, Void> worker = new SwingWorker<ServerMsg, Void>() {
-                    @Override
-                    protected ServerMsg doInBackground() throws Exception {
-                        ostream.writeObject(new ClientMsg("GET", "foo", null));
-                        return (ServerMsg) istream.readObject();
-                    };
+    /**
+     * Return the client. When used inside one of the {@code GUI...}, it is safe to
+     * cast
+     * to one of {@code Administrator}, {@code Student}, or {@code Instructor}.
+     * 
+     * @return The object that identifies the user that's logged in.
+     */
+    public Serializable getMe() {
+        return whoami;
+    }
 
-                    @Override
-                    protected void done() {
-                        try {
-                            ServerMsg resp = get();
-                            if (resp.isOk()) {
-                                success_btn.setBackground(Color.GREEN);
-                            } else {
-                                success_btn.setBackground(Color.YELLOW);
-                            }
-
-                            success_btn.setText((String) resp.getBody());
-                        } catch (Exception err) {
-                            err.printStackTrace();
-                        }
-                    };
-                };
-                worker.execute();
-            };
-        });
-
-        // Same as above but send an "incorrect" request.
-        fail_btn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                success_btn.setEnabled(false);
-                fail_btn.setEnabled(false);
-
-                SwingWorker<ServerMsg, Void> worker = new SwingWorker<ServerMsg, Void>() {
-                    @Override
-                    protected ServerMsg doInBackground() throws Exception {
-                        ostream.writeObject(new ClientMsg("GET", "bar", null));
-                        // Artificial delay
-                        // Even if there's something blocking on this function,
-                        // the button still "lives" (if the button is enabled, it still react to being
-                        // hovered on).
-                        Thread.sleep(2000);
-                        return (ServerMsg) istream.readObject();
-                    };
-
-                    @Override
-                    protected void done() {
-                        try {
-                            ServerMsg resp = get();
-                            if (resp.isOk()) {
-                                fail_btn.setBackground(Color.GREEN);
-                            } else {
-                                fail_btn.setBackground(Color.YELLOW);
-                            }
-
-                            fail_btn.setText((String) resp.getBody());
-                        } catch (Exception err) {
-                            err.printStackTrace();
-                        }
-                    };
-                };
-                worker.execute();
-            };
-        });
-
-        panel.add(success_btn);
-        panel.add(fail_btn);
-        window.add(panel);
+    /**
+     * Set the client.
+     * 
+     * @param me The object that identifies the user that's logged in. When the user
+     *           is logged out, this should be null.
+     */
+    public void setMe(Serializable me) {
+        whoami = me;
     }
 }

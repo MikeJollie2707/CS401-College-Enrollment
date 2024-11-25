@@ -19,7 +19,7 @@ public class StudentSessionHandler extends SessionHandler {
     @Override
     public void run() {
         try {
-            ostream.writeObject(ServerMsg.asOK(student.getID()));
+            ostream.writeObject(ServerMsg.asOK(new BodyLoginSuccess("student", student)));
             while (true) {
                 ClientMsg req = null;
                 ServerMsg resp = null;
