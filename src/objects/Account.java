@@ -37,7 +37,7 @@ public class Account implements Serializable {
         return this.email.equals(email) && this.password.equals(password);
     }
 
-    public String getEmail() {
-        return email;
+    public boolean isSimilar(Account account) {
+        return this.email.equals(account.email) && this.password.equals(account.password);
     }
 }

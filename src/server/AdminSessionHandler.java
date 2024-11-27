@@ -123,7 +123,11 @@ public class AdminSessionHandler extends SessionHandler {
                 return ServerMsg.asERR(String.format("Student with ID '%s' already existed.", clientStudent.getID()));
             }
             Student student = new Student(clientStudent.getName(), clientStudent.getAccount());
-            university.addStudent(student);
+            try {
+                university.addStudent(student);
+            } catch (IllegalArgumentException err) {
+                return ServerMsg.asERR(err.getMessage());
+            }
             return ServerMsg.asOK(student);
         } catch (ClassCastException err) {
             return ServerMsg.asERR(String.format("%s", err.getMessage()));
