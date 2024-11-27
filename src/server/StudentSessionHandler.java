@@ -126,25 +126,7 @@ public class StudentSessionHandler extends SessionHandler {
     private synchronized ServerMsg drop(ClientMsg req) {
         try {
             Section clientSection = (Section) req.getBody();
-            Course clientCourse = clientSection.getCourse();
-            Course course = university.getCourseByID(clientCourse.getID());
-            if (course == null) {
-                return ServerMsg.asERR(String.format("Course ID '%s' not found.", clientCourse.getID()));
-            }
-
-            Section section = null;
-            for (var s : course.getSections()) {
-                if (clientSection.getID().equals(s.getID())) {
-                    section = s;
-                    break;
-                }
-            }
-            if (section == null) {
-                return ServerMsg.asERR(String.format("Section ID '%s' not found.", clientSection.getID()));
-            }
-
-            section.dropStudent(student.getID());
-            return ServerMsg.asOK("");
+            return Util.drop(clientSection, student, university);
         } catch (ClassCastException err) {
             return ServerMsg.asERR(String.format("%s", err.getMessage()));
         }
