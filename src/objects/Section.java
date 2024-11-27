@@ -278,7 +278,8 @@ public class Section implements Serializable {
         this.max_wait = wait;
 
         while (wait < waitlisted.size()) {
-            waitlisted.removeLast();
+            Student droppedStudent = waitlisted.removeLast();
+            droppedStudent.drop(id);
         }
 
     }
