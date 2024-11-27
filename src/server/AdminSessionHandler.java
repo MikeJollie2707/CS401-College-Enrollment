@@ -361,6 +361,14 @@ public class AdminSessionHandler extends SessionHandler {
             return ServerMsg.asERR(String.format("%s", err.getMessage()));
         }
     }
+
+    /**
+     * The handler for {@code DELETE course} requests.
+     * 
+     * @param req The client's request. The body MUST be of type {@code Course}.
+     * @return If success, an {@code OK ServerMsg}. If failed, an
+     *         {@code ERR ServerMsg} containing the reason {@code String}.
+     */
     private synchronized ServerMsg delCourse(ClientMsg req) {
         try {
             Course clientCourse = (Course) req.getBody();
@@ -369,6 +377,12 @@ public class AdminSessionHandler extends SessionHandler {
                 return ServerMsg.asERR(String.format("Course ID '%s' not found.", clientCourse.getID()));
             }
 
+            for (var section : course.getSections()) {
+                // Don't touch the completed ones because they're "archived".
+                if (section.getStatus() == SectionStatus.ACTIVE) {
+                    section.setStatus(SectionStatus.INACTIVE);
+                }
+            }
             university.delCourse(course.getID());
             return ServerMsg.asOK("");
         } catch (ClassCastException err) {
