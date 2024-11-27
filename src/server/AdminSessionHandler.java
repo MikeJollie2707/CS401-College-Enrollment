@@ -19,8 +19,6 @@ public class AdminSessionHandler extends SessionHandler {
     @Override
     public void run() {
         try {
-            // NOTE: Temporary, may return some more info like admin name and stuff.
-            // Probably will just send the entire Admin object tbh but will see how it goes.
             ostream.writeObject(ServerMsg.asOK(new BodyLoginSuccess("admin", admin)));
             while (true) {
                 ClientMsg req = null;
@@ -42,12 +40,14 @@ public class AdminSessionHandler extends SessionHandler {
                     }
                 }
 
-                if (req.isEndpoint("CREATE", "message")) {
-                    resp = capitalizeMessage(req);
-                } else if (req.isEndpoint("GET", "courses")) {
+                if (req.isEndpoint("GET", "courses")) {
                     resp = fetchCourses(req);
                 } else if (req.isEndpoint("GET", "report")) {
                     resp = fetchReport(req);
+                } else if (req.isEndpoint("GET", "students")) {
+                    resp = fetchStudents(req);
+                } else if (req.isEndpoint("GET", "instructors")) {
+                    resp = fetchInstructors(req);
                 } else if (req.isEndpoint("CREATE", "student")) {
                     resp = createStudent(req);
                 } else if (req.isEndpoint("CREATE", "section")) {
@@ -80,12 +80,6 @@ public class AdminSessionHandler extends SessionHandler {
         }
     }
 
-    // NOTE: Mock service, will delete later.
-    private ServerMsg capitalizeMessage(ClientMsg req) {
-        String message = (String) req.getBody();
-        return ServerMsg.asOK(message.toUpperCase());
-    }
-
     private ServerMsg logout(ClientMsg req) {
         return ServerMsg.asOK("logout");
     }
@@ -101,6 +95,16 @@ public class AdminSessionHandler extends SessionHandler {
 
     private synchronized ServerMsg fetchReport(ClientMsg req) {
         return null;
+    }
+
+    private synchronized ServerMsg fetchStudents(ClientMsg req) {
+        var students = university.getStudents().keySet().toArray(new Student[0]);
+        return ServerMsg.asOK(students);
+    }
+
+    private synchronized ServerMsg fetchInstructors(ClientMsg req) {
+        var instructors = university.getInstructors().keySet().toArray(new Instructor[0]);
+        return ServerMsg.asOK(instructors);
     }
 
     /**
