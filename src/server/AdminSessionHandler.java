@@ -147,16 +147,9 @@ public class AdminSessionHandler extends SessionHandler {
                 return ServerMsg.asERR(String.format("Course ID '%s' not found.", clientCourse.getID()));
             }
 
-            Section section = null;
-            for (var s : course.getSections()) {
-                if (clientSection.getID().equals(s.getID())) {
-                    section = s;
-                    break;
-                }
-            }
-            if (section != null) {
-                return ServerMsg.asERR(String.format("Section ID '%s' already existed.", clientSection.getID()));
-            }
+            // We don't check for section ID for 2 reasons:
+            // 1. Client doesn't have the correct section ID anyway cuz it's autoincrement.
+            // 2. It makes more sense to check for instructor availability.
 
             Instructor clientInstructor = clientSection.getInstructor();
             var instructorMapping = university.getInstructors();
@@ -165,15 +158,21 @@ public class AdminSessionHandler extends SessionHandler {
             }
 
             Instructor instructor = instructorMapping.get(clientInstructor.getID());
-            // TODO: Check for instructor availability for this section.
+            Section conflictedSection = Util.findOverlap(clientSection, instructor.getTeaching());
+            if (conflictedSection != null) {
+                return ServerMsg
+                        .asERR(String.format("Unable to create section: Instructor has conflict with section ID '%s'.",
+                                conflictedSection.getID()));
+            }
 
-            section = new Section(
+            Section section = new Section(
                     course,
                     clientSection.getNumber(),
                     clientSection.getMaxCapacity(),
                     clientSection.getMaxWaitlistSize(),
                     instructor);
             course.insertSection(section);
+            instructor.teachSection(section);
             return ServerMsg.asOK(section);
         } catch (ClassCastException err) {
             return ServerMsg.asERR(String.format("%s", err.getMessage()));
@@ -207,14 +206,39 @@ public class AdminSessionHandler extends SessionHandler {
             if (section == null) {
                 return ServerMsg.asERR(String.format("Section ID '%s' not found.", clientSection.getID()));
             }
+            
+            if (clientSection.getStatus() == SectionStatus.INACTIVE) {
+                return ServerMsg.asERR("Operation not permitted.");
+            }
+            
+            Instructor clientInstructor = clientSection.getInstructor();
+            Instructor instructor = university.getInstructors().get(clientInstructor.getID());
+            if (instructor == null) {
+                return ServerMsg.asERR(String.format("Instructor ID '%s' not found.", clientInstructor.getID()));
+            }
+            
+            var conflictedSection = Util.findOverlap(section, instructor.getTeaching());
+            if (conflictedSection != null) {
+                return ServerMsg.asERR(
+                        String.format("The new instructor is not available for this section due to section '%s'.",
+                                conflictedSection.getID()));
+            }
 
-            section.setActiveState(clientSection.isActive());
-            section.setMaxCapacity(clientSection.getMaxCapacity());
-            section.setMaxWaitSize(clientSection.getMaxWaitlistSize());
             section.setNumber(clientSection.getNumber());
             section.setSchedule(clientSection.getSchedule());
 
-            // TODO: Update instructor
+            // Order of setters for this part matters.
+
+            // Waitlist first, then capacity, to avoid dropping students prematurely.
+            section.setMaxWaitSize(clientSection.getMaxWaitlistSize());
+            section.setMaxCapacity(clientSection.getMaxCapacity());
+            
+            Instructor oldInstructor = section.getInstructor();
+            oldInstructor.dropSection(section);
+            section.setInstructor(instructor);
+
+            // Status last to finalize stuff.
+            section.setStatus(clientSection.getStatus());
 
             return ServerMsg.asOK(section);
         } catch (ClassCastException err) {
@@ -242,6 +266,7 @@ public class AdminSessionHandler extends SessionHandler {
                 return ServerMsg.asERR(String.format("Section ID '%s' not found.", clientSection.getID()));
             }
 
+            section.setStatus(SectionStatus.INACTIVE);
             course.delSection(section.getID());
             return ServerMsg.asOK("");
         } catch (ClassCastException err) {
@@ -270,7 +295,8 @@ public class AdminSessionHandler extends SessionHandler {
             for (var prereq : clientCourse.getPrerequisites()) {
                 Course prereqCourse = university.getCourseByID(prereq);
                 if (prereqCourse == null) {
-                    // NOTE: Two options: Either skip, or return error.
+                    // Skip is a safe option.
+                    continue;
                 }
                 course.insertPrereq(prereqCourse);
             }
