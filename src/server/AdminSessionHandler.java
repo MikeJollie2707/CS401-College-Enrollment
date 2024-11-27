@@ -94,6 +94,20 @@ public class AdminSessionHandler extends SessionHandler {
     }
 
     private synchronized ServerMsg fetchReport(ClientMsg req) {
+        /**
+         * - Course count
+         * - Active section count
+         * - Entries with {sectionID, enrollCount}
+         * - (Maybe?) Top 3 highest+lowest enroll count
+         * - (Maybe?) Avg enroll per section.
+         * 
+         * The report feature feels like it's just client getting all courses in the
+         * uni,
+         * then do all the calc on their own.
+         * Cuz for each section entry the client want to know what course is it, who's
+         * teaching,
+         * what's the time and format. That's basically a simplified view of a section.
+         */
         return null;
     }
 
@@ -210,17 +224,17 @@ public class AdminSessionHandler extends SessionHandler {
             if (section == null) {
                 return ServerMsg.asERR(String.format("Section ID '%s' not found.", clientSection.getID()));
             }
-            
+
             if (clientSection.getStatus() == SectionStatus.INACTIVE) {
                 return ServerMsg.asERR("Operation not permitted.");
             }
-            
+
             Instructor clientInstructor = clientSection.getInstructor();
             Instructor instructor = university.getInstructors().get(clientInstructor.getID());
             if (instructor == null) {
                 return ServerMsg.asERR(String.format("Instructor ID '%s' not found.", clientInstructor.getID()));
             }
-            
+
             var conflictedSection = Util.findOverlap(section, instructor.getTeaching());
             if (conflictedSection != null) {
                 return ServerMsg.asERR(
@@ -236,7 +250,7 @@ public class AdminSessionHandler extends SessionHandler {
             // Waitlist first, then capacity, to avoid dropping students prematurely.
             section.setMaxWaitSize(clientSection.getMaxWaitlistSize());
             section.setMaxCapacity(clientSection.getMaxCapacity());
-            
+
             Instructor oldInstructor = section.getInstructor();
             oldInstructor.dropSection(section);
             section.setInstructor(instructor);
@@ -250,6 +264,13 @@ public class AdminSessionHandler extends SessionHandler {
         }
     }
 
+    /**
+     * The handler for {@code DELETE section} requests.
+     * 
+     * @param req The client's request. The body MUST be of type {@code Section}.
+     * @return If success, an {@code OK ServerMsg}. If failed, an
+     *         {@code ERR ServerMsg} containing the reason {@code String}.
+     */
     private synchronized ServerMsg delSection(ClientMsg req) {
         try {
             Section clientSection = (Section) req.getBody();
@@ -390,7 +411,16 @@ public class AdminSessionHandler extends SessionHandler {
         }
     }
 
-    private ServerMsg enrollStudent(ClientMsg req) {
+    /**
+     * The handler for {@code CREATE enroll-student} requests.
+     * 
+     * @param req The client's request. The body MUST be of type
+     *            {@code BodyEnrollOrDropAs}.
+     * @return If success, an {@code OK ServerMsg} containing the
+     *         {@code EnrollStatus}. If failed, an {@code ERR ServerMsg} containing
+     *         the reason {@code String}.
+     */
+    private synchronized ServerMsg enrollStudent(ClientMsg req) {
         try {
             var body = (BodyEnrollOrDropAs) req.getBody();
             String studentID = body.getStudentID();
@@ -407,6 +437,14 @@ public class AdminSessionHandler extends SessionHandler {
         }
     }
 
+    /**
+     * The handler for {@code CREATE drop-student} requests.
+     * 
+     * @param req The client's request. The body MUST be of type
+     *            {@code BodyEnrollOrDropAs}.
+     * @return If success, an {@code OK ServerMsg}. If failed, an
+     *         {@code ERR ServerMsg} containing the reason {@code String}.
+     */
     private ServerMsg dropStudent(ClientMsg req) {
         try {
             var body = (BodyEnrollOrDropAs) req.getBody();

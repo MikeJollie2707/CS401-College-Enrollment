@@ -138,7 +138,6 @@ public class University implements Serializable {
         Set<String> newPrereqs = newCourse.getPrerequisites();
         // Check if new prereqs cause cycle.
         if (!isCycle(oldCourse, newPrereqs)) {
-            // NOTE: Check for existing prefix+number
             catalog.put(oldCourse.getID(), newCourse);
         } else {
             throw new RuntimeException(
