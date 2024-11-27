@@ -13,7 +13,7 @@ public class Section implements Serializable {
     private String id;
     private Course course;
     private String number;
-    private Boolean active;
+    private SectionStatus status;
     private int max_capacity;
     private int max_wait;
     private Instructor instructor;
@@ -52,6 +52,7 @@ public class Section implements Serializable {
         
         this.enrolled = new ArrayList<>();
         this.waitlisted = new ArrayList<>();
+        status = SectionStatus.ACTIVE;
     }
 
     /**
@@ -61,7 +62,7 @@ public class Section implements Serializable {
      * @param student The student to enroll.
      * @return {@code ENROLLED} if the student is enrolled, {@code WAITLISTED} if
      *         the student is put on the waitlist, or {@code UNSUCCESSFUL} if the
-     *         section is full.
+     *         section is full or is not active.
      * @throws NullPointerException If {@code student} is null.
      */
     public synchronized EnrollStatus enrollStudent(Student student) {
@@ -70,6 +71,11 @@ public class Section implements Serializable {
          * It's more convenient to return non-error value cuz if there's error,
          * we'd need to guess what is the error, so make it consistent.
          */
+
+        if (status != SectionStatus.ACTIVE) {
+            return EnrollStatus.UNSUCCESSFUL;
+        }
+
         for (var enrolledStudent : enrolled) {
             if (student.getID().equals(enrolledStudent.getID())) {
                 return EnrollStatus.ENROLLED;
@@ -132,8 +138,8 @@ public class Section implements Serializable {
         return (enrolled.size() + waitlisted.size()) >= (max_capacity + max_wait);
     }
 
-    public synchronized boolean isActive() {
-        return active;
+    public synchronized SectionStatus getStatus() {
+        return status;
     }
 
     public synchronized String getID() {
@@ -176,8 +182,42 @@ public class Section implements Serializable {
         this.number = num;
     }
 
-    public synchronized void setActiveState(boolean state) {
-        this.active = state;
+    /**
+     * Set the status of this section.
+     * <p>
+     * If {@code state} is not {@code ACTIVE}, it'll drop instructors and all
+     * students. If {@code state} is {@code COMPLETED}, this section will be
+     * considered as finished and aside from dropping all people, also make sure
+     * each enrolled student will have this section as their past enrollment.
+     * 
+     * @param state The state of this section. See above for details.
+     */
+    public synchronized void setStatus(SectionStatus state) {
+        this.status = state;
+
+        if (status != SectionStatus.ACTIVE) {
+            instructor.dropSection(this);
+            // Need to move these students into a separate array
+            // because dropStudent() messes with enrolled.
+            Student[] enrolledOnly = enrolled.toArray(new Student[0]);
+            for (int i = 0; i < enrolledOnly.length; ++i) {
+                Student student = enrolledOnly[i];
+                dropStudent(student.getID());
+
+                if (status == SectionStatus.COMPLETED) {
+                    var pastSections = student.getPastEnrollments();
+                    pastSections.addLast(this);
+
+                    // This is probably not needed.
+                    student.setPastEnrollments(pastSections);
+                }
+            }
+
+            // Clear any previously waitlisted students.
+            while (enrolled.size() > 0) {
+                dropStudent(enrolled.get(0).getID());
+            }
+        }
     }
 
     /**
