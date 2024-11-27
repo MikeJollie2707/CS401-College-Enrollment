@@ -317,10 +317,50 @@ public class AdminSessionHandler extends SessionHandler {
         }
     }
 
+    /**
+     * The handler for {@code EDIT course} requests.
+     * <p>
+     * This endpoint is meant to only edit metadata and prerequisites. It is NOT
+     * meant to be used to edit course prefix, course number, or sections. To edit
+     * course prefix or course number, use {@code DELETE course}. To edit sections,
+     * use {@code EDIT section}.
+     * 
+     * @param req The client's request. The body MUST be of type {@code Course}.
+     * @return If success, an {@code OK ServerMsg} containing the edited course. If
+     *         failed, an {@code ERR ServerMsg} containing the reason
+     *         {@code String}.
+     */
     private synchronized ServerMsg editCourse(ClientMsg req) {
-        return null;
-    }
+        try {
+            Course clientCourse = (Course) req.getBody();
+            Course course = university.getCourseByID(clientCourse.getID());
+            if (course == null) {
+                return ServerMsg.asERR(String.format("Course ID '%s' not found.", clientCourse.getID()));
+            }
 
+            Course newCourse = new Course(clientCourse.getPrefix(), clientCourse.getNumber(),
+                    clientCourse.getDescription());
+            for (var prereq : clientCourse.getPrerequisites()) {
+                Course prereqCourse = university.getCourseByID(prereq);
+                if (prereqCourse == null) {
+                    // Skip is a safe option.
+                    continue;
+                }
+                newCourse.insertPrereq(prereqCourse);
+            }
+
+            try {
+                university.editCourse(newCourse);
+            } catch (RuntimeException err) {
+                // Existence check is done earlier so this is most likely prereq issue.
+                return ServerMsg.asERR(err.getMessage());
+            }
+
+            return ServerMsg.asOK(newCourse);
+        } catch (ClassCastException err) {
+            return ServerMsg.asERR(String.format("%s", err.getMessage()));
+        }
+    }
     private synchronized ServerMsg delCourse(ClientMsg req) {
         try {
             Course clientCourse = (Course) req.getBody();
