@@ -1,6 +1,7 @@
 package server;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.function.Predicate;
 
 import objects.BodyCourseSearch;
@@ -8,6 +9,7 @@ import objects.Course;
 import objects.EnrollStatus;
 import objects.ScheduleEntry;
 import objects.Section;
+import objects.SectionStatus;
 import objects.ServerMsg;
 import objects.Student;
 import objects.University;
@@ -82,23 +84,15 @@ public class Util {
         if (section == null) {
             return ServerMsg.asERR(String.format("Section ID '%s' not found.", clientSection.getID()));
         }
+        if (section.getStatus() != SectionStatus.ACTIVE) {
+            return ServerMsg.asERR("Unable to enroll: This section does not accept new enrolling.");
+        }
 
         // Check schedule conflict.
-        for (var otherSection : student.getCurrentSchedule()) {
-            ScheduleEntry[] schedule = otherSection.getSchedule();
-            // Skip check if schedule is null
-            if (schedule == null || otherSection == null) {
-                continue;
-            } else {
-                for (var otherEntry : schedule) {
-                    for (var entry : section.getSchedule()) {
-                        if (entry.isOverlap(otherEntry)) {
-                            return ServerMsg.asERR(String.format("Unable to enroll: Conflict with section ID '%s'.",
-                                    otherSection.getID()));
-                        }
-                    }
-                }
-            }
+        Section conflictedSection = Util.findOverlap(section, student.getCurrentSchedule());
+        if (conflictedSection != null) {
+            return ServerMsg.asERR(String.format("Unable to enroll: Conflict with section ID '%s'.",
+                                conflictedSection.getID()));
         }
 
         EnrollStatus status = section.enrollStudent(student);
@@ -186,5 +180,26 @@ public class Util {
             return prefix_pred.test(c) && name_pred.test(c) && number_pred.test(c) && instructor_pred.test(c);
         });
         return ServerMsg.asOK(res.toArray(new Course[0]));
+    }
+
+    /**
+     * Return whether or not a section's schedule overlaps with existing sections.
+     * 
+     * @param section The section to check. This is usually a new section.
+     * @param otherSections Existing sections to check.
+     * @return {@code null} if there is no overlap, {@code Section} otherwise.
+     */
+    public static Section findOverlap(Section section, List<Section> otherSections) {
+        for (var otherSection : otherSections) {
+            ScheduleEntry[] schedule = otherSection.getSchedule();
+            for (var otherEntry : schedule) {
+                for (var entry : section.getSchedule()) {
+                    if (entry.isOverlap(otherEntry)) {
+                        return otherSection;
+                    }
+                }
+            }
+        }
+        return null;
     }
 }
