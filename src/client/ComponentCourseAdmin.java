@@ -1,6 +1,5 @@
 package client;
 
-import java.awt.Color;
 import java.awt.FlowLayout;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -15,7 +14,6 @@ import objects.ClientMsg;
 import objects.Course;
 import objects.Section;
 import objects.ServerMsg;
-import objects.Instructor;
 
 public class ComponentCourseAdmin {
     private Course course;
@@ -46,7 +44,7 @@ public class ComponentCourseAdmin {
         courseHeader.add(courseLabel);
 
         JButton deleteCourseBtn = new JButton("Delete Course");
-        deleteCourseBtn.addActionListener(e -> {
+        deleteCourseBtn.addActionListener(_ -> {
             deleteCourse();
         });
         courseHeader.add(deleteCourseBtn);
@@ -98,8 +96,8 @@ public class ComponentCourseAdmin {
     private void deleteCourse() {
         try {
             ostream.writeObject(new ClientMsg("DELETE", "course", course));
-            var ServerMsg = (ServerMsg) istream.readObject();
-            if (ServerMsg.isOk()) {
+            var resp = (ServerMsg) istream.readObject();
+            if (resp.isOk()) {
                 SwingUtilities.invokeLater(() -> {
                     panelCatalog.getSearchWorker(new BodyCourseSearch()).execute();
                 });
@@ -113,8 +111,8 @@ public class ComponentCourseAdmin {
     private void addNewSection() {
         try {
             ostream.writeObject(new ClientMsg("CREATE", "section", course));
-            var ServerMsg = (ServerMsg) istream.readObject();
-            if (ServerMsg.isOk()) {
+            var resp = (ServerMsg) istream.readObject();
+            if (resp.isOk()) {
                 //refreshCourse();
                 SwingUtilities.invokeLater(() -> {
                     panelCatalog.getSearchWorker(new BodyCourseSearch()).execute();
@@ -129,8 +127,8 @@ public class ComponentCourseAdmin {
     private void editSection(Section section, JPanel sectionpanel) {
         try {
             ostream.writeObject(new ClientMsg("EDIT", "section", section));
-            var ServerMsg = (ServerMsg) istream.readObject();
-            if (ServerMsg.isOk()) {
+            var resp = (ServerMsg) istream.readObject();
+            if (resp.isOk()) {
                // refreshCourse();
                 SwingUtilities.invokeLater(() -> {
                     panelCatalog.getSearchWorker(new BodyCourseSearch()).execute();
@@ -148,8 +146,8 @@ public class ComponentCourseAdmin {
     private void deleteSection(Section section, JPanel sectionPanel) {
         try {
             ostream.writeObject(new ClientMsg("DELETE", "section", section));
-            var ServerMsg = (ServerMsg) istream.readObject();
-            if (ServerMsg.isOk()) {
+            var resp = (ServerMsg) istream.readObject();
+            if (resp.isOk()) {
                 sectionPanel.removeAll();
                 sectionPanel.revalidate();
                 sectionPanel.repaint();
