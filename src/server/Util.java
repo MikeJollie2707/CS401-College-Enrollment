@@ -37,14 +37,13 @@ public class Util {
 
         HashSet<String> unfulfilledPrereqs = new HashSet<>(course.getPrerequisites());
         /**
-         * If unfulfilledPrereqs has something after this loop,
-         * the student hasn't cleared all prereqs.
-         * This only check one level of prerequisite, so it can false-alarm in rare
-         * cases (but it's probably safe to ignore it).
-         * ie. if CS 401 explicitly requires both CS 301 and CS 201
-         * (and CS 301 requires CS 201) and the student only clear CS 301
-         * (maybe they get CS 201 equivalent from a different course)
-         * then the check will fail with CS 201 as an unfulfilled prereq.
+         * If unfulfilledPrereqs has something after this loop, the student hasn't
+         * cleared all prereqs. This only check one level of prerequisite, so it can
+         * false-alarm in rare cases (but it's probably safe to ignore it). ie. if CS
+         * 401 explicitly requires both CS 301 and CS 201 (and CS 301 requires CS 201)
+         * and the student only clear CS 301 (maybe they get CS 201 equivalent from a
+         * different course) then the check will fail with CS 201 as an unfulfilled
+         * prereq.
          */
         for (var pastSection : student.getPastEnrollments()) {
             // Just to make sure it's the latest object.
@@ -69,9 +68,8 @@ public class Util {
             }
         }
         if (unfulfilledPrereqs.size() != 0) {
-            return ServerMsg.asERR(
-                    String.format("Unable to enroll: Prerequisite '%s' not met.",
-                            String.join(", ", unfulfilledPrereqs)));
+            return ServerMsg.asERR(String.format("Unable to enroll: Prerequisite '%s' not met.",
+                    String.join(", ", unfulfilledPrereqs)));
         }
 
         Section section = null;
@@ -88,11 +86,16 @@ public class Util {
         // Check schedule conflict.
         for (var otherSection : student.getCurrentSchedule()) {
             ScheduleEntry[] schedule = otherSection.getSchedule();
-            for (var otherEntry : schedule) {
-                for (var entry : section.getSchedule()) {
-                    if (entry.isOverlap(otherEntry)) {
-                        return ServerMsg.asERR(String.format("Unable to enroll: Conflict with section ID '%s'.",
-                                otherSection.getID()));
+            // Skip check if schedule is null
+            if (schedule == null || otherSection == null) {
+                continue;
+            } else {
+                for (var otherEntry : schedule) {
+                    for (var entry : section.getSchedule()) {
+                        if (entry.isOverlap(otherEntry)) {
+                            return ServerMsg.asERR(String.format("Unable to enroll: Conflict with section ID '%s'.",
+                                    otherSection.getID()));
+                        }
                     }
                 }
             }
@@ -180,10 +183,7 @@ public class Util {
         };
 
         var res = university.getCoursesByFilter((Course c) -> {
-            return prefix_pred.test(c) &&
-                    name_pred.test(c) &&
-                    number_pred.test(c) &&
-                    instructor_pred.test(c);
+            return prefix_pred.test(c) && name_pred.test(c) && number_pred.test(c) && instructor_pred.test(c);
         });
         return ServerMsg.asOK(res.toArray(new Course[0]));
     }

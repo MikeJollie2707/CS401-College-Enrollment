@@ -13,6 +13,8 @@ import java.util.stream.Collectors;
 import objects.Account;
 import objects.Administrator;
 import objects.Course;
+import objects.Instructor;
+import objects.Section;
 import objects.Student;
 import objects.University;
 
@@ -126,17 +128,17 @@ public class ServerMain {
         try (Scanner scanner = new Scanner(file)) {
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
-                String[] parts = line.split(",", 4);
+                String[] parts = line.split(",");
+                
                 String coursePrefix = parts[0];
                 String courseNumber = parts[1];
                 String courseDesc = parts[2];
                 Course course = new Course(coursePrefix, courseNumber, courseDesc);
-                if (parts.length == 4) {
-                    String[] prerequisites = parts[3].split(",");
-                    for (var prereq : prerequisites) {
-                        String[] spl = prereq.split(" ", 2);
-                        String prereqPrefix = spl[0];
-                        String prereqNumber = spl[1];
+                if(!parts[3].equals("none")) {
+                    String[] prerequisites = parts[3].split("");
+                    for (int i = 0; i < prerequisites.length; i += 2) {
+                        String prereqPrefix = prerequisites[i];
+                        String prereqNumber = (i + 1 < prerequisites.length) ? prerequisites[i + 1] : "";
                         var found = university.getCoursesByFilter((Course c) -> {
                             return c.getPrefix().equals(prereqPrefix) && c.getNumber().equals(prereqNumber);
                         });
@@ -145,6 +147,20 @@ public class ServerMain {
                         }
                     }
                 }
+                // keep looping here after preqs in case a course has multiple sections
+                for (int i = 4; i < parts.length; i += 4) {
+                    if (i + 3 >= parts.length) {
+                        break;
+                    }
+                    String sectionNum = parts[i];
+                    int maxCapacity = Integer.parseInt(parts[i + 1]);
+                    int maxWaitlist = Integer.parseInt(parts[i + 2]);
+                    String instructorLast = parts[i + 3];
+
+                    Instructor instructor = new Instructor(instructorLast, null);
+                    Section section = new Section(course, sectionNum, maxCapacity, maxWaitlist, instructor);
+                    course.insertSection(section);
+                };
                 university.addCourse(course);
             }
         } catch (FileNotFoundException e) {

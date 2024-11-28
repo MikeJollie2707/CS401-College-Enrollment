@@ -1,6 +1,6 @@
-CS,101,Intro to CS
-CS,201,CS but C++,CS 201
-CS,211,Discrete Math,MATH 130
-CS,301,DSA,CS 201,CS 211
-CS,401,Software Engineering,CS 301
-MATH,130,Calc 1
+CS,101,Intro to CS,none,1,20,10,Smith,2,25,10,Franklin
+CS,201,CS but C++,CS 101,2,20,5,John
+CS,211,Discrete Math,MATH 130,3,20,5,Denny
+CS,301,DSA,CS 201 CS 211,1,20,5,Adam
+CS,401,Software Engineering,CS 301,2,20,5,Ronny
+MATH,130,Calc 1,none,3,20,5,Bonny

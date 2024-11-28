@@ -12,6 +12,7 @@ import objects.ClientMsg;
 import objects.ServerMsg;
 
 import java.awt.CardLayout;
+import java.awt.Color;
 import java.awt.Dialog.ModalityType;
 import java.awt.event.*;
 
@@ -43,7 +44,7 @@ public class MainFrame {
 
         // TODO: Decorate this thing so it doesn't just display a white window.
         loadingDialog = new JDialog(window, "Loading...", ModalityType.DOCUMENT_MODAL);
-        loadingDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+        loadingDialog.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
         loadingDialog.setSize(300, 300);
         loadingDialog.setLocationRelativeTo(null);
 
@@ -64,6 +65,8 @@ public class MainFrame {
         JButton[] logoutBtns = new JButton[3];
         for (int i = 0; i < 3; ++i) {
             logoutBtns[i] = new JButton("Logout");
+            logoutBtns[i].setBackground(Color.RED);
+            logoutBtns[i].setForeground(Color.BLACK);
             logoutBtns[i].addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {

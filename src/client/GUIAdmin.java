@@ -19,7 +19,6 @@ public class GUIAdmin extends JPanel {
         panelMap = new LinkedHashMap<>();
         panelMap.put("Search Courses", new PanelCatalog(frame, ostream, istream));
         panelMap.put("Create Course", new PanelCreateCourse(frame, ostream, istream));
-
         setLayout(new BorderLayout());
         setupView();
     }
