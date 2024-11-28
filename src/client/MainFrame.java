@@ -127,6 +127,12 @@ public class MainFrame {
             loadingDialog.setVisible(false);
         }
     }
+
+    /**
+     * Show a generic dialog for when an operation times out.
+     */
+    public void showTimeoutDialog() {
+        JOptionPane.showMessageDialog(window, "Operation aborted: The server takes longer than expected to response.");
     }
 
     /**
