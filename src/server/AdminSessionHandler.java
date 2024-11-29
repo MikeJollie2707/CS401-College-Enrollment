@@ -171,12 +171,20 @@ public class AdminSessionHandler extends SessionHandler {
             // 2. It makes more sense to check for instructor availability.
 
             Instructor clientInstructor = clientSection.getInstructor();
-            var instructorMapping = university.getInstructors();
-            if (!instructorMapping.containsKey(clientInstructor.getID())) {
-                return ServerMsg.asERR(String.format("Instructor ID '%s' not found.", clientInstructor.getID()));
+            var instructors = university.getInstructors().values();
+            var found = instructors.stream()
+                    .filter((i) -> i.getName().equals(clientInstructor.getName()))
+                    .collect(Collectors.toList())
+                    .toArray(new Instructor[0]);
+            Instructor instructor = null;
+            if (found.length < 1) {
+                // return ServerMsg.asERR(String.format("Instructor '%s' not found.",
+                // clientInstructor.getName()));
+                instructor = new Instructor(clientInstructor.getName(), null);
+            } else {
+                instructor = found[0];
             }
 
-            Instructor instructor = instructorMapping.get(clientInstructor.getID());
             Section conflictedSection = Util.findOverlap(clientSection, instructor.getTeaching());
             if (conflictedSection != null) {
                 return ServerMsg
