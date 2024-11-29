@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.stream.Collectors;
 
 import objects.*;
 
@@ -230,10 +231,16 @@ public class AdminSessionHandler extends SessionHandler {
             }
 
             Instructor clientInstructor = clientSection.getInstructor();
-            Instructor instructor = university.getInstructors().get(clientInstructor.getID());
-            if (instructor == null) {
-                return ServerMsg.asERR(String.format("Instructor ID '%s' not found.", clientInstructor.getID()));
+            var instructors = university.getInstructors().values();
+            var found = instructors.stream()
+                    .filter((i) -> i.getName().equals(clientInstructor.getName()))
+                    .collect(Collectors.toList())
+                    .toArray(new Instructor[0]);
+            if (found.length < 1) {
+                return ServerMsg.asERR(String.format("Instructor '%s' not found.", clientInstructor.getName()));
             }
+
+            Instructor instructor = found[0];
 
             var conflictedSection = Util.findOverlap(section, instructor.getTeaching());
             if (conflictedSection != null) {
