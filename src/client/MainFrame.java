@@ -114,18 +114,19 @@ public class MainFrame {
      * GUI while some expensive operations are running.
      */
     public void showLoading() {
-        if (!loadingDialog.isVisible()) {
-            loadingDialog.setVisible(true);
-        }
+        loadingDialog.setVisible(true);
     }
 
     /**
      * Remove the loading dialog over the current frame.
      */
     public void stopLoading() {
-        if (loadingDialog.isVisible()) {
-            loadingDialog.setVisible(false);
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException e) {
         }
+
+        loadingDialog.setVisible(false);
     }
 
     /**

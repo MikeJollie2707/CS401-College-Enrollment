@@ -2,7 +2,6 @@ package client;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -52,7 +51,7 @@ public class PanelCatalog extends PanelBase {
             @Override
             protected ServerMsg doInBackground() throws Exception {
                 // need to save  states instead of fully resetting component course
-                existingStates = CourseStateManager.getInstance().filterStatesByCriteria(body, CourseStateManager.getInstance().getCourseStates());
+                // existingStates = CourseStateManager.getInstance().filterStatesByCriteria(body, CourseStateManager.getInstance().getCourseStates());
                 ostream.writeObject(new ClientMsg("GET", "courses", body));
                 return (ServerMsg) istream.readObject();
             }
@@ -70,16 +69,14 @@ public class PanelCatalog extends PanelBase {
                             notFound.setForeground(Color.BLUE);
                             resultPanel.add(notFound, BorderLayout.CENTER);
                         } else {
+                            Object me = frame.getMe();
                             for (int i = 0; i < courses.length; ++i) {
-                                Object me = frame.getMe();
                                 if (me instanceof Administrator) {
                                     ComponentCourseAdmin adminComponent = new ComponentCourseAdmin(frame, PanelCatalog.this, ostream, istream, courses[i]);
                                     resultPanel.add(adminComponent.build());
                                     refreshPanel();
                                 } else if (me instanceof Student) {
-                                    // have to save previous states so all sections status is saved after search
-                                    String courseKey = courses[i].getPrefix() + courses[i].getNumber();
-                                    CourseState courseState = existingStates.get(courseKey);
+                                    CourseState courseState = new CourseState(courses[i], (Student) me);
                                     ComponentCourse componentCourse = new ComponentCourse(frame, ostream, istream, courses[i], courseState);
                                     resultPanel.add(componentCourse.build());
                                 }

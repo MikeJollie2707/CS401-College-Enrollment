@@ -116,6 +116,8 @@ public class ComponentCourseAdmin {
                 SwingUtilities.invokeLater(() -> {
                     panelCatalog.getSearchWorker(new BodyCourseSearch()).execute();
                 });
+            } else {
+                JOptionPane.showMessageDialog(null, (String) resp.getBody());
             }
         } catch (IOException | ClassNotFoundException e) {
             // TODO Auto-generated catch block
@@ -132,6 +134,8 @@ public class ComponentCourseAdmin {
                 SwingUtilities.invokeLater(() -> {
                     panelCatalog.getSearchWorker(new BodyCourseSearch()).execute();
                 });
+            } else {
+                JOptionPane.showMessageDialog(null, (String) resp.getBody());
             }
         } catch (IOException | ClassNotFoundException e) {
             // TODO Auto-generated catch block
@@ -148,6 +152,8 @@ public class ComponentCourseAdmin {
                 SwingUtilities.invokeLater(() -> {
                     panelCatalog.getSearchWorker(new BodyCourseSearch()).execute();
                 });
+            } else {
+                JOptionPane.showMessageDialog(null, (String) resp.getBody());
             }
         } catch (IOException e) {
             // TODO Auto-generated catch block
@@ -170,6 +176,8 @@ public class ComponentCourseAdmin {
                 SwingUtilities.invokeLater(() -> {
                     panelCatalog.getSearchWorker(new BodyCourseSearch()).execute();
                 });
+            } else {
+                JOptionPane.showMessageDialog(null, (String) resp.getBody());
             }
         } catch (IOException e) {
             // TODO Auto-generated catch block

@@ -53,7 +53,8 @@ public class StudentSessionHandler extends SessionHandler {
                 }
 
                 if (resp != null) {
-                    ostream.writeObject(resp);
+                    ostream.writeUnshared(resp);
+                    ostream.reset();
                 } else {
                     ostream.writeObject(ServerMsg.asERR(
                             String.format("Endpoint '%s %s' is not available.", req.getMethod(), req.getResource())));

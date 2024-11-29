@@ -14,14 +14,7 @@ import java.util.HashMap;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
-import objects.Account;
-import objects.Administrator;
-import objects.Course;
-import objects.Instructor;
-import objects.ScheduleEntry;
-import objects.Section;
-import objects.Student;
-import objects.University;
+import objects.*;
 
 public class ServerMain {
     public static void main(String[] args) {
@@ -222,8 +215,20 @@ public class ServerMain {
                     }
 
                     var sections = mapper.get(course.getID());
+                    var found = university.getInstructors().values().stream()
+                            .filter(i -> i.getName().equals(instructorName)).collect(Collectors.toList())
+                            .toArray(new Instructor[0]);
+                    
+                    Instructor instructor = null;
+                    if (found.length > 0) {
+                        instructor = found[0];
+                    }
+                    else {
+                        instructor = new Instructor(instructorName, null);
+                        university.addInstructor(instructor);
+                    }
                     Section section = new Section(course, sectionNum, Integer.valueOf(capacity),
-                            Integer.valueOf(waitlist), new Instructor(instructorName, null));
+                            Integer.valueOf(waitlist), instructor);
                     section.setSchedule(entries.toArray(new ScheduleEntry[0]));
                     sections.add(section);
                 } catch (IndexOutOfBoundsException e) {

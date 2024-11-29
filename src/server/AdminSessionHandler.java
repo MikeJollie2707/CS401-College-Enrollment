@@ -70,7 +70,8 @@ public class AdminSessionHandler extends SessionHandler {
                 }
 
                 if (resp != null) {
-                    ostream.writeObject(resp);
+                    ostream.writeUnshared(resp);
+                    ostream.reset();
                 } else {
                     ostream.writeObject(ServerMsg.asERR(
                             String.format("Endpoint '%s %s' is not available.", req.getMethod(), req.getResource())));
@@ -225,7 +226,7 @@ public class AdminSessionHandler extends SessionHandler {
 
             Section section = null;
             for (var s : course.getSections()) {
-                if (clientSection.getID().equals(s.getID())) {
+                if (clientSection.getNumber().equals(s.getNumber())) {
                     section = s;
                     break;
                 }

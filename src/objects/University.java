@@ -188,7 +188,7 @@ public class University implements Serializable {
      *                                  university.
      */
     public synchronized void addInstructor(Instructor instructor) {
-        if (isAccountExisted(instructor.getAccount())) {
+        if (instructor.getAccount() != null && isAccountExisted(instructor.getAccount())) {
             throw new IllegalArgumentException("An account with the same name already existed.");
         }
         instructors.put(instructor.getID(), instructor);

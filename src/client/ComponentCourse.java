@@ -38,7 +38,7 @@ public class ComponentCourse {
         if (existingState != null) {
             this.courseState = existingState;
         } else {
-            this.courseState = CourseStateManager.getInstance().getOrCreateState(course, currentStudent);
+            // this.courseState = CourseStateManager.getInstance().getOrCreateState(course, currentStudent);
         }
     }
 
@@ -90,6 +90,7 @@ public class ComponentCourse {
                 } else if (buttonText.equals("Enroll") || buttonText.equals("Enroll Waitlist")) {
                     enrollCourse(section, sectionState, actionButton);
                 } else if (buttonText.equals("Drop Enrollment")) {
+                    System.out.println("Dropping " + section.getID());
                     dropEnrollment(section, sectionState, actionButton);
                 }
             });
@@ -134,7 +135,6 @@ public class ComponentCourse {
                 @Override
                 protected ServerMsg doInBackground() throws Exception {
                     ostream.writeObject(new ClientMsg("CREATE", "enroll", section));
-                    Thread.sleep(2000);
                     return (ServerMsg) istream.readObject();
                 }
             };
