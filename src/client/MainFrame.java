@@ -114,29 +114,25 @@ public class MainFrame {
      * GUI while some expensive operations are running.
      */
     public void showLoading() {
-        loadingDialog.setVisible(true);
+        if (!loadingDialog.isVisible()) {
+            loadingDialog.setVisible(true);
+        }
     }
 
     /**
      * Remove the loading dialog over the current frame.
      */
     public void stopLoading() {
-        /**
-         * When this method is used in other panels, oftentimes it'll not close
-         * the dialog, but the rest of the GUI still works and it doesn't block
-         * anything.
-         * 
-         * I think this is bcuz it opens and closes too fast, so it just freaks out
-         * and not closes the thing, but internally it is considered closed.
-         * So the hack here is to add this tiny delay here. And voila, it closes every
-         * time. You won't even notice it's there!
-         */
-        try {
-            Thread.sleep(10);
-        } catch (InterruptedException err) {
-
+        if (loadingDialog.isVisible()) {
+            loadingDialog.setVisible(false);
         }
-        loadingDialog.setVisible(false);
+    }
+
+    /**
+     * Show a generic dialog for when an operation times out.
+     */
+    public void showTimeoutDialog() {
+        JOptionPane.showMessageDialog(window, "Operation aborted: The server takes longer than expected to response.");
     }
 
     /**

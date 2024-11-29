@@ -1,0 +1,7 @@
+CS 101,1,1,0,Smith,1,9:45,10:45,location1,s,3,9:45,10:45,location1,s
+CS 101,2,25,10,Franklin,2,16:00,17:00,location1,s,4,16:00,17:00,,a
+CS 201,2,20,5,Denny,2,10:30,11:30,location2,s,4,10:30,11:30,location2,s
+CS 211,3,20,5,John,1,15:45,17:45,location3,s
+CS 301,1,20,5,Adam,2,8:00,9:00,location3,s,4,8:00,9:00,online,s
+CS 401,2,20,5,Ronny,1,18:00,19:00,online,s,3,18:00,19:00,online,s
+MATH 130,1,20,5,Bonny,1,9:00,9:45,location4,s,3,9:00,9:45,location4,s,5,9:00,9:45,location4,s
