@@ -2,6 +2,7 @@ package client;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Font;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
@@ -28,7 +29,12 @@ public class GUIStudent extends JPanel {
         BuilderRadioPanel radio = new BuilderRadioPanel();
         JPanel sidebar = radio.getOptions();
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
-        sidebar.add(Box.createVerticalStrut(250));
+        
+        JLabel topText = new JLabel("(Logged in as student)");
+        topText.setFont(new Font("Arial", Font.BOLD, 20));
+        topText.setForeground(Color.GRAY);
+        sidebar.add(topText);
+        sidebar.add(Box.createVerticalStrut(200));
         for (var sceneName : panelMap.sequencedKeySet()) {
             JButton btn = radio.add(sceneName, panelMap.get(sceneName));
             btn.setBackground(Color.BLACK);
