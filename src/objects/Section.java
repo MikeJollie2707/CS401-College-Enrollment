@@ -217,6 +217,8 @@ public class Section implements Serializable {
             while (enrolled.size() > 0) {
                 dropStudent(enrolled.get(0).getID());
             }
+
+            course.delSection(id);
         }
     }
 
@@ -267,12 +269,12 @@ public class Section implements Serializable {
      * If {@code wait < waitlisted.size()}, this method will drop students from the
      * last student to the most current.
      * 
-     * @param wait A positive value indicating the max size of the waitlist.
-     * @throws IllegalArgumentException If {@code wait} is not positive.
+     * @param wait A non-negative value indicating the max size of the waitlist.
+     * @throws IllegalArgumentException If {@code wait} is negative.
      */
     public synchronized void setMaxWaitSize(int wait) {
-        if (wait <= 0) {
-            throw new IllegalArgumentException("Waitlist size must be greater than zero.");
+        if (wait < 0) {
+            throw new IllegalArgumentException("Waitlist size must be non-negative.");
         }
 
         this.max_wait = wait;

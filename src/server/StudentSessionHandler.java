@@ -40,16 +40,22 @@ public class StudentSessionHandler extends SessionHandler {
                     }
                 }
 
-                if (req.isEndpoint("GET", "courses")) {
-                    resp = fetchCourses(req);
-                } else if (req.isEndpoint("GET", "schedule")) {
-                    resp = fetchSchedule(req);
-                } else if (req.isEndpoint("CREATE", "enroll")) {
-                    resp = enroll(req);
-                } else if (req.isEndpoint("CREATE", "drop")) {
-                    resp = drop(req);
-                } else if (req.isEndpoint("GET", "past-enroll")) {
-                    resp = fetchPastEnrollment(req);
+                try {
+                    if (req.isEndpoint("GET", "courses")) {
+                        resp = fetchCourses(req);
+                    } else if (req.isEndpoint("GET", "schedule")) {
+                        resp = fetchSchedule(req);
+                    } else if (req.isEndpoint("CREATE", "enroll")) {
+                        resp = enroll(req);
+                    } else if (req.isEndpoint("CREATE", "drop")) {
+                        resp = drop(req);
+                    } else if (req.isEndpoint("GET", "past-enroll")) {
+                        resp = fetchPastEnrollment(req);
+                    }
+                }
+                catch (Exception err) {
+                    err.printStackTrace();
+                    resp = ServerMsg.asERR(String.format("Internal error: %s", err.getMessage()));
                 }
 
                 if (resp != null) {

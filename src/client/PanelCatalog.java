@@ -21,7 +21,6 @@ public class PanelCatalog extends PanelBase {
 
     private BuilderForm searchForm;
     private JPanel resultPanel;
-    private JScrollPane scroll;
     private Map<String, CourseState> existingStates = new HashMap<>();
 
     public PanelCatalog(MainFrame frame, ObjectOutputStream ostream, ObjectInputStream istream) {
@@ -35,8 +34,6 @@ public class PanelCatalog extends PanelBase {
         JPanel searchPanel = searchForm.getPanel();
         searchPanel.setLayout(new BoxLayout(searchPanel, BoxLayout.Y_AXIS));
         resultPanel.setLayout(new BoxLayout(resultPanel, BoxLayout.Y_AXIS));
-        scroll = new JScrollPane(resultPanel);
-        scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
     }
 
     /**
@@ -131,7 +128,7 @@ public class PanelCatalog extends PanelBase {
         var worker = getSearchWorker(new BodyCourseSearch());
         worker.execute();
         add(searchForm.getPanel());
-        add(scroll);
+        add(resultPanel);
         frame.showLoading();
     }
 

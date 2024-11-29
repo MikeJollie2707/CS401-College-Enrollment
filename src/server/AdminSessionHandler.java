@@ -41,32 +41,37 @@ public class AdminSessionHandler extends SessionHandler {
                     }
                 }
 
-                if (req.isEndpoint("GET", "courses")) {
-                    resp = fetchCourses(req);
-                } else if (req.isEndpoint("GET", "report")) {
-                    resp = fetchReport(req);
-                } else if (req.isEndpoint("GET", "students")) {
-                    resp = fetchStudents(req);
-                } else if (req.isEndpoint("GET", "instructors")) {
-                    resp = fetchInstructors(req);
-                } else if (req.isEndpoint("CREATE", "student")) {
-                    resp = createStudent(req);
-                } else if (req.isEndpoint("CREATE", "section")) {
-                    resp = addSection(req);
-                } else if (req.isEndpoint("EDIT", "section")) {
-                    resp = editSection(req);
-                } else if (req.isEndpoint("DELETE", "section")) {
-                    resp = delSection(req);
-                } else if (req.isEndpoint("CREATE", "course")) {
-                    resp = addCourse(req);
-                } else if (req.isEndpoint("EDIT", "course")) {
-                    resp = editCourse(req);
-                } else if (req.isEndpoint("DELETE", "course")) {
-                    resp = delCourse(req);
-                } else if (req.isEndpoint("CREATE", "enroll-student")) {
-                    resp = enrollStudent(req);
-                } else if (req.isEndpoint("CREATE", "drop-student")) {
-                    resp = dropStudent(req);
+                try {
+                    if (req.isEndpoint("GET", "courses")) {
+                        resp = fetchCourses(req);
+                    } else if (req.isEndpoint("GET", "report")) {
+                        resp = fetchReport(req);
+                    } else if (req.isEndpoint("GET", "students")) {
+                        resp = fetchStudents(req);
+                    } else if (req.isEndpoint("GET", "instructors")) {
+                        resp = fetchInstructors(req);
+                    } else if (req.isEndpoint("CREATE", "student")) {
+                        resp = createStudent(req);
+                    } else if (req.isEndpoint("CREATE", "section")) {
+                        resp = addSection(req);
+                    } else if (req.isEndpoint("EDIT", "section")) {
+                        resp = editSection(req);
+                    } else if (req.isEndpoint("DELETE", "section")) {
+                        resp = delSection(req);
+                    } else if (req.isEndpoint("CREATE", "course")) {
+                        resp = addCourse(req);
+                    } else if (req.isEndpoint("EDIT", "course")) {
+                        resp = editCourse(req);
+                    } else if (req.isEndpoint("DELETE", "course")) {
+                        resp = delCourse(req);
+                    } else if (req.isEndpoint("CREATE", "enroll-student")) {
+                        resp = enrollStudent(req);
+                    } else if (req.isEndpoint("CREATE", "drop-student")) {
+                        resp = dropStudent(req);
+                    }
+                } catch (Exception err) {
+                    err.printStackTrace();
+                    resp = ServerMsg.asERR(String.format("Internal error: %s", err.getMessage()));
                 }
 
                 if (resp != null) {
@@ -87,12 +92,8 @@ public class AdminSessionHandler extends SessionHandler {
     }
 
     private synchronized ServerMsg fetchCourses(ClientMsg req) {
-        try {
-            var body = (BodyCourseSearch) req.getBody();
-            return Util.searchCourses(body, university);
-        } catch (ClassCastException err) {
-            return ServerMsg.asERR(String.format("%s", err.getMessage()));
-        }
+        var body = (BodyCourseSearch) req.getBody();
+        return Util.searchCourses(body, university);
     }
 
     private synchronized ServerMsg fetchReport(ClientMsg req) {
@@ -132,22 +133,14 @@ public class AdminSessionHandler extends SessionHandler {
      *         reason {@code String}.
      */
     private synchronized ServerMsg createStudent(ClientMsg req) {
+        Student clientStudent = (Student) req.getBody();
+        Student student = new Student(clientStudent.getName(), clientStudent.getAccount());
         try {
-            Student clientStudent = (Student) req.getBody();
-            var studentMapping = university.getStudents();
-            if (studentMapping.containsKey(clientStudent.getID())) {
-                return ServerMsg.asERR(String.format("Student with ID '%s' already existed.", clientStudent.getID()));
-            }
-            Student student = new Student(clientStudent.getName(), clientStudent.getAccount());
-            try {
-                university.addStudent(student);
-            } catch (IllegalArgumentException err) {
-                return ServerMsg.asERR(err.getMessage());
-            }
-            return ServerMsg.asOK(student);
-        } catch (ClassCastException err) {
-            return ServerMsg.asERR(String.format("%s", err.getMessage()));
+            university.addStudent(student);
+        } catch (IllegalArgumentException err) {
+            return ServerMsg.asERR(err.getMessage());
         }
+        return ServerMsg.asOK(student);
     }
 
     /**
@@ -159,52 +152,49 @@ public class AdminSessionHandler extends SessionHandler {
      *         reason {@code String}.
      */
     private synchronized ServerMsg addSection(ClientMsg req) {
-        try {
-            Section clientSection = (Section) req.getBody();
-            Course clientCourse = clientSection.getCourse();
-            Course course = university.getCourseByID(clientCourse.getID());
-            if (course == null) {
-                return ServerMsg.asERR(String.format("Course ID '%s' not found.", clientCourse.getID()));
-            }
-
-            // We don't check for section ID for 2 reasons:
-            // 1. Client doesn't have the correct section ID anyway cuz it's autoincrement.
-            // 2. It makes more sense to check for instructor availability.
-
-            Instructor clientInstructor = clientSection.getInstructor();
-            var instructors = university.getInstructors().values();
-            var found = instructors.stream()
-                    .filter((i) -> i.getName().equals(clientInstructor.getName()))
-                    .collect(Collectors.toList())
-                    .toArray(new Instructor[0]);
-            Instructor instructor = null;
-            if (found.length < 1) {
-                // return ServerMsg.asERR(String.format("Instructor '%s' not found.",
-                // clientInstructor.getName()));
-                instructor = new Instructor(clientInstructor.getName(), null);
-            } else {
-                instructor = found[0];
-            }
-
-            Section conflictedSection = Util.findOverlap(clientSection, instructor.getTeaching());
-            if (conflictedSection != null) {
-                return ServerMsg
-                        .asERR(String.format("Unable to create section: Instructor has conflict with section ID '%s'.",
-                                conflictedSection.getID()));
-            }
-
-            Section section = new Section(
-                    course,
-                    clientSection.getNumber(),
-                    clientSection.getMaxCapacity(),
-                    clientSection.getMaxWaitlistSize(),
-                    instructor);
-            course.insertSection(section);
-            instructor.teachSection(section);
-            return ServerMsg.asOK(section);
-        } catch (ClassCastException err) {
-            return ServerMsg.asERR(String.format("%s", err.getMessage()));
+        Section clientSection = (Section) req.getBody();
+        Course clientCourse = clientSection.getCourse();
+        Course course = university.getCourseByID(clientCourse.getID());
+        if (course == null) {
+            return ServerMsg.asERR(String.format("Course ID '%s' not found.", clientCourse.getID()));
         }
+
+        // We don't check for section ID for 2 reasons:
+        // 1. Client doesn't have the correct section ID anyway cuz it's autoincrement.
+        // 2. It makes more sense to check for instructor availability.
+
+        Instructor clientInstructor = clientSection.getInstructor();
+        var instructors = university.getInstructors().values();
+        var found = instructors.stream()
+                .filter((i) -> i.getName().equals(clientInstructor.getName()))
+                .collect(Collectors.toList())
+                .toArray(new Instructor[0]);
+        Instructor instructor = null;
+        if (found.length < 1) {
+            // return ServerMsg.asERR(String.format("Instructor '%s' not found.",
+            // clientInstructor.getName()));
+            instructor = new Instructor(clientInstructor.getName(), null);
+        } else {
+            instructor = found[0];
+        }
+
+        Section conflictedSection = Util.findOverlap(clientSection, instructor.getTeaching());
+        if (conflictedSection != null) {
+            return ServerMsg
+                    .asERR(String.format("Unable to create section: Instructor has conflict with section ID '%s'.",
+                            conflictedSection.getID()));
+        }
+
+        Section section = new Section(
+                course,
+                clientSection.getNumber(),
+                clientSection.getMaxCapacity(),
+                clientSection.getMaxWaitlistSize(),
+                instructor);
+        section.setSchedule(clientSection.getSchedule());
+        course.insertSection(section);
+        instructor.teachSection(section);
+        return ServerMsg.asOK(section);
     }
 
     /**
@@ -216,68 +206,64 @@ public class AdminSessionHandler extends SessionHandler {
      *         reason {@code String}.
      */
     private synchronized ServerMsg editSection(ClientMsg req) {
-        try {
-            Section clientSection = (Section) req.getBody();
-            Course clientCourse = clientSection.getCourse();
-            Course course = university.getCourseByID(clientCourse.getID());
-            if (course == null) {
-                return ServerMsg.asERR(String.format("Course ID '%s' not found.", clientCourse.getID()));
-            }
-
-            Section section = null;
-            for (var s : course.getSections()) {
-                if (clientSection.getNumber().equals(s.getNumber())) {
-                    section = s;
-                    break;
-                }
-            }
-            if (section == null) {
-                return ServerMsg.asERR(String.format("Section ID '%s' not found.", clientSection.getID()));
-            }
-
-            if (clientSection.getStatus() == SectionStatus.INACTIVE) {
-                return ServerMsg.asERR("Operation not permitted.");
-            }
-
-            Instructor clientInstructor = clientSection.getInstructor();
-            var instructors = university.getInstructors().values();
-            var found = instructors.stream()
-                    .filter((i) -> i.getName().equals(clientInstructor.getName()))
-                    .collect(Collectors.toList())
-                    .toArray(new Instructor[0]);
-            if (found.length < 1) {
-                return ServerMsg.asERR(String.format("Instructor '%s' not found.", clientInstructor.getName()));
-            }
-
-            Instructor instructor = found[0];
-
-            var conflictedSection = Util.findOverlap(section, instructor.getTeaching());
-            if (conflictedSection != null) {
-                return ServerMsg.asERR(
-                        String.format("The new instructor is not available for this section due to section '%s'.",
-                                conflictedSection.getID()));
-            }
-
-            section.setNumber(clientSection.getNumber());
-            section.setSchedule(clientSection.getSchedule());
-
-            // Order of setters for this part matters.
-
-            // Waitlist first, then capacity, to avoid dropping students prematurely.
-            section.setMaxWaitSize(clientSection.getMaxWaitlistSize());
-            section.setMaxCapacity(clientSection.getMaxCapacity());
-
-            Instructor oldInstructor = section.getInstructor();
-            oldInstructor.dropSection(section);
-            section.setInstructor(instructor);
-
-            // Status last to finalize stuff.
-            section.setStatus(clientSection.getStatus());
-
-            return ServerMsg.asOK(section);
-        } catch (ClassCastException err) {
-            return ServerMsg.asERR(String.format("%s", err.getMessage()));
+        Section clientSection = (Section) req.getBody();
+        Course clientCourse = clientSection.getCourse();
+        Course course = university.getCourseByID(clientCourse.getID());
+        if (course == null) {
+            return ServerMsg.asERR(String.format("Course ID '%s' not found.", clientCourse.getID()));
         }
+
+        Section section = null;
+        for (var s : course.getSections()) {
+            if (clientSection.getNumber().equals(s.getNumber())) {
+                section = s;
+                break;
+            }
+        }
+        if (section == null) {
+            return ServerMsg.asERR(String.format("Section ID '%s' not found.", clientSection.getID()));
+        }
+
+        if (clientSection.getStatus() == SectionStatus.INACTIVE) {
+            return ServerMsg.asERR("Operation not permitted.");
+        }
+
+        Instructor clientInstructor = clientSection.getInstructor();
+        var instructors = university.getInstructors().values();
+        var found = instructors.stream()
+                .filter((i) -> i.getName().equals(clientInstructor.getName()))
+                .collect(Collectors.toList())
+                .toArray(new Instructor[0]);
+        if (found.length < 1) {
+            return ServerMsg.asERR(String.format("Instructor '%s' not found.", clientInstructor.getName()));
+        }
+
+        Instructor instructor = found[0];
+
+        var conflictedSection = Util.findOverlap(section, instructor.getTeaching());
+        if (conflictedSection != null) {
+            return ServerMsg.asERR(
+                    String.format("The new instructor is not available for this section due to section '%s'.",
+                            conflictedSection.getID()));
+        }
+
+        section.setNumber(clientSection.getNumber());
+        section.setSchedule(clientSection.getSchedule());
+
+        // Order of setters for this part matters.
+
+        // Waitlist first, then capacity, to avoid dropping students prematurely.
+        section.setMaxWaitSize(clientSection.getMaxWaitlistSize());
+        section.setMaxCapacity(clientSection.getMaxCapacity());
+
+        Instructor oldInstructor = section.getInstructor();
+        oldInstructor.dropSection(section);
+        section.setInstructor(instructor);
+
+        // Status last to finalize stuff.
+        section.setStatus(clientSection.getStatus());
+
+        return ServerMsg.asOK(section);
     }
 
     /**
@@ -288,31 +274,27 @@ public class AdminSessionHandler extends SessionHandler {
      *         {@code ERR ServerMsg} containing the reason {@code String}.
      */
     private synchronized ServerMsg delSection(ClientMsg req) {
-        try {
-            Section clientSection = (Section) req.getBody();
-            Course clientCourse = clientSection.getCourse();
-            Course course = university.getCourseByID(clientCourse.getID());
-            if (course == null) {
-                return ServerMsg.asERR(String.format("Course ID '%s' not found.", clientCourse.getID()));
-            }
-
-            Section section = null;
-            for (var s : course.getSections()) {
-                if (clientSection.getID().equals(s.getID())) {
-                    section = s;
-                    break;
-                }
-            }
-            if (section == null) {
-                return ServerMsg.asERR(String.format("Section ID '%s' not found.", clientSection.getID()));
-            }
-
-            section.setStatus(SectionStatus.INACTIVE);
-            course.delSection(section.getID());
-            return ServerMsg.asOK("");
-        } catch (ClassCastException err) {
-            return ServerMsg.asERR(String.format("%s", err.getMessage()));
+        Section clientSection = (Section) req.getBody();
+        Course clientCourse = clientSection.getCourse();
+        Course course = university.getCourseByID(clientCourse.getID());
+        if (course == null) {
+            return ServerMsg.asERR(String.format("Course ID '%s' not found.", clientCourse.getID()));
         }
+
+        Section section = null;
+        for (var s : course.getSections()) {
+            if (clientSection.getID().equals(s.getID())) {
+                section = s;
+                break;
+            }
+        }
+        if (section == null) {
+            return ServerMsg.asERR(String.format("Section ID '%s' not found.", clientSection.getID()));
+        }
+
+        section.setStatus(SectionStatus.INACTIVE);
+        course.delSection(section.getID());
+        return ServerMsg.asOK("");
     }
 
     /**
@@ -323,35 +305,31 @@ public class AdminSessionHandler extends SessionHandler {
      *         {@code ERR ServerMsg} containing the reason {@code String}.
      */
     private synchronized ServerMsg addCourse(ClientMsg req) {
-        try {
-            Course clientCourse = (Course) req.getBody();
-            Course course = university.getCourseByID(clientCourse.getID());
-            if (course != null) {
-                return ServerMsg.asERR(String.format("Course ID '%s' already existed.", course.getID()));
-            }
-
-            // Don't copy over the sections.
-            course = new Course(clientCourse.getPrefix(), clientCourse.getNumber(),
-                    clientCourse.getDescription());
-            for (var prereq : clientCourse.getPrerequisites()) {
-                Course prereqCourse = university.getCourseByID(prereq);
-                if (prereqCourse == null) {
-                    // Skip is a safe option.
-                    continue;
-                }
-                course.insertPrereq(prereqCourse);
-            }
-            try {
-                university.addCourse(course);
-            } catch (RuntimeException err) {
-                // Existence check is done earlier so this is most likely prereq issue.
-                return ServerMsg.asERR(err.getMessage());
-            }
-
-            return ServerMsg.asOK(course);
-        } catch (ClassCastException err) {
-            return ServerMsg.asERR(String.format("%s", err.getMessage()));
+        Course clientCourse = (Course) req.getBody();
+        Course course = university.getCourseByID(clientCourse.getID());
+        if (course != null) {
+            return ServerMsg.asERR(String.format("Course ID '%s' already existed.", course.getID()));
         }
+
+        // Don't copy over the sections.
+        course = new Course(clientCourse.getPrefix(), clientCourse.getNumber(),
+                clientCourse.getDescription());
+        for (var prereq : clientCourse.getPrerequisites()) {
+            Course prereqCourse = university.getCourseByID(prereq);
+            if (prereqCourse == null) {
+                // Skip is a safe option.
+                continue;
+            }
+            course.insertPrereq(prereqCourse);
+        }
+        try {
+            university.addCourse(course);
+        } catch (RuntimeException err) {
+            // Existence check is done earlier so this is most likely prereq issue.
+            return ServerMsg.asERR(err.getMessage());
+        }
+
+        return ServerMsg.asOK(course);
     }
 
     /**
@@ -368,35 +346,31 @@ public class AdminSessionHandler extends SessionHandler {
      *         {@code String}.
      */
     private synchronized ServerMsg editCourse(ClientMsg req) {
-        try {
-            Course clientCourse = (Course) req.getBody();
-            Course course = university.getCourseByID(clientCourse.getID());
-            if (course == null) {
-                return ServerMsg.asERR(String.format("Course ID '%s' not found.", clientCourse.getID()));
-            }
-
-            Course newCourse = new Course(clientCourse.getPrefix(), clientCourse.getNumber(),
-                    clientCourse.getDescription());
-            for (var prereq : clientCourse.getPrerequisites()) {
-                Course prereqCourse = university.getCourseByID(prereq);
-                if (prereqCourse == null) {
-                    // Skip is a safe option.
-                    continue;
-                }
-                newCourse.insertPrereq(prereqCourse);
-            }
-
-            try {
-                university.editCourse(newCourse);
-            } catch (RuntimeException err) {
-                // Existence check is done earlier so this is most likely prereq issue.
-                return ServerMsg.asERR(err.getMessage());
-            }
-
-            return ServerMsg.asOK(newCourse);
-        } catch (ClassCastException err) {
-            return ServerMsg.asERR(String.format("%s", err.getMessage()));
+        Course clientCourse = (Course) req.getBody();
+        Course course = university.getCourseByID(clientCourse.getID());
+        if (course == null) {
+            return ServerMsg.asERR(String.format("Course ID '%s' not found.", clientCourse.getID()));
         }
+
+        Course newCourse = new Course(clientCourse.getPrefix(), clientCourse.getNumber(),
+                clientCourse.getDescription());
+        for (var prereq : clientCourse.getPrerequisites()) {
+            Course prereqCourse = university.getCourseByID(prereq);
+            if (prereqCourse == null) {
+                // Skip is a safe option.
+                continue;
+            }
+            newCourse.insertPrereq(prereqCourse);
+        }
+
+        try {
+            university.editCourse(newCourse);
+        } catch (RuntimeException err) {
+            // Existence check is done earlier so this is most likely prereq issue.
+            return ServerMsg.asERR(err.getMessage());
+        }
+
+        return ServerMsg.asOK(newCourse);
     }
 
     /**
@@ -407,24 +381,20 @@ public class AdminSessionHandler extends SessionHandler {
      *         {@code ERR ServerMsg} containing the reason {@code String}.
      */
     private synchronized ServerMsg delCourse(ClientMsg req) {
-        try {
-            Course clientCourse = (Course) req.getBody();
-            Course course = university.getCourseByID(clientCourse.getID());
-            if (course == null) {
-                return ServerMsg.asERR(String.format("Course ID '%s' not found.", clientCourse.getID()));
-            }
-
-            for (var section : course.getSections()) {
-                // Don't touch the completed ones because they're "archived".
-                if (section.getStatus() == SectionStatus.ACTIVE) {
-                    section.setStatus(SectionStatus.INACTIVE);
-                }
-            }
-            university.delCourse(course.getID());
-            return ServerMsg.asOK("");
-        } catch (ClassCastException err) {
-            return ServerMsg.asERR(String.format("%s", err.getMessage()));
+        Course clientCourse = (Course) req.getBody();
+        Course course = university.getCourseByID(clientCourse.getID());
+        if (course == null) {
+            return ServerMsg.asERR(String.format("Course ID '%s' not found.", clientCourse.getID()));
         }
+
+        for (var section : course.getSections()) {
+            // Don't touch the completed ones because they're "archived".
+            if (section.getStatus() == SectionStatus.ACTIVE) {
+                section.setStatus(SectionStatus.INACTIVE);
+            }
+        }
+        university.delCourse(course.getID());
+        return ServerMsg.asOK("");
     }
 
     /**
@@ -437,20 +407,16 @@ public class AdminSessionHandler extends SessionHandler {
      *         the reason {@code String}.
      */
     private synchronized ServerMsg enrollStudent(ClientMsg req) {
-        try {
-            var body = (BodyEnrollOrDropAs) req.getBody();
-            String studentID = body.getStudentID();
+        var body = (BodyEnrollOrDropAs) req.getBody();
+        String studentID = body.getStudentID();
 
-            if (!university.getStudents().containsKey(studentID)) {
-                return ServerMsg.asERR(String.format("Student ID '%s' not found.", studentID));
-            }
-            Student student = university.getStudents().get(studentID);
-
-            Section clientSection = body.getSection();
-            return Util.enroll(clientSection, student, university);
-        } catch (ClassCastException err) {
-            return ServerMsg.asERR(String.format("%s", err.getMessage()));
+        if (!university.getStudents().containsKey(studentID)) {
+            return ServerMsg.asERR(String.format("Student ID '%s' not found.", studentID));
         }
+        Student student = university.getStudents().get(studentID);
+
+        Section clientSection = body.getSection();
+        return Util.enroll(clientSection, student, university);
     }
 
     /**
@@ -462,19 +428,15 @@ public class AdminSessionHandler extends SessionHandler {
      *         {@code ERR ServerMsg} containing the reason {@code String}.
      */
     private ServerMsg dropStudent(ClientMsg req) {
-        try {
-            var body = (BodyEnrollOrDropAs) req.getBody();
-            String studentID = body.getStudentID();
+        var body = (BodyEnrollOrDropAs) req.getBody();
+        String studentID = body.getStudentID();
 
-            if (!university.getStudents().containsKey(studentID)) {
-                return ServerMsg.asERR(String.format("Student ID '%s' not found.", studentID));
-            }
-            Student student = university.getStudents().get(studentID);
-
-            Section clientSection = body.getSection();
-            return Util.drop(clientSection, student, university);
-        } catch (ClassCastException err) {
-            return ServerMsg.asERR(String.format("%s", err.getMessage()));
+        if (!university.getStudents().containsKey(studentID)) {
+            return ServerMsg.asERR(String.format("Student ID '%s' not found.", studentID));
         }
+        Student student = university.getStudents().get(studentID);
+
+        Section clientSection = body.getSection();
+        return Util.drop(clientSection, student, university);
     }
 }

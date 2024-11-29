@@ -43,9 +43,10 @@ public class GUIStudent extends PanelBase {
         sidebar.add(logoutBtn);
 
         JPanel viewer = radio.buildView();
+        JScrollPane viewerScroll = new JScrollPane(viewer);
 
         this.add(sidebar, BorderLayout.WEST);
-        this.add(viewer);
+        this.add(viewerScroll);
     }
 
     @Override

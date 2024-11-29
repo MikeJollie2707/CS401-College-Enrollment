@@ -4,8 +4,10 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -38,7 +40,8 @@ public class ComponentCourse {
         if (existingState != null) {
             this.courseState = existingState;
         } else {
-            // this.courseState = CourseStateManager.getInstance().getOrCreateState(course, currentStudent);
+            // this.courseState = CourseStateManager.getInstance().getOrCreateState(course,
+            // currentStudent);
         }
     }
 
@@ -60,11 +63,26 @@ public class ComponentCourse {
         panel.add(sectionsLabelPanel);
 
         for (var section : course.getSections()) {
-            JPanel sectionPanel = new JPanel(new FlowLayout());
-            sectionPanel.add(new JLabel(prefix + number + "-" + section.getNumber()));
-            sectionPanel.add(new JLabel("Max Capacity: " + section.getMaxCapacity()));
-            sectionPanel.add(new JLabel("Max Waitlist Size: " + section.getMaxWaitlistSize()));
-            sectionPanel.add(new JLabel("Instructor: " + section.getInstructor().getName()));
+            JPanel sectionPanel = new JPanel();
+            sectionPanel.setLayout(new BoxLayout(sectionPanel, BoxLayout.Y_AXIS));
+            JPanel headerPanel = new JPanel();
+            headerPanel.add(new JLabel(prefix + number + "-" + section.getNumber()));
+            headerPanel.add(new JLabel("Max Capacity: " + section.getMaxCapacity()));
+            headerPanel.add(new JLabel("Max Waitlist Size: " + section.getMaxWaitlistSize()));
+            headerPanel.add(new JLabel("Instructor: " + section.getInstructor().getName()));
+
+            JPanel schedulePanel = new JPanel();
+            schedulePanel.setLayout(new BoxLayout(schedulePanel, BoxLayout.Y_AXIS));
+            for (var entry : section.getSchedule()) {
+                JPanel row = new JPanel();
+                var time = entry.getTime();
+                row.add(new JLabel(entry.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.US)));
+                row.add(new JLabel(String.format("Start: %s - End: %s",
+                        time.getStart().toLocalTime(), time.getEnd().toLocalTime())));
+                row.add(new JLabel(String.format("@ %s", entry.getLocation())));
+                row.add(new JLabel(String.format("(%s)", entry.isSync() ? "sync" : "async")));
+                schedulePanel.add(row);
+            }
 
             SectionState sectionState = courseState.getSectionState(section);
 
@@ -90,12 +108,13 @@ public class ComponentCourse {
                 } else if (buttonText.equals("Enroll") || buttonText.equals("Enroll Waitlist")) {
                     enrollCourse(section, sectionState, actionButton);
                 } else if (buttonText.equals("Drop Enrollment")) {
-                    System.out.println("Dropping " + section.getID());
                     dropEnrollment(section, sectionState, actionButton);
                 }
             });
             sectionButtons.add(actionButton);
-            sectionPanel.add(actionButton);
+            headerPanel.add(actionButton);
+            sectionPanel.add(headerPanel);
+            sectionPanel.add(schedulePanel);
             panel.add(sectionPanel);
         }
         JScrollPane scroll = new JScrollPane(panel);
