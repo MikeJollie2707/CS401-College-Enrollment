@@ -1,6 +1,6 @@
-CS,101,Intro to CS
-CS,201,CS but C++,CS 201
+CS,101,Intro to CS,none
+CS,201,CS but C++,CS 101
 CS,211,Discrete Math,MATH 130
-CS,301,DSA,CS 201,CS 211
+CS,301,DSA,CS 201 CS 211
 CS,401,Software Engineering,CS 301
-MATH,130,Calc 1
+MATH,130,Calc 1,none

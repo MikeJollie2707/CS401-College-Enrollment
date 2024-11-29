@@ -2,6 +2,7 @@
 package objects;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,7 +34,7 @@ public class Section implements Serializable {
      *                                  if {@code max_wait} is negative.
      */
     public Section(Course course, String number, int max_capacity, int max_wait, Instructor instructor) {
-        if (course == null || number == null | instructor == null) {
+        if (course == null || number == null || instructor == null) {
             throw new NullPointerException("Arguments for constructor must not be null.");
         }
         if (max_capacity <= 0 || max_wait < 0) {
@@ -48,6 +49,9 @@ public class Section implements Serializable {
         this.max_capacity = max_capacity;
         this.max_wait = max_wait;
         this.instructor = instructor;
+        
+        this.enrolled = new ArrayList<>();
+        this.waitlisted = new ArrayList<>();
     }
 
     /**

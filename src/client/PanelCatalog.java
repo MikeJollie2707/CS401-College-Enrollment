@@ -7,6 +7,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.*;
 
@@ -19,6 +21,8 @@ public class PanelCatalog extends PanelBase {
 
     private BuilderForm searchForm;
     private JPanel resultPanel;
+    private JScrollPane scroll;
+    private Map<String, CourseState> existingStates = new HashMap<>();
 
     public PanelCatalog(MainFrame frame, ObjectOutputStream ostream, ObjectInputStream istream) {
         this.frame = frame;
@@ -31,6 +35,8 @@ public class PanelCatalog extends PanelBase {
         JPanel searchPanel = searchForm.getPanel();
         searchPanel.setLayout(new BoxLayout(searchPanel, BoxLayout.Y_AXIS));
         resultPanel.setLayout(new BoxLayout(resultPanel, BoxLayout.Y_AXIS));
+        scroll = new JScrollPane(resultPanel);
+        scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
     }
 
     /**
@@ -44,10 +50,8 @@ public class PanelCatalog extends PanelBase {
         SwingWorker<ServerMsg, Void> worker = new SwingWorker<ServerMsg, Void>() {
             @Override
             protected ServerMsg doInBackground() throws Exception {
-                // Have to create a new body every time
-                // otherwise it'll reuse the default body (blank on all fields).
-                // It's probably because of thread race, but whatever, it's a lightweight obj,
-                // doesn't hurt to create a new one for every request.
+                // need to save  states instead of fully resetting component course
+                existingStates = CourseStateManager.getInstance().filterStatesByCriteria(body, CourseStateManager.getInstance().getCourseStates());
                 ostream.writeObject(new ClientMsg("GET", "courses", body));
                 return (ServerMsg) istream.readObject();
             }
@@ -59,15 +63,24 @@ public class PanelCatalog extends PanelBase {
                     if (resp.isOk()) {
                         Course[] courses = (Course[]) resp.getBody();
                         resultPanel.removeAll();
-
                         if (courses.length < 1) {
-                            JLabel notFound = new JLabel("No courses found in :(");
+                            JLabel notFound = new JLabel("No courses found :(");
                             notFound.setFont(new Font("Arial", Font.BOLD, 20));
                             notFound.setForeground(Color.BLUE);
                             resultPanel.add(notFound, BorderLayout.CENTER);
                         } else {
                             for (int i = 0; i < courses.length; ++i) {
-                                resultPanel.add(new ComponentCourse(courses[i]).build());
+                                Object me = frame.getMe();
+                                if (me instanceof Administrator) {
+                                    ComponentCourseAdmin adminComponent = new ComponentCourseAdmin(frame, PanelCatalog.this, ostream, istream, courses[i]);
+                                    resultPanel.add(adminComponent.build());
+                                } else if (me instanceof Student) {
+                                    // have to save previous states so all sections status is saved after search
+                                    String courseKey = courses[i].getPrefix() + courses[i].getNumber();
+                                    CourseState courseState = existingStates.get(courseKey);
+                                    ComponentCourse componentCourse = new ComponentCourse(frame, ostream, istream, courses[i], courseState);
+                                    resultPanel.add(componentCourse.build());
+                                }
                             }
                         }
                         refreshPanel();
@@ -117,7 +130,7 @@ public class PanelCatalog extends PanelBase {
         var worker = getSearchWorker(new BodyCourseSearch());
         worker.execute();
         add(searchForm.getPanel());
-        add(resultPanel);
+        add(scroll);
         frame.showLoading();
     }
 
