@@ -1,5 +1,6 @@
 package client;
 
+import java.awt.Component;
 import java.util.ArrayList;
 import java.util.function.Supplier;
 
@@ -61,7 +62,11 @@ public class BuilderForm {
      * @return {@code this}
      */
     public BuilderForm addEntry(JLabel label, JComponent input, Supplier<String> getter) {
+        label.setAlignmentX(Component.CENTER_ALIGNMENT);
+        label.setAlignmentY(Component.CENTER_ALIGNMENT);
         form.add(label);
+        input.setAlignmentX(Component.CENTER_ALIGNMENT);
+        input.setAlignmentY(Component.CENTER_ALIGNMENT);
         form.add(input);
 
         inputs.add(input);
