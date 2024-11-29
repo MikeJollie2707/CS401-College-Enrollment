@@ -2,6 +2,7 @@ package client;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -74,6 +75,7 @@ public class PanelCatalog extends PanelBase {
                                 if (me instanceof Administrator) {
                                     ComponentCourseAdmin adminComponent = new ComponentCourseAdmin(frame, PanelCatalog.this, ostream, istream, courses[i]);
                                     resultPanel.add(adminComponent.build());
+                                    refreshPanel();
                                 } else if (me instanceof Student) {
                                     // have to save previous states so all sections status is saved after search
                                     String courseKey = courses[i].getPrefix() + courses[i].getNumber();
@@ -81,10 +83,12 @@ public class PanelCatalog extends PanelBase {
                                     ComponentCourse componentCourse = new ComponentCourse(frame, ostream, istream, courses[i], courseState);
                                     resultPanel.add(componentCourse.build());
                                 }
+                                refreshPanel();
                             }
                         }
                         refreshPanel();
                     }
+                    refreshPanel();
                     frame.stopLoading();
                 } catch (Exception err) {
                     err.printStackTrace();

@@ -155,6 +155,7 @@ public class AdminSessionHandler extends SessionHandler {
             }
 
             Instructor clientInstructor = clientSection.getInstructor();
+            /* I don't want to map instructors since i am creating a new section instructor from admin
             var instructorMapping = university.getInstructors();
             if (!instructorMapping.containsKey(clientInstructor.getID())) {
                 return ServerMsg.asERR(String.format("Instructor ID '%s' not found.", clientInstructor.getID()));
@@ -162,13 +163,13 @@ public class AdminSessionHandler extends SessionHandler {
 
             Instructor instructor = instructorMapping.get(clientInstructor.getID());
             // TODO: Check for instructor availability for this section.
-
+            */
             section = new Section(
                     course,
                     clientSection.getNumber(),
                     clientSection.getMaxCapacity(),
                     clientSection.getMaxWaitlistSize(),
-                    instructor);
+                    clientInstructor);
             course.insertSection(section);
             return ServerMsg.asOK(section);
         } catch (ClassCastException err) {

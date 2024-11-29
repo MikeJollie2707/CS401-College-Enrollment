@@ -1,6 +1,10 @@
 package client;
 
+import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.LinkedHashMap;
@@ -24,6 +28,14 @@ public class BuilderRadioPanel {
         cards = new CardLayout();
         currentPanel = new JPanel(cards);
         panelMap = new LinkedHashMap<>();
+        
+        JLabel templateText = new JLabel("Welcome! Please click an option to start.");
+        templateText.setVerticalAlignment(SwingConstants.CENTER);
+        templateText.setHorizontalAlignment(SwingConstants.CENTER);
+        templateText.setFont(new Font("Arial", Font.BOLD, 30));
+        templateText.setForeground(Color.BLUE);
+        
+        currentPanel.add(templateText, "templateStart");
     }
 
     /**
