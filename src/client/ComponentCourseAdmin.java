@@ -67,7 +67,20 @@ public class ComponentCourseAdmin {
 
             JButton editButton = new JButton("Edit Section");
             editButton.addActionListener(e -> {
-                editSection(section, sectionPanel);
+                SectionEditForm form = new SectionEditForm(section);
+                int result = JOptionPane.showConfirmDialog(null, new JScrollPane(form.getPanel()), "Edit Section", JOptionPane.OK_CANCEL_OPTION);
+                if (result == JOptionPane.OK_OPTION) {
+                    Section newSection = null;
+                    try {
+                        newSection = form.getEditedSection();
+                    }
+                    catch (Exception err) {
+                        JOptionPane.showMessageDialog(null, "One of the field is invalid.");
+                        return;
+                    }
+
+                    editSection(newSection, sectionPanel);
+                }
             });
             sectionButtons.add(editButton);
             sectionPanel.add(editButton, sectionPanel);
