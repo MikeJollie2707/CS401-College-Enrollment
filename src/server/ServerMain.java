@@ -59,7 +59,6 @@ public class ServerMain {
                 String universityName = entry[0];
                 String location = entry[1];
                 University university = new University(universityName, location);
-
                 // Loading more information relating to Admins
                 if (entry.length > 2) {
                     String adminsFile = entry[2];
@@ -136,7 +135,6 @@ public class ServerMain {
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
                 String[] parts = line.split(",");
-
                 String coursePrefix = parts[0];
                 String courseNumber = parts[1];
                 String courseDesc = parts[2];

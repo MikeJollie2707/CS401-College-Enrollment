@@ -35,7 +35,6 @@ public class ComponentCourse {
         this.istream = istream;
         this.currentStudent = (Student) frame.getMe();
         this.sectionButtons = new ArrayList<>();
-
         if (existingState != null) {
             this.courseState = existingState;
         } else {
@@ -70,7 +69,6 @@ public class ComponentCourse {
             SectionState sectionState = courseState.getSectionState(section);
 
             JButton actionButton = new JButton();
-
             if (sectionState.isWaitlisted()) {
                 actionButton.setText("Drop From Waitlist");
                 actionButton.setBackground(Color.BLUE);
@@ -95,12 +93,10 @@ public class ComponentCourse {
                     dropEnrollment(section, sectionState, actionButton);
                 }
             });
-
             sectionButtons.add(actionButton);
             sectionPanel.add(actionButton);
             panel.add(sectionPanel);
         }
-
         JScrollPane scroll = new JScrollPane(panel);
         return scroll;
     }
