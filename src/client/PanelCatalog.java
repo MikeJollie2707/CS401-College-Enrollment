@@ -7,8 +7,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.swing.*;
 
@@ -21,7 +19,6 @@ public class PanelCatalog extends PanelBase {
 
     private BuilderForm searchForm;
     private JPanel resultPanel;
-    private Map<String, CourseState> existingStates = new HashMap<>();
 
     public PanelCatalog(MainFrame frame, ObjectOutputStream ostream, ObjectInputStream istream) {
         this.frame = frame;
@@ -95,12 +92,12 @@ public class PanelCatalog extends PanelBase {
     void initForm() {
         JTextField prefixField = new JTextField(10);
         JTextField numberField = new JTextField(10);
-        JTextField descField = new JTextField(10);
+        JTextField nameField = new JTextField(10);
         JTextField instructorField = new JTextField(10);
 
         searchForm.addEntry(new JLabel("Course prefix:"), prefixField, () -> prefixField.getText());
         searchForm.addEntry(new JLabel("Course number:"), numberField, () -> numberField.getText());
-        searchForm.addEntry(new JLabel("Course description:"), descField, () -> descField.getText());
+        searchForm.addEntry(new JLabel("Course name:"), nameField, () -> nameField.getText());
         searchForm.addEntry(new JLabel("Instructor:"), instructorField, () -> instructorField.getText());
 
         JButton searchBtn = new JButton("Search");

@@ -130,8 +130,9 @@ public class ServerMain {
                 String[] parts = line.split(",");
                 String coursePrefix = parts[0];
                 String courseNumber = parts[1];
-                String courseDesc = parts[2];
-                Course course = new Course(coursePrefix, courseNumber, courseDesc);
+                String courseName = parts[2];
+                String courseDesc = parts[3];
+                Course course = new Course(coursePrefix, courseNumber, courseName, courseDesc);
                 if (!parts[3].equals("none")) {
                     String[] prerequisites = parts[3].split(" ");
                     for (int i = 0; i < prerequisites.length; i += 2) {
@@ -145,21 +146,6 @@ public class ServerMain {
                         }
                     }
                 }
-                // keep looping here after preqs in case a course has multiple sections
-                // for (int i = 4; i < parts.length; i += 4) {
-                // if (i + 3 >= parts.length) {
-                // break;
-                // }
-                // String sectionNum = parts[i];
-                // int maxCapacity = Integer.parseInt(parts[i + 1]);
-                // int maxWaitlist = Integer.parseInt(parts[i + 2]);
-                // String instructorLast = parts[i + 3];
-
-                // Instructor instructor = new Instructor(instructorLast, null);
-                // Section section = new Section(course, sectionNum, maxCapacity, maxWaitlist,
-                // instructor);
-                // course.insertSection(section);
-                // };
                 university.addCourse(course);
             }
         } catch (FileNotFoundException e) {

@@ -9,6 +9,7 @@ import java.util.*;
 public class Course implements Serializable {
     private String prefix;
     private String number;
+    private String name;
     private String description;
     private Set<String> prerequisites;
     private List<Section> sections;
@@ -18,12 +19,14 @@ public class Course implements Serializable {
      * 
      * @param prefix      The course prefix.
      * @param number      The course number.
+     * @param name        The course name.
      * @param description The description of this course.
      * @throws NullPointerException If any parameters are null.
      */
-    public Course(String prefix, String number, String description) {
+    public Course(String prefix, String number, String name, String description) {
         setPrefix(prefix);
         setNumber(number);
+        setName(name);
         setDescription(description);
 
         prerequisites = new HashSet<>();
@@ -100,6 +103,10 @@ public class Course implements Serializable {
         return number;
     }
 
+    public synchronized String getName() {
+        return name;
+    }
+
     public synchronized String getDescription() {
         return description;
     }
@@ -136,6 +143,13 @@ public class Course implements Serializable {
             throw new NullPointerException("'number' must not be null.");
         }
         this.number = number;
+    }
+
+    public synchronized void setName(String name) {
+        if (name == null) {
+            throw new NullPointerException("'name' must not be null.");
+        }
+        this.name = name;
     }
 
     /**

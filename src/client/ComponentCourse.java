@@ -49,12 +49,13 @@ public class ComponentCourse {
         JPanel panel = new JPanel();
         String prefix = course.getPrefix();
         String number = course.getNumber();
+        String name = course.getName();
         String desc = course.getDescription();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
         JPanel courseHeader = new JPanel();
         courseHeader.setLayout(new FlowLayout(FlowLayout.CENTER));
-        courseHeader.add(new JLabel("Course: " + prefix + " " + number + ", " + desc));
+        courseHeader.add(new JLabel("Course: " + prefix + " " + number + ", " + name));
         panel.add(courseHeader);
 
         JPanel sectionsLabelPanel = new JPanel();

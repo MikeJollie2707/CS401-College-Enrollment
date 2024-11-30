@@ -312,7 +312,7 @@ public class AdminSessionHandler extends SessionHandler {
         }
 
         // Don't copy over the sections.
-        course = new Course(clientCourse.getPrefix(), clientCourse.getNumber(),
+        course = new Course(clientCourse.getPrefix(), clientCourse.getNumber(), clientCourse.getName(),
                 clientCourse.getDescription());
         for (var prereq : clientCourse.getPrerequisites()) {
             Course prereqCourse = university.getCourseByID(prereq);
@@ -352,7 +352,7 @@ public class AdminSessionHandler extends SessionHandler {
             return ServerMsg.asERR(String.format("Course ID '%s' not found.", clientCourse.getID()));
         }
 
-        Course newCourse = new Course(clientCourse.getPrefix(), clientCourse.getNumber(),
+        Course newCourse = new Course(clientCourse.getPrefix(), clientCourse.getNumber(), clientCourse.getName(),
                 clientCourse.getDescription());
         for (var prereq : clientCourse.getPrerequisites()) {
             Course prereqCourse = university.getCourseByID(prereq);

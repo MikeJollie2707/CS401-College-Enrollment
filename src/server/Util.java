@@ -153,8 +153,7 @@ public class Util {
         };
         final Predicate<Course> name_pred = (Course c) -> {
             if (body.getCourseName() != null && !body.getCourseName().isBlank()) {
-                // NOTE: Consider adding a name field for Course
-                return c.getDescription().toLowerCase().contains(body.getCourseName());
+                return c.getName().toLowerCase().contains(body.getCourseName());
             }
             return true;
         };

@@ -102,10 +102,12 @@ public class PanelCreateCourse extends PanelBase {
     void initForm() {
         JTextField prefixField = new JTextField(10);
         JTextField numberField = new JTextField(10);
+        JTextField nameField = new JTextField(10);
         JTextField descField = new JTextField(10);
 
         courseForm.addEntry(new JLabel("Prefix:"), prefixField, () -> prefixField.getText());
         courseForm.addEntry(new JLabel("Number:"), numberField, () -> numberField.getText());
+        courseForm.addEntry(new JLabel("Subject:"), nameField, () -> nameField.getText());
         courseForm.addEntry(new JLabel("Description:"), descField, () -> descField.getText());
         courseForm.addEntry(new JLabel("Prerequisites:"), prereqPanel, () -> {
             // Dropdown has default values so we need this to filter the duplicates.
@@ -128,15 +130,16 @@ public class PanelCreateCourse extends PanelBase {
 
                 String prefix = results.get(0);
                 String number = results.get(1);
-                String description = results.get(2);
-                String prereqs = results.get(3);
+                String name = results.get(2);
+                String description = results.get(3);
+                String prereqs = results.get(4);
 
-                Course course = new Course(prefix, number, description);
+                Course course = new Course(prefix, number, name, description);
                 String[] parts = prereqs.split("\n");
                 for (var part : parts) {
                     if (!part.isBlank()) {
                         String[] prereqInfo = part.split(" ");
-                        course.insertPrereq(new Course(prereqInfo[0], prereqInfo[1], ""));
+                        course.insertPrereq(new Course(prereqInfo[0], prereqInfo[1], "", ""));
                     }
                 }
 
