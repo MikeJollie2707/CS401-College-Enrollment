@@ -91,17 +91,18 @@ class CourseTest {
 		assertTrue(sections.contains(section));
 	}
 	
-	/*
+	
 	//Test Failing 
 	@Test
 	void testInsertSectionInvalid() {
-		Section invalidSection = new Section(course, "1", 30, 10, null);
+		Course CSCourse = new Course("CS", "102", "Intro Part 2");
+		Section invalidSection = new Section(CSCourse, "1", 30, 10, new Instructor("Teacher1", null));
 		Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             course.insertSection(invalidSection);
         });
 		assertEquals("The section to be added doesn't refer to this course.", exception.getMessage());
 	}
-	*/
+	
 	
 	@Test
 	void testDelSection() {

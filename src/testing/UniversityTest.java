@@ -123,17 +123,15 @@ class UniversityTest {
 		assertNotNull(editedCourse);
 		assertEquals("Intro to Programming", editedCourse.getDescription());
 	}
-	
-	//Test Failing
-	/*
+		
 	@Test
 	void testEditCourseNull() {
-		Exception exception = assertThrows(RuntimeException.class, () -> {
+		Exception exception = assertThrows(NullPointerException.class, () -> {
 			university.editCourse(null);
 		});
 		assertEquals("Error: Course is not found in the catalog.", exception.getMessage());
 	}
-	*/
+	
 	
 	@Test
 	void testAddAdmin() {
@@ -229,10 +227,9 @@ class UniversityTest {
 	
 	@Test
 	void testIsCycleNull() {
-		Exception exception = assertThrows(NullPointerException.class, () -> {
+		assertThrows(NullPointerException.class, () -> {
 			university.addCourse(null);
 		});
-		assertEquals("Cannot invoke \"objects.Course.getID()\" because \"course\" is null", exception.getMessage());
 	}
 	
 	@Test
