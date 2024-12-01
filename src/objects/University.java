@@ -130,9 +130,13 @@ public class University implements Serializable {
      *                              would cause a prerequisite cycle.
      */
     public synchronized void editCourse(Course newCourse) {
-        Course oldCourse = getCourseByID(newCourse.getID());
+    	if (newCourse == null) {
+            throw new NullPointerException("Error: Course is not found in the catalog.");
+        }
+    	
+    	Course oldCourse = getCourseByID(newCourse.getID());
         if (oldCourse == null) {
-            throw new RuntimeException("Error: Course is not found in the catalog.");
+            throw new NullPointerException("Error: Course is not found in the catalog.");
         }
 
         Set<String> newPrereqs = newCourse.getPrerequisites();
