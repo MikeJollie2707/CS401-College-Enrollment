@@ -50,7 +50,7 @@ class ScheduleEntryTest {
 			false,
 			DayOfWeek.TUESDAY,
 			OffsetTime.parse("12:00+00:00"),
-			OffsetTime.parse("01:15+00:00")
+			OffsetTime.parse("13:15+00:00")
 		);
 		assertNotNull(validTime);
 		assertEquals("location3", validTime.getLocation());
@@ -60,7 +60,6 @@ class ScheduleEntryTest {
 	}
 	
 	//Test Failing 
-	/*
 	@Test
 	void testConstructorInvalid() {
 		Exception exception = assertThrows(IllegalArgumentException.class, () -> {
@@ -73,7 +72,6 @@ class ScheduleEntryTest {
 		});
 		assertEquals("'end_time' must be strictly after 'start_time'", exception.getMessage());
 	}
-	*/
 	
 	@Test
 	void testGetTime() {
