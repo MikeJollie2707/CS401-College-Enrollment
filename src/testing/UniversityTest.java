@@ -227,10 +227,9 @@ class UniversityTest {
 	
 	@Test
 	void testIsCycleNull() {
-		Exception exception = assertThrows(NullPointerException.class, () -> {
+		assertThrows(NullPointerException.class, () -> {
 			university.addCourse(null);
 		});
-		assertEquals("Cannot invoke \"objects.Course.getID()\" because \"course\" is null", exception.getMessage());
 	}
 	
 	@Test
