@@ -141,7 +141,12 @@ public class Section implements Serializable {
     public synchronized SectionStatus getStatus() {
         return status;
     }
-
+    
+  //Testing Purposes
+    public static void resetID() {
+    	_id = 0;
+    }
+    
     public synchronized String getID() {
         return id;
     }
