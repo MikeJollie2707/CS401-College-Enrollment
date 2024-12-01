@@ -18,6 +18,7 @@ class SectionTest {
 	
 	@BeforeEach
 	void setUp() {
+		Section.resetID();
 		course = new Course("CS", "401", "Software Engineering");
 		instructor = new Instructor("Smith", null);
 		section = new Section(course, "1", 30, 10, instructor);
@@ -144,7 +145,7 @@ class SectionTest {
 	
 	@Test
 	void testGetID() {
-		assertEquals("section_7", section.getID());
+		assertEquals("section_0", section.getID());
 	}
 	
 	@Test 
