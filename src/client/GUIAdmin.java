@@ -2,16 +2,14 @@ package client;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Font;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import javax.swing.*;
 
-public class GUIAdmin extends JPanel {
+public class GUIAdmin extends PanelBase {
     private JButton logoutBtn;
     private LinkedHashMap<String, PanelBase> panelMap;
 
@@ -22,8 +20,8 @@ public class GUIAdmin extends JPanel {
         panelMap.put("Search Courses", new PanelCatalog(frame, ostream, istream));
         panelMap.put("Create Course", new PanelCreateCourse(frame, ostream, istream));
         panelMap.put("Create Section", new PanelCreateSection(frame, ostream, istream));
+        panelMap.put("Create Student", new PanelCreateStudent(frame, ostream, istream));
         setLayout(new BorderLayout());
-        setupView();
     }
 
     void setupView() {
@@ -46,9 +44,20 @@ public class GUIAdmin extends JPanel {
         sidebar.add(logoutBtn);
 
         JPanel viewer = radio.buildView();
+        JScrollPane viewerScroll = new JScrollPane(viewer);
 
         this.add(sidebar, BorderLayout.WEST);
-        this.add(viewer, BorderLayout.CENTER);
+        this.add(viewerScroll, BorderLayout.CENTER);
     }
 
+    @Override
+    void onLoad() {
+        setupView();
+        refreshPanel();
+    }
+
+    @Override
+    void onUnload() {
+        removeAll();
+    }
 }

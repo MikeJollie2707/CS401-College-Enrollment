@@ -1,6 +1,7 @@
 package objects;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -31,6 +32,8 @@ public class Instructor implements Serializable {
 
         this.account = account;
         this.name = name;
+
+        teaching = new ArrayList<>();
     }
 
     public synchronized String getID() {
@@ -43,5 +46,17 @@ public class Instructor implements Serializable {
 
     public synchronized String getName() {
         return name;
+    }
+
+    public synchronized List<Section> getTeaching() {
+        return teaching;
+    }
+
+    public synchronized void teachSection(Section section) {
+        teaching.addLast(section);
+    }
+
+    public synchronized void dropSection(Section section) {
+        teaching.remove(section);
     }
 }

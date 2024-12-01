@@ -40,20 +40,27 @@ public class StudentSessionHandler extends SessionHandler {
                     }
                 }
 
-                if (req.isEndpoint("GET", "courses")) {
-                    resp = fetchCourses(req);
-                } else if (req.isEndpoint("GET", "schedule")) {
-                    resp = fetchSchedule(req);
-                } else if (req.isEndpoint("CREATE", "enroll")) {
-                    resp = enroll(req);
-                } else if (req.isEndpoint("CREATE", "drop")) {
-                    resp = drop(req);
-                } else if (req.isEndpoint("GET", "past-enroll")) {
-                    resp = fetchPastEnrollment(req);
+                try {
+                    if (req.isEndpoint("GET", "courses")) {
+                        resp = fetchCourses(req);
+                    } else if (req.isEndpoint("GET", "schedule")) {
+                        resp = fetchSchedule(req);
+                    } else if (req.isEndpoint("CREATE", "enroll")) {
+                        resp = enroll(req);
+                    } else if (req.isEndpoint("CREATE", "drop")) {
+                        resp = drop(req);
+                    } else if (req.isEndpoint("GET", "past-enroll")) {
+                        resp = fetchPastEnrollment(req);
+                    }
+                }
+                catch (Exception err) {
+                    err.printStackTrace();
+                    resp = ServerMsg.asERR(String.format("Internal error: %s", err.getMessage()));
                 }
 
                 if (resp != null) {
-                    ostream.writeObject(resp);
+                    ostream.writeUnshared(resp);
+                    ostream.reset();
                 } else {
                     ostream.writeObject(ServerMsg.asERR(
                             String.format("Endpoint '%s %s' is not available.", req.getMethod(), req.getResource())));
@@ -126,25 +133,7 @@ public class StudentSessionHandler extends SessionHandler {
     private synchronized ServerMsg drop(ClientMsg req) {
         try {
             Section clientSection = (Section) req.getBody();
-            Course clientCourse = clientSection.getCourse();
-            Course course = university.getCourseByID(clientCourse.getID());
-            if (course == null) {
-                return ServerMsg.asERR(String.format("Course ID '%s' not found.", clientCourse.getID()));
-            }
-
-            Section section = null;
-            for (var s : course.getSections()) {
-                if (clientSection.getID().equals(s.getID())) {
-                    section = s;
-                    break;
-                }
-            }
-            if (section == null) {
-                return ServerMsg.asERR(String.format("Section ID '%s' not found.", clientSection.getID()));
-            }
-
-            section.dropStudent(student.getID());
-            return ServerMsg.asOK("");
+            return Util.drop(clientSection, student, university);
         } catch (ClassCastException err) {
             return ServerMsg.asERR(String.format("%s", err.getMessage()));
         }

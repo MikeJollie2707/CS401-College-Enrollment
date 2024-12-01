@@ -1,5 +1,12 @@
+/**
+ * This is copied from SectionEditForm with hasty modifications to make it work.
+ * A better way to not repeat these very similar code is ideal, but we don't have
+ * time, so it is what it is.
+ */
+
 package client;
 
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.DayOfWeek;
@@ -16,13 +23,13 @@ import javax.swing.*;
 import objects.*;
 
 /**
- * A wrapper around a {@code BuilderForm} used to edit a section.
+ * A wrapper around a {@code BuilderForm} used to create a section.
  * <p>
  * To render, use {@code getPanel()}.
  */
-public class SectionEditForm {
+public class SectionCreateForm {
     private BuilderForm form;
-    private Section section;
+    private Course course;
     private JPanel schedulePanel;
     private String[] DAYOFWEEKSTRINGS;
 
@@ -38,12 +45,11 @@ public class SectionEditForm {
     private ArrayList<JPanel> entryPanels;
 
     /**
-     * Create a form to edit an existing section.
+     * Create a form to create a section.
      * 
-     * @param section An existing section.
      */
-    public SectionEditForm(Section section) {
-        this.section = section;
+    public SectionCreateForm() {
+        this.course = null;
         day = new ArrayList<>();
         fromHour = new ArrayList<>();
         fromMinute = new ArrayList<>();
@@ -58,8 +64,6 @@ public class SectionEditForm {
                 .toArray(new String[0]);
 
         form = new BuilderForm(null);
-        form.getPanel().add(new JLabel(
-                "Warning: This may cause some students to get dropped from this section or cause conflicts to their schedule."));
 
         schedulePanel = new JPanel();
         schedulePanel.setLayout(new BoxLayout(schedulePanel, BoxLayout.Y_AXIS));
@@ -103,25 +107,17 @@ public class SectionEditForm {
         int waitlist = 5;
         String instructorName = "";
 
-        capacity = section.getMaxCapacity();
-        waitlist = section.getMaxWaitlistSize();
-        instructorName = section.getInstructor().getName();
+        JPanel entryPanel = createScheduleEntryPanel(
+                new ScheduleEntry("", true, DayOfWeek.MONDAY, OffsetTime.MIN, OffsetTime.MAX));
+        entryPanels.add(entryPanel);
+        schedulePanel.add(entryPanel);
 
-        for (var schedule : section.getSchedule()) {
-            JPanel entryPanel = createScheduleEntryPanel(schedule);
-            entryPanels.add(entryPanel);
-            schedulePanel.add(entryPanel);
-        }
-
-        JCheckBox isCompleted = new JCheckBox();
-        isCompleted.setSelected(section.getStatus() == SectionStatus.COMPLETED);
+        JTextField sectionNumber = new JTextField();
         JTextField sectionCapacity = new JTextField(String.valueOf(capacity));
         JTextField sectionWaitlist = new JTextField(String.valueOf(waitlist));
         JTextField sectionInstructor = new JTextField(instructorName);
 
-        // TODO: Shorten this sentence somehow.
-        form.addEntry(new JLabel("Tick this to mark the section as completed and will count towards prerequisites:"),
-                isCompleted, () -> isCompleted.isSelected() ? "t" : "f");
+        form.addEntry(new JLabel("Section number:"), sectionNumber, () -> sectionNumber.getText());
         form.addEntry(new JLabel("Max capacity:"), sectionCapacity, () -> sectionCapacity.getText());
         form.addEntry(new JLabel("Max waitlist size:"), sectionWaitlist, () -> sectionWaitlist.getText());
         form.addEntry(new JLabel("Instructor:"), sectionInstructor, () -> sectionInstructor.getText());
@@ -174,11 +170,30 @@ public class SectionEditForm {
         syncs.add(isSyncField);
 
         entryPanel.add(dayofweek);
-        entryPanel.add(fromHourField);
-        entryPanel.add(fromMinuteField);
-        entryPanel.add(toHourField);
-        entryPanel.add(toMinuteField);
-        entryPanel.add(locationField);
+        JPanel timePanel = new JPanel();
+        timePanel.setLayout(new BoxLayout(timePanel, BoxLayout.Y_AXIS));
+        timePanel.setAlignmentY(0);
+
+        JPanel startTimePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        startTimePanel.add(new JLabel("Start:"));
+        startTimePanel.add(fromHourField);
+        startTimePanel.add(new JLabel(":"));
+        startTimePanel.add(fromMinuteField);
+        JPanel endTimePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        endTimePanel.add(new JLabel("End:"));
+        endTimePanel.add(toHourField);
+        endTimePanel.add(new JLabel(":"));
+        endTimePanel.add(toMinuteField);
+        timePanel.add(startTimePanel);
+        timePanel.add(endTimePanel);
+        entryPanel.add(timePanel);
+
+        JPanel locationPanel = new JPanel();
+        locationPanel.setLayout(new BoxLayout(locationPanel, BoxLayout.Y_AXIS));
+        locationPanel.add(new JLabel("Location:"));
+        locationPanel.add(locationField);
+        entryPanel.add(locationPanel);
+        
         entryPanel.add(isSyncField);
         return entryPanel;
     }
@@ -190,14 +205,16 @@ public class SectionEditForm {
     /**
      * Get a {@code Section} that is meant to be created from this form.
      * 
+     * @param course The course for this section.
+     * 
      * @return
      * @throws NumberFormatException If one of the entry expects a number but a
      *                               string is provided.
      * @throws DateTimeException     If one of the date entry is out of bound.
      */
-    public Section getEditedSection() {
+    public Section getEditedSection(Course course) {
         var results = form.getResults();
-        String rawIsCompleted = results.get(0);
+        String rawNumber = results.get(0);
         String rawCapacity = results.get(1);
         String rawWaitlist = results.get(2);
         String rawInstructor = results.get(3);
@@ -234,11 +251,8 @@ public class SectionEditForm {
 
         Instructor instructor = new Instructor(rawInstructor, null);
 
-        Section newSection = new Section(section.getCourse(), section.getNumber(), capacity, waitlist, instructor);
+        Section newSection = new Section(course, rawNumber, capacity, waitlist, instructor);
         newSection.setSchedule(entries.toArray(new ScheduleEntry[0]));
-        if (rawIsCompleted.equals("t")) {
-            newSection.setStatus(SectionStatus.COMPLETED);
-        }
         return newSection;
     }
 

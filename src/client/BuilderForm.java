@@ -54,6 +54,7 @@ public class BuilderForm {
      * <li>Example 2: If {@code input} is a {@code JPanel} containing many
      * {@code JTextField}, you can pass a function that iterate through all text
      * fields and return a combined result.
+     * </ul>
      * 
      * @param label  The label for the input.
      * @param input  Any component to render. See {@code getter} attribute for more

@@ -1,5 +1,6 @@
 package server;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -93,7 +94,11 @@ public class ClientHandler implements Runnable {
             } catch (Exception err) {
                 err.printStackTrace();
             }
-        } catch (IOException err) {
+        } 
+        catch (EOFException err) {
+            System.out.println("EOFException: Most likely the client closed their socket.");
+        }
+        catch (IOException err) {
             err.printStackTrace();
         } finally {
             System.out.println("Socket closed.");

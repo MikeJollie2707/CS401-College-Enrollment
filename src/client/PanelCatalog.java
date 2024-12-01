@@ -2,14 +2,11 @@ package client;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.swing.*;
 
@@ -22,8 +19,6 @@ public class PanelCatalog extends PanelBase {
 
     private BuilderForm searchForm;
     private JPanel resultPanel;
-    private JScrollPane scroll;
-    private Map<String, CourseState> existingStates = new HashMap<>();
 
     public PanelCatalog(MainFrame frame, ObjectOutputStream ostream, ObjectInputStream istream) {
         this.frame = frame;
@@ -36,8 +31,6 @@ public class PanelCatalog extends PanelBase {
         JPanel searchPanel = searchForm.getPanel();
         searchPanel.setLayout(new BoxLayout(searchPanel, BoxLayout.Y_AXIS));
         resultPanel.setLayout(new BoxLayout(resultPanel, BoxLayout.Y_AXIS));
-        scroll = new JScrollPane(resultPanel);
-        scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
     }
 
     /**
@@ -52,7 +45,7 @@ public class PanelCatalog extends PanelBase {
             @Override
             protected ServerMsg doInBackground() throws Exception {
                 // need to save  states instead of fully resetting component course
-                existingStates = CourseStateManager.getInstance().filterStatesByCriteria(body, CourseStateManager.getInstance().getCourseStates());
+                // existingStates = CourseStateManager.getInstance().filterStatesByCriteria(body, CourseStateManager.getInstance().getCourseStates());
                 ostream.writeObject(new ClientMsg("GET", "courses", body));
                 return (ServerMsg) istream.readObject();
             }
@@ -70,16 +63,14 @@ public class PanelCatalog extends PanelBase {
                             notFound.setForeground(Color.BLUE);
                             resultPanel.add(notFound, BorderLayout.CENTER);
                         } else {
+                            Object me = frame.getMe();
                             for (int i = 0; i < courses.length; ++i) {
-                                Object me = frame.getMe();
                                 if (me instanceof Administrator) {
                                     ComponentCourseAdmin adminComponent = new ComponentCourseAdmin(frame, PanelCatalog.this, ostream, istream, courses[i]);
                                     resultPanel.add(adminComponent.build());
                                     refreshPanel();
                                 } else if (me instanceof Student) {
-                                    // have to save previous states so all sections status is saved after search
-                                    String courseKey = courses[i].getPrefix() + courses[i].getNumber();
-                                    CourseState courseState = existingStates.get(courseKey);
+                                    CourseState courseState = new CourseState(courses[i], (Student) me);
                                     ComponentCourse componentCourse = new ComponentCourse(frame, ostream, istream, courses[i], courseState);
                                     resultPanel.add(componentCourse.build());
                                 }
@@ -101,12 +92,12 @@ public class PanelCatalog extends PanelBase {
     void initForm() {
         JTextField prefixField = new JTextField(10);
         JTextField numberField = new JTextField(10);
-        JTextField descField = new JTextField(10);
+        JTextField nameField = new JTextField(10);
         JTextField instructorField = new JTextField(10);
 
         searchForm.addEntry(new JLabel("Course prefix:"), prefixField, () -> prefixField.getText());
         searchForm.addEntry(new JLabel("Course number:"), numberField, () -> numberField.getText());
-        searchForm.addEntry(new JLabel("Course description:"), descField, () -> descField.getText());
+        searchForm.addEntry(new JLabel("Course name:"), nameField, () -> nameField.getText());
         searchForm.addEntry(new JLabel("Instructor:"), instructorField, () -> instructorField.getText());
 
         JButton searchBtn = new JButton("Search");
@@ -134,7 +125,7 @@ public class PanelCatalog extends PanelBase {
         var worker = getSearchWorker(new BodyCourseSearch());
         worker.execute();
         add(searchForm.getPanel());
-        add(scroll);
+        add(resultPanel);
         frame.showLoading();
     }
 

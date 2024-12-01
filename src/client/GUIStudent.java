@@ -9,7 +9,7 @@ import java.util.LinkedHashMap;
 
 import javax.swing.*;
 
-public class GUIStudent extends JPanel {
+public class GUIStudent extends PanelBase {
     private JButton logoutBtn;
     private LinkedHashMap<String, PanelBase> panelMap;
 
@@ -21,7 +21,6 @@ public class GUIStudent extends JPanel {
         panelMap.put("Search Courses", new PanelCatalog(frame, ostream, istream));
         
         setLayout(new BorderLayout());
-        setupView();
     }
 
     void setupView() {
@@ -44,9 +43,21 @@ public class GUIStudent extends JPanel {
         sidebar.add(logoutBtn);
 
         JPanel viewer = radio.buildView();
+        JScrollPane viewerScroll = new JScrollPane(viewer);
 
         this.add(sidebar, BorderLayout.WEST);
-        this.add(viewer);
+        this.add(viewerScroll);
+    }
+
+    @Override
+    void onLoad() {
+        setupView();
+        refreshPanel();
+    }
+
+    @Override
+    void onUnload() {
+        removeAll();
     }
 
 }

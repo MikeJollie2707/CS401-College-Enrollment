@@ -1,6 +1,6 @@
-CS,101,Intro to CS,none
-CS,201,CS but C++,CS 101
-CS,211,Discrete Math,MATH 130
-CS,301,DSA,CS 201 CS 211
-CS,401,Software Engineering,CS 301
-MATH,130,Calc 1,none
+CS,101,Intro to CS,Some Python stuff going on,none
+CS,201,CS but C++,Claimed to be an intro to DSA but it's just C++ all the way,CS 101
+CS,211,Discrete Math,Set math and some vector matrix,MATH 130
+CS,301,DSA,Self-explanatory,CS 201 CS 211
+CS,401,Software Engineering,TLDR: This project,CS 301
+MATH,130,Calc 1,Limit and derivative,none

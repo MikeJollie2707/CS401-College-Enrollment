@@ -138,7 +138,6 @@ public class University implements Serializable {
         Set<String> newPrereqs = newCourse.getPrerequisites();
         // Check if new prereqs cause cycle.
         if (!isCycle(oldCourse, newPrereqs)) {
-            // NOTE: Check for existing prefix+number
             catalog.put(oldCourse.getID(), newCourse);
         } else {
             throw new RuntimeException(
@@ -151,13 +150,15 @@ public class University implements Serializable {
      * Add an admin.
      * 
      * @param admin
-     * @throws NullPointerException If {@code admin} is null.
+     * @throws NullPointerException     If {@code admin} is null.
+     * @throws IllegalArgumentException If the provided student has an account
+     *                                  that's too similar to an account within the
+     *                                  university.
      */
     public synchronized void addAdmin(Administrator admin) {
-        if (admin == null) {
-            throw new NullPointerException("'admin' must not be null.");
+        if (isAccountExisted(admin.getAccount())) {
+            throw new IllegalArgumentException("An account with the same name already existed.");
         }
-        // TODO: Check if this admin's account's email already exist.
         admins.add(admin);
     }
 
@@ -165,10 +166,15 @@ public class University implements Serializable {
      * Add a student.
      * 
      * @param student
-     * @throws NullPointerException If {@code student} is null.
+     * @throws NullPointerException     If {@code student} is null.
+     * @throws IllegalArgumentException If the provided student has an account
+     *                                  that's too similar to an account within the
+     *                                  university.
      */
     public synchronized void addStudent(Student student) {
-        // TODO: Check if this student's account's email already exist.
+        if (isAccountExisted(student.getAccount())) {
+            throw new IllegalArgumentException("An account with the same name already existed.");
+        }
         students.put(student.getID(), student);
     }
 
@@ -176,10 +182,15 @@ public class University implements Serializable {
      * Add an instructor.
      * 
      * @param instructor
-     * @throws NullPointerException If {@code instructor} is null.
+     * @throws NullPointerException     If {@code instructor} is null.
+     * @throws IllegalArgumentException If the provided student has an account
+     *                                  that's too similar to an account within the
+     *                                  university.
      */
     public synchronized void addInstructor(Instructor instructor) {
-        // TODO: Check if this instructor's account's email already exist.
+        if (instructor.getAccount() != null && isAccountExisted(instructor.getAccount())) {
+            throw new IllegalArgumentException("An account with the same name already existed.");
+        }
         instructors.put(instructor.getID(), instructor);
     }
 
@@ -266,5 +277,33 @@ public class University implements Serializable {
 
         return false;
 
+    }
+
+    /**
+     * Return whether or not this account already existed in the university.
+     * 
+     * @param account An account.
+     * @return
+     */
+    private synchronized boolean isAccountExisted(Account account) {
+        for (var existingStudent : students.values()) {
+            Account existingAccount = existingStudent.getAccount();
+            if (account.isSimilar(existingAccount)) {
+                return true;
+            }
+        }
+        for (var existingInstructor : instructors.values()) {
+            Account existingAccount = existingInstructor.getAccount();
+            if (existingAccount != null && account.isSimilar(existingAccount)) {
+                return true;
+            }
+        }
+        for (var existingAdmin : admins) {
+            Account existingAccount = existingAdmin.getAccount();
+            if (account.isSimilar(existingAccount)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

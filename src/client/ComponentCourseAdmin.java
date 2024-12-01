@@ -4,8 +4,10 @@ import java.awt.FlowLayout;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import javax.swing.*;
 
@@ -20,9 +22,8 @@ public class ComponentCourseAdmin {
     private MainFrame frame;
     final private ObjectOutputStream ostream;
     final private ObjectInputStream istream;
-    private List<JButton> sectionButtons = new ArrayList<>();
+    private List<JButton> sectionButtons;
     private JPanel panel;
-    private JPanel resultPanel;
     private PanelCatalog panelCatalog;
 
     public ComponentCourseAdmin(MainFrame frame, PanelCatalog panelCatalog, ObjectOutputStream ostream,
@@ -32,17 +33,19 @@ public class ComponentCourseAdmin {
         this.ostream = ostream;
         this.istream = istream;
         this.panelCatalog = panelCatalog;
+        sectionButtons = new ArrayList<>();
     }
 
     public JScrollPane build() {
         panel = new JPanel();
         String prefix = course.getPrefix();
         String number = course.getNumber();
+        String name = course.getName();
         String desc = course.getDescription();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
         JPanel courseHeader = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        JLabel courseLabel = new JLabel("Course: " + prefix + " " + number + ", " + desc);
+        JLabel courseLabel = new JLabel("Course: " + prefix + " " + number + ", " + name);
         courseHeader.add(courseLabel);
 
         JButton editCourseBtn = new JButton("Edit Course");
@@ -51,7 +54,13 @@ public class ComponentCourseAdmin {
         });
         JButton deleteCourseBtn = new JButton("Delete Course");
         deleteCourseBtn.addActionListener(_ -> {
-            deleteCourse();
+            int result = JOptionPane.showConfirmDialog(null,
+                    "This will delete ALL active sections, are you sure to continue?",
+                    "Delete Course",
+                    JOptionPane.OK_CANCEL_OPTION);
+            if (result == JOptionPane.OK_OPTION) {
+                deleteCourse();
+            }
         });
         courseHeader.add(editCourseBtn);
         courseHeader.add(deleteCourseBtn);
@@ -66,13 +75,26 @@ public class ComponentCourseAdmin {
         sectionButtons.clear();
 
         for (var section : course.getSections()) {
-            System.out.print("Instructors teaching" + prefix + number + ": " + section.getInstructor().getName());
-            System.out.println();
-            JPanel sectionPanel = new JPanel(new FlowLayout());
-            sectionPanel.add(new JLabel(prefix + number + "-" + section.getNumber()));
-            sectionPanel.add(new JLabel("Max Capacity: " + section.getMaxCapacity()));
-            sectionPanel.add(new JLabel("Max Waitlist Size: " + section.getMaxWaitlistSize()));
-            sectionPanel.add(new JLabel("Instructor: " + section.getInstructor().getName()));
+            JPanel sectionPanel = new JPanel();
+            sectionPanel.setLayout(new BoxLayout(sectionPanel, BoxLayout.Y_AXIS));
+            JPanel headerPanel = new JPanel();
+            headerPanel.add(new JLabel(prefix + number + "-" + section.getNumber()));
+            headerPanel.add(new JLabel("Max Capacity: " + section.getMaxCapacity()));
+            headerPanel.add(new JLabel("Max Waitlist Size: " + section.getMaxWaitlistSize()));
+            headerPanel.add(new JLabel("Instructor: " + section.getInstructor().getName()));
+
+            JPanel schedulePanel = new JPanel();
+            schedulePanel.setLayout(new BoxLayout(schedulePanel, BoxLayout.Y_AXIS));
+            for (var entry : section.getSchedule()) {
+                JPanel row = new JPanel();
+                var time = entry.getTime();
+                row.add(new JLabel(entry.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.US)));
+                row.add(new JLabel(String.format("Start: %s - End: %s",
+                        time.getStart().toLocalTime(), time.getEnd().toLocalTime())));
+                row.add(new JLabel(String.format("@ %s", entry.getLocation())));
+                row.add(new JLabel(String.format("(%s)", entry.isSync() ? "sync" : "async")));
+                schedulePanel.add(row);
+            }
 
             JButton editButton = new JButton("Edit Section");
             editButton.addActionListener(e -> {
@@ -92,15 +114,23 @@ public class ComponentCourseAdmin {
                 }
             });
             sectionButtons.add(editButton);
-            sectionPanel.add(editButton, sectionPanel);
 
             JButton deleteButton = new JButton("Delete Section");
             deleteButton.addActionListener(e -> {
-                deleteSection(section, sectionPanel);
+                int result = JOptionPane.showConfirmDialog(null,
+                        "This will drop ALL students and instructors from this section, are you sure to continue?",
+                        "Delete Section",
+                        JOptionPane.OK_CANCEL_OPTION);
+                if (result == JOptionPane.OK_OPTION) {
+                    deleteSection(section, sectionPanel);
+                }
             });
-
             sectionButtons.add(deleteButton);
-            sectionPanel.add(deleteButton);
+
+            headerPanel.add(editButton);
+            headerPanel.add(deleteButton);
+            sectionPanel.add(headerPanel);
+            sectionPanel.add(schedulePanel);
             panel.add(sectionPanel);
         }
 
@@ -116,6 +146,8 @@ public class ComponentCourseAdmin {
                 SwingUtilities.invokeLater(() -> {
                     panelCatalog.getSearchWorker(new BodyCourseSearch()).execute();
                 });
+            } else {
+                JOptionPane.showMessageDialog(null, (String) resp.getBody());
             }
         } catch (IOException | ClassNotFoundException e) {
             // TODO Auto-generated catch block
@@ -132,6 +164,8 @@ public class ComponentCourseAdmin {
                 SwingUtilities.invokeLater(() -> {
                     panelCatalog.getSearchWorker(new BodyCourseSearch()).execute();
                 });
+            } else {
+                JOptionPane.showMessageDialog(null, (String) resp.getBody());
             }
         } catch (IOException | ClassNotFoundException e) {
             // TODO Auto-generated catch block
@@ -148,6 +182,8 @@ public class ComponentCourseAdmin {
                 SwingUtilities.invokeLater(() -> {
                     panelCatalog.getSearchWorker(new BodyCourseSearch()).execute();
                 });
+            } else {
+                JOptionPane.showMessageDialog(null, (String) resp.getBody());
             }
         } catch (IOException e) {
             // TODO Auto-generated catch block
@@ -170,6 +206,8 @@ public class ComponentCourseAdmin {
                 SwingUtilities.invokeLater(() -> {
                     panelCatalog.getSearchWorker(new BodyCourseSearch()).execute();
                 });
+            } else {
+                JOptionPane.showMessageDialog(null, (String) resp.getBody());
             }
         } catch (IOException e) {
             // TODO Auto-generated catch block

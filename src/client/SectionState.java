@@ -13,8 +13,24 @@ public class SectionState {
         this.section = section;
         this.student = student;
         // enrolled and waitlisted are the only states, otherwise it just reverts to default enroll button
-        this.isEnrolled = section.getEnrolled().contains(student);
-        this.isWaitlisted = section.getWaitlisted().contains(student);
+        this.isEnrolled = false;
+        for (var s : section.getEnrolled()) {
+            if (student.getID().equals(s.getID())) {
+                this.isEnrolled = true;
+                this.isWaitlisted = false;
+                break;
+            }
+        }
+        
+        this.isWaitlisted = false;
+        if (!this.isEnrolled) {
+            for (var s : section.getWaitlisted()) {
+                if (student.getID().equals(s.getID())) {
+                    this.isWaitlisted = true;
+                    break;
+                }
+            }
+        }
     }
     
     public boolean isEnrolled() {
