@@ -92,6 +92,7 @@ public class PanelSchedule extends PanelBase {
                     frame.showTimeoutDialog();
                 } catch (Exception err) {
                     err.printStackTrace();
+                    JOptionPane.showMessageDialog(null, "An internal error occurred.");
                 }
             }
         };

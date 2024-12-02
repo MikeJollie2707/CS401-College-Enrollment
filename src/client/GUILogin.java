@@ -114,6 +114,7 @@ public class GUILogin extends JPanel {
                             frame.showTimeoutDialog();
                         }
                         catch (Exception err) {
+                            JOptionPane.showMessageDialog(null, "An internal error occurred.");
                             err.printStackTrace();
                         }
                     };

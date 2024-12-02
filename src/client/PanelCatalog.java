@@ -90,6 +90,7 @@ public class PanelCatalog extends PanelBase {
                 } catch (TimeoutException err) {
                     frame.showTimeoutDialog();
                 } catch (Exception err) {
+                    JOptionPane.showMessageDialog(null, "An internal error occurred.");
                     err.printStackTrace();
                 }
             }

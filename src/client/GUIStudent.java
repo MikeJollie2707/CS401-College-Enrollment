@@ -19,7 +19,7 @@ public class GUIStudent extends PanelBase {
         panelMap = new LinkedHashMap<>();
         panelMap.put("View Schedules", new PanelSchedule(frame, ostream, istream));
         panelMap.put("Search Courses", new PanelCatalog(frame, ostream, istream));
-        
+
         setLayout(new BorderLayout());
     }
 
@@ -27,7 +27,7 @@ public class GUIStudent extends PanelBase {
         BuilderRadioPanel radio = new BuilderRadioPanel();
         JPanel sidebar = radio.getOptions();
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
-        
+
         JLabel topText = new JLabel("(Logged in as student)");
         topText.setFont(new Font("Arial", Font.BOLD, 20));
         topText.setForeground(Color.GRAY);

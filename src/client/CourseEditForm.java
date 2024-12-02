@@ -98,6 +98,7 @@ public class CourseEditForm {
                     JOptionPane.showMessageDialog(null, "Operation aborted: It's taking longer than it should be.");
                 }
                 catch (Exception err) {
+                    JOptionPane.showMessageDialog(null, "An internal error occurred.");
                     err.printStackTrace();
                 }
             }
