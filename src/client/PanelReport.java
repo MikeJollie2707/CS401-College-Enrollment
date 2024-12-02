@@ -1,5 +1,10 @@
 package client;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.concurrent.TimeUnit;
@@ -21,7 +26,7 @@ public class PanelReport extends PanelBase {
     }
 
     SwingWorker<ServerMsg, Void> getReportWorker() {
-        SwingWorker<ServerMsg, Void> worker = new SwingWorker<ServerMsg,Void>() {
+        SwingWorker<ServerMsg, Void> worker = new SwingWorker<ServerMsg, Void>() {
             @Override
             protected ServerMsg doInBackground() throws Exception {
                 ostream.writeObject(new ClientMsg("GET", "report", null));
@@ -34,17 +39,31 @@ public class PanelReport extends PanelBase {
                     var resp = get(3, TimeUnit.SECONDS);
                     if (resp.isOk()) {
                         var body = (BodyReport) resp.getBody();
-                        System.out.println(body.toString());
-                        JTextArea a = new JTextArea(body.toString());
-                        add(a);
+                        String content = body.toString();
+                        JTextArea reportDump = new JTextArea(content);
+                        reportDump.setEditable(false);
+                        add(reportDump);
+                        JButton downloadBtn = new JButton("Save report");
+                        downloadBtn.addActionListener(new ActionListener() {
+                            public void actionPerformed(ActionEvent e) {
+                                JFileChooser fileChooser = new JFileChooser();
+                                if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+                                    File file = fileChooser.getSelectedFile();
+                                    try (FileWriter writer = new FileWriter(file)) {
+                                        writer.write(content);
+                                    } catch (IOException err) {
+                                        JOptionPane.showMessageDialog(null, "Can't write to file.");
+                                    }
+                                }
+                            };
+                        });
+                        add(downloadBtn);
                         refreshPanel();
                     }
-                }
-                catch (TimeoutException err) {
-
-                }
-                catch (Exception err) {
-
+                } catch (TimeoutException err) {
+                    frame.showTimeoutDialog();
+                } catch (Exception err) {
+                    JOptionPane.showMessageDialog(null, err.getMessage());
                 }
             }
         };
