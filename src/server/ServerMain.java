@@ -17,11 +17,12 @@ import java.util.stream.Collectors;
 import objects.*;
 
 public class ServerMain {
+    static final int port = 7777;
     public static void main(String[] args) {
-        try (ServerSocket ss = new ServerSocket(7777)) {
+        try (ServerSocket ss = new ServerSocket(port)) {
             ss.setReuseAddress(true);
             InetAddress localhost = InetAddress.getLocalHost();
-            System.out.println(String.format("Listening on %s:%d", localhost.getHostAddress(), 7777));
+            System.out.println(String.format("Listening on %s:%d", localhost.getHostAddress(), port));
 
             University[] universities = loadInfoFromFile("unis.txt");
 

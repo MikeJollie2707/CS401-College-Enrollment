@@ -59,7 +59,7 @@ public class ComponentCourseAdmin {
             }
         });
         JButton deleteCourseBtn = new JButton("Delete Course");
-        deleteCourseBtn.addActionListener(_ -> {
+        deleteCourseBtn.addActionListener(e -> {
             int result = JOptionPane.showConfirmDialog(null,
                     "This will delete ALL active sections, are you sure to continue?",
                     "Delete Course",

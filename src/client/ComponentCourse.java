@@ -102,7 +102,7 @@ public class ComponentCourse {
                 actionButton.setForeground(Color.BLACK);
             }
 
-            actionButton.addActionListener(_ -> {
+            actionButton.addActionListener(e -> {
                 String buttonText = actionButton.getText();
                 if (buttonText.equals("Drop From Waitlist")) {
                     dropWaitlist(section, sectionState, actionButton);
