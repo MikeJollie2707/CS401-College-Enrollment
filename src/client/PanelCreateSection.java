@@ -9,6 +9,8 @@ import java.awt.event.ActionListener;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.swing.*;
 
@@ -46,15 +48,18 @@ public class PanelCreateSection extends PanelBase {
             @Override
             protected void done() {
                 try {
-                    var resp = get();
+                    var resp = get(3, TimeUnit.SECONDS);
                     frame.stopLoading();
                     if (resp.isOk()) {
                         JOptionPane.showMessageDialog(self, "Section created successfully.");
                     } else {
                         JOptionPane.showMessageDialog(self, (String) resp.getBody());
                     }
+                } catch (TimeoutException err) {
+                    frame.showTimeoutDialog();
                 } catch (Exception err) {
                     err.printStackTrace();
+                    JOptionPane.showMessageDialog(null, "An internal error occurred.");
                 }
             }
         };
@@ -72,32 +77,35 @@ public class PanelCreateSection extends PanelBase {
             @Override
             protected void done() {
                 try {
-                    var resp = get();
+                    var resp = get(3, TimeUnit.SECONDS);
                     if (resp.isOk()) {
                         var cs = (Course[]) resp.getBody();
                         // courseDropdown = new JComboBox<>();
                         courseDropdown.removeAll();
                         for (Course c : cs) {
-                            String courseInfo = c.getID() + ", " + c.getDescription();
+                            String courseInfo = c.getID() + ", " + c.getName();
                             courseDropdown.addItem(courseInfo);
                             courseMap.put(courseInfo, c);
                         }
                         refreshPanel();
                         // SwingUtilities.invokeLater(() -> {
-                        //     courseForm.addEntry(new JLabel("Select Course:"), courseDropdown, () -> {
-                        //         String selectedCourseDescription = (String) courseDropdown.getSelectedItem();
-                        //         Course selectedCourse = courseMap.get(selectedCourseDescription);
-                        //         return selectedCourse != null ? selectedCourse.getID() : "";
-                        //     });
-                        //     // initForm();
-                        //     refreshPanel();
+                        // courseForm.addEntry(new JLabel("Select Course:"), courseDropdown, () -> {
+                        // String selectedCourseDescription = (String) courseDropdown.getSelectedItem();
+                        // Course selectedCourse = courseMap.get(selectedCourseDescription);
+                        // return selectedCourse != null ? selectedCourse.getID() : "";
+                        // });
+                        // // initForm();
+                        // refreshPanel();
                         // });
                     } else {
-                        System.out.println("Error: Unable to fetch courses");
+                        JOptionPane.showMessageDialog(null, "Error: Unable to fetch courses");
                     }
                     frame.stopLoading();
+                } catch (TimeoutException err) {
+                    frame.showTimeoutDialog();
                 } catch (Exception err) {
                     err.printStackTrace();
+                    JOptionPane.showMessageDialog(null, "An internal error occurred.");
                 }
             }
         };
@@ -126,20 +134,23 @@ public class PanelCreateSection extends PanelBase {
                     @Override
                     protected void done() {
                         try {
-                            var resp = get();
+                            var resp = get(3, TimeUnit.SECONDS);
                             frame.stopLoading();
                             if (resp.isOk()) {
                                 JOptionPane.showMessageDialog(self, "Section created successfully.");
                             } else {
                                 JOptionPane.showMessageDialog(self, (String) resp.getBody());
                             }
+                        } catch (TimeoutException err) {
+                            frame.showTimeoutDialog();
                         } catch (Exception err) {
                             err.printStackTrace();
+                            JOptionPane.showMessageDialog(null, "An internal error occurred.");
                         }
                     }
                 };
                 worker.execute();
-                frame.showLoading();
+                // frame.showLoading();
             }
         });
         submitBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -154,7 +165,7 @@ public class PanelCreateSection extends PanelBase {
         add(courseDropdown);
         initForm();
         add(form.getPanel());
-        frame.showLoading();
+        // frame.showLoading();
     }
 
     @Override

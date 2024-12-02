@@ -73,12 +73,13 @@ public class PanelCreateStudent extends PanelBase {
                         } catch (TimeoutException err) {
                             frame.showTimeoutDialog();
                         } catch (Exception err) {
+                            err.printStackTrace();
                             JOptionPane.showMessageDialog(null, err);
                         }
                     };
                 };
                 worker.execute();
-                frame.showLoading();
+                // frame.showLoading();
             }
         });
         

@@ -3,6 +3,8 @@ package client;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.swing.*;
 
@@ -89,7 +91,7 @@ public class GUILogin extends JPanel {
 
                     protected void done() {
                         try {
-                            var resp = get();
+                            var resp = get(3, TimeUnit.SECONDS);
                             if (resp.isOk()) {
                                 var body = (BodyLoginSuccess) resp.getBody();
                                 String role = body.getRole();
@@ -107,13 +109,18 @@ public class GUILogin extends JPanel {
                                 frame.stopLoading();
                                 JOptionPane.showMessageDialog(null, "Login failed.");
                             }
-                        } catch (Exception err) {
+                        } 
+                        catch (TimeoutException err) {
+                            frame.showTimeoutDialog();
+                        }
+                        catch (Exception err) {
+                            JOptionPane.showMessageDialog(null, "An internal error occurred.");
                             err.printStackTrace();
                         }
                     };
                 };
                 loginWorker.execute();
-                frame.showLoading();
+                // frame.showLoading();
             };
         });
         formPanel.add(submitBtn);

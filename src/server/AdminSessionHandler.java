@@ -97,21 +97,9 @@ public class AdminSessionHandler extends SessionHandler {
     }
 
     private synchronized ServerMsg fetchReport(ClientMsg req) {
-        /**
-         * - Course count
-         * - Active section count
-         * - Entries with {sectionID, enrollCount}
-         * - (Maybe?) Top 3 highest+lowest enroll count
-         * - (Maybe?) Avg enroll per section.
-         * 
-         * The report feature feels like it's just client getting all courses in the
-         * uni,
-         * then do all the calc on their own.
-         * Cuz for each section entry the client want to know what course is it, who's
-         * teaching,
-         * what's the time and format. That's basically a simplified view of a section.
-         */
-        return null;
+        var courses = university.getAllCourses();
+        BodyReport report = new BodyReport(courses);
+        return ServerMsg.asOK(report);
     }
 
     private synchronized ServerMsg fetchStudents(ClientMsg req) {
@@ -361,6 +349,11 @@ public class AdminSessionHandler extends SessionHandler {
                 continue;
             }
             newCourse.insertPrereq(prereqCourse);
+        }
+        // Move sections from old to new course.
+        for (var section : course.getSections()) {
+            section.setCourse(newCourse);
+            newCourse.insertSection(section);
         }
 
         try {

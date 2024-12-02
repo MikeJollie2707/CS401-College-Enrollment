@@ -21,6 +21,7 @@ public class GUIAdmin extends PanelBase {
         panelMap.put("Create Course", new PanelCreateCourse(frame, ostream, istream));
         panelMap.put("Create Section", new PanelCreateSection(frame, ostream, istream));
         panelMap.put("Create Student", new PanelCreateStudent(frame, ostream, istream));
+        panelMap.put("View Report", new PanelReport(frame, ostream, istream));
         setLayout(new BorderLayout());
     }
 
@@ -39,7 +40,7 @@ public class GUIAdmin extends PanelBase {
             btn.setBackground(Color.BLACK);
             btn.setForeground(Color.RED);
 
-            sidebar.add(Box.createVerticalStrut(100));
+            sidebar.add(Box.createVerticalStrut(50));
         }
         sidebar.add(logoutBtn);
 

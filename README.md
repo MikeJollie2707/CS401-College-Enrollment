@@ -12,6 +12,8 @@ Source code for CS 401 group project.
 
 ## Setup
 
+Requires JDK 21+ (tested with JDK 21 and 22).
+
 Clone this repo into the current working directory (make sure it's empty). There's a dot at the end.
 
 ```sh

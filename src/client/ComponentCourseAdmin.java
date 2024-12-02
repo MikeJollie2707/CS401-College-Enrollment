@@ -50,10 +50,16 @@ public class ComponentCourseAdmin {
 
         JButton editCourseBtn = new JButton("Edit Course");
         editCourseBtn.addActionListener(e -> {
-            editCourse();
+            CourseEditForm courseForm = new CourseEditForm(course, ostream, istream);
+            int result = JOptionPane.showConfirmDialog(null, new JScrollPane(courseForm.getPanel()), "Edit Course",
+                    JOptionPane.OK_CANCEL_OPTION);
+            if (result == JOptionPane.OK_OPTION) {
+                Course newCourse = courseForm.getEditedCourse();
+                editCourse(newCourse);
+            }
         });
         JButton deleteCourseBtn = new JButton("Delete Course");
-        deleteCourseBtn.addActionListener(_ -> {
+        deleteCourseBtn.addActionListener(e -> {
             int result = JOptionPane.showConfirmDialog(null,
                     "This will delete ALL active sections, are you sure to continue?",
                     "Delete Course",
@@ -155,9 +161,9 @@ public class ComponentCourseAdmin {
         }
     }
 
-    private void editCourse() {
+    private void editCourse(Course course) {
         try {
-            ostream.writeObject(new ClientMsg("CREATE", "section", course));
+            ostream.writeObject(new ClientMsg("EDIT", "course", course));
             var resp = (ServerMsg) istream.readObject();
             if (resp.isOk()) {
                 // refreshCourse();

@@ -7,6 +7,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.swing.*;
 
@@ -44,8 +46,10 @@ public class PanelCatalog extends PanelBase {
         SwingWorker<ServerMsg, Void> worker = new SwingWorker<ServerMsg, Void>() {
             @Override
             protected ServerMsg doInBackground() throws Exception {
-                // need to save  states instead of fully resetting component course
-                // existingStates = CourseStateManager.getInstance().filterStatesByCriteria(body, CourseStateManager.getInstance().getCourseStates());
+                // need to save states instead of fully resetting component course
+                // existingStates =
+                // CourseStateManager.getInstance().filterStatesByCriteria(body,
+                // CourseStateManager.getInstance().getCourseStates());
                 ostream.writeObject(new ClientMsg("GET", "courses", body));
                 return (ServerMsg) istream.readObject();
             }
@@ -53,7 +57,7 @@ public class PanelCatalog extends PanelBase {
             @Override
             protected void done() {
                 try {
-                    var resp = get();
+                    var resp = get(3, TimeUnit.SECONDS);
                     if (resp.isOk()) {
                         Course[] courses = (Course[]) resp.getBody();
                         resultPanel.removeAll();
@@ -66,12 +70,14 @@ public class PanelCatalog extends PanelBase {
                             Object me = frame.getMe();
                             for (int i = 0; i < courses.length; ++i) {
                                 if (me instanceof Administrator) {
-                                    ComponentCourseAdmin adminComponent = new ComponentCourseAdmin(frame, PanelCatalog.this, ostream, istream, courses[i]);
+                                    ComponentCourseAdmin adminComponent = new ComponentCourseAdmin(frame,
+                                            PanelCatalog.this, ostream, istream, courses[i]);
                                     resultPanel.add(adminComponent.build());
                                     refreshPanel();
                                 } else if (me instanceof Student) {
                                     CourseState courseState = new CourseState(courses[i], (Student) me);
-                                    ComponentCourse componentCourse = new ComponentCourse(frame, ostream, istream, courses[i], courseState);
+                                    ComponentCourse componentCourse = new ComponentCourse(frame, ostream, istream,
+                                            courses[i], courseState);
                                     resultPanel.add(componentCourse.build());
                                 }
                                 refreshPanel();
@@ -81,7 +87,10 @@ public class PanelCatalog extends PanelBase {
                     }
                     refreshPanel();
                     frame.stopLoading();
+                } catch (TimeoutException err) {
+                    frame.showTimeoutDialog();
                 } catch (Exception err) {
+                    JOptionPane.showMessageDialog(null, "An internal error occurred.");
                     err.printStackTrace();
                 }
             }
@@ -112,7 +121,7 @@ public class PanelCatalog extends PanelBase {
                 body.setInstructorName(results.get(3).toLowerCase());
                 var worker = getSearchWorker(body);
                 worker.execute();
-                frame.showLoading();
+                // frame.showLoading();
             }
         });
         JPanel searchPanel = searchForm.getPanel();
@@ -126,7 +135,7 @@ public class PanelCatalog extends PanelBase {
         worker.execute();
         add(searchForm.getPanel());
         add(resultPanel);
-        frame.showLoading();
+        // frame.showLoading();
     }
 
     @Override

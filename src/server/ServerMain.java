@@ -17,11 +17,12 @@ import java.util.stream.Collectors;
 import objects.*;
 
 public class ServerMain {
+    static final int port = 7777;
     public static void main(String[] args) {
-        try (ServerSocket ss = new ServerSocket(7777)) {
+        try (ServerSocket ss = new ServerSocket(port)) {
             ss.setReuseAddress(true);
             InetAddress localhost = InetAddress.getLocalHost();
-            System.out.println(String.format("Listening on %s:%d", localhost.getHostAddress(), 7777));
+            System.out.println(String.format("Listening on %s:%d", localhost.getHostAddress(), port));
 
             University[] universities = loadInfoFromFile("unis.txt");
 
@@ -133,8 +134,8 @@ public class ServerMain {
                 String courseName = parts[2];
                 String courseDesc = parts[3];
                 Course course = new Course(coursePrefix, courseNumber, courseName, courseDesc);
-                if (!parts[3].equals("none")) {
-                    String[] prerequisites = parts[3].split(" ");
+                if (!parts[4].equals("none")) {
+                    String[] prerequisites = parts[4].split(" ");
                     for (int i = 0; i < prerequisites.length; i += 2) {
                         String prereqPrefix = prerequisites[i];
                         String prereqNumber = (i + 1 < prerequisites.length) ? prerequisites[i + 1] : "";
