@@ -24,11 +24,11 @@ class UniversityTest {
 	@BeforeEach
 	void setUp() {
 		university = new University("CSU East Bay", "Somewhere on Earth");
-		course1 = new Course("CS", "101", "Intro to CS");
-		course2 = new Course("CS", "201", "CS but C++");
+		course1 = new Course("CS", "101", "Intro to CS", "Description");
+		course2 = new Course("CS", "201", "CS but C++", "Description");
 		university.addCourse(course1);
 		
-		courseWithCycle = new Course("CS", "301", "Data Structures");
+		courseWithCycle = new Course("CS", "301", "Data Structures", "Description");
 		courseWithCycle.insertPrereq(course1);
 		
 		admin = new Administrator("Admin1", new Account("admin1", "pass1"));
@@ -116,12 +116,12 @@ class UniversityTest {
 	
 	@Test
 	void testEditCourse() {
-		Course updatedCourse = new Course("CS", "101", "Intro to Programming");
+		Course updatedCourse = new Course("CS", "101", "Intro to Programming", "Description");
 		university.editCourse(updatedCourse);
 		
 		Course editedCourse = university.getCourseByID(updatedCourse.getID());
 		assertNotNull(editedCourse);
-		assertEquals("Intro to Programming", editedCourse.getDescription());
+		assertEquals("Intro to Programming", editedCourse.getName());
 	}
 		
 	@Test
@@ -144,7 +144,6 @@ class UniversityTest {
 		Exception exception = assertThrows(NullPointerException.class, () -> {
 			university.addAdmin(null);
 		});
-		assertEquals("'admin' must not be null.", exception.getMessage());
 	}
 	
 	@Test

@@ -19,7 +19,7 @@ class SectionTest {
 	@BeforeEach
 	void setUp() {
 		Section.resetID();
-		course = new Course("CS", "401", "Software Engineering");
+		course = new Course("CS", "401", "Software Engineering", "Description");
 		instructor = new Instructor("Smith", null);
 		section = new Section(course, "1", 30, 10, instructor);
 		
@@ -139,8 +139,8 @@ class SectionTest {
 	
 	@Test
 	void testIsActive() {
-		section.setActiveState(true);
-		assertTrue(section.isActive());
+		section.setStatus(SectionStatus.ACTIVE);
+		assertTrue(section.getStatus() == SectionStatus.ACTIVE);
 	}
 	
 	@Test

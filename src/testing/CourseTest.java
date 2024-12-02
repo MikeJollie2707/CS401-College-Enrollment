@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import objects.*;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Set;
 
@@ -17,8 +16,8 @@ class CourseTest {
 	
 	@BeforeEach
 	void setUp() {
-		course = new Course("CS", "401", "Software Engineering");
-		prereqCourse = new Course("CS", "101", "Intro to CS");
+		course = new Course("CS", "401", "Software Engineering", "Description");
+		prereqCourse = new Course("CS", "101", "Computer Science I", "Description");
 		Instructor instructor = new Instructor("Smith", null);
 		section = new Section(course, "1", 30, 10, instructor);
 		
@@ -28,28 +27,33 @@ class CourseTest {
 	@Test
 	void testConstructorNull() {
 		Exception exception = assertThrows(NullPointerException.class, () -> {
-			new Course(null, "101", "Intro to CS");
+			new Course(null, "101", "Computer Science I", "Description");
 		});
 		assertEquals("'prefix' must not be null.", exception.getMessage());
 		
 		exception = assertThrows(NullPointerException.class, () -> {
-			new Course("CS", null, "Intro to CS");
+			new Course("CS", null, "Intro to CS", "Description");
 		});
 		assertEquals("'number' must not be null.", exception.getMessage());
 		
 		exception = assertThrows(NullPointerException.class, () -> {
-			new Course("CS", "101", null);
+			new Course("CS", "101", null, "Description");
+		});
+		assertEquals("'name' must not be null.", exception.getMessage());
+		exception = assertThrows(NullPointerException.class, () -> {
+			new Course("CS", "101", "Intro to CS", null);
 		});
 		assertEquals("'description' must not be null.", exception.getMessage());
 	}
 	
 	@Test
 	void testConstructorValid() {
-		Course course = new Course("CS", "101", "Intro to CS");
+		Course course = new Course("CS", "101", "Intro to CS", "Description");
 		assertNotNull(course);
 		assertEquals("CS", course.getPrefix());
         assertEquals("101", course.getNumber());
-        assertEquals("Intro to CS", course.getDescription());
+        assertEquals("Intro to CS", course.getName());
+		assertEquals("Description", course.getDescription());
         assertTrue(course.getPrerequisites().isEmpty());
         assertTrue(course.getSections().isEmpty());
 	}
@@ -95,7 +99,7 @@ class CourseTest {
 	//Test Failing 
 	@Test
 	void testInsertSectionInvalid() {
-		Course CSCourse = new Course("CS", "102", "Intro Part 2");
+		Course CSCourse = new Course("CS", "102", "Intro Part 2", "Description");
 		Section invalidSection = new Section(CSCourse, "1", 30, 10, new Instructor("Teacher1", null));
 		Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             course.insertSection(invalidSection);
@@ -128,13 +132,18 @@ class CourseTest {
 	}
 	
 	@Test
+	void testGetName() {
+		assertEquals("Software Engineering", course.getName());
+	}
+
+	@Test
 	void testGetDescription() {
-		assertEquals("Software Engineering", course.getDescription());
+		assertEquals("Description", course.getDescription());
 	}
 	
 	@Test
 	void testGetPrerequisites() {
-		Course prereq = new Course("CS", "301", "Data Structures");
+		Course prereq = new Course("CS", "301", "Data Structures", "Description");
 		course.insertPrereq(prereq);
 		Set<String> prereqs = course.getPrerequisites();
 		assertTrue(prereqs.contains(prereq.getID()));
