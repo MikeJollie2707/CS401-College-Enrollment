@@ -15,7 +15,7 @@ class BodyEnrollOrDropAsTest {
 	@BeforeEach
 	void setUp() {
 		studentID = "student1";
-		Course course = new Course("CS", "401", "Software Engineering");
+		Course course = new Course("CS", "401", "Software Engineering", "Description");
 		Instructor instructor = new Instructor("Dr. Smith", new Account("smith", "pass123"));
 		section = new Section(course, "1", 30, 10, instructor);
 		body = new BodyEnrollOrDropAs(studentID, section);

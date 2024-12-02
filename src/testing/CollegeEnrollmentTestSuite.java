@@ -24,10 +24,5 @@ import org.junit.jupiter.api.Test;
 	UniversityTest.class
 })
 
-class CollegeEnrollmentTestSuite {
-	@Test
-	void testAll() {
-		
-	}
-
+public class CollegeEnrollmentTestSuite {
 }
