@@ -133,8 +133,8 @@ public class ServerMain {
                 String courseName = parts[2];
                 String courseDesc = parts[3];
                 Course course = new Course(coursePrefix, courseNumber, courseName, courseDesc);
-                if (!parts[3].equals("none")) {
-                    String[] prerequisites = parts[3].split(" ");
+                if (!parts[4].equals("none")) {
+                    String[] prerequisites = parts[4].split(" ");
                     for (int i = 0; i < prerequisites.length; i += 2) {
                         String prereqPrefix = prerequisites[i];
                         String prereqNumber = (i + 1 < prerequisites.length) ? prerequisites[i + 1] : "";
