@@ -7,6 +7,8 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import javax.swing.*;
@@ -51,13 +53,15 @@ public class PanelCreateCourse extends PanelBase {
             @Override
             protected void done() {
                 try {
-                    var resp = get();
+                    var resp = get(3, TimeUnit.SECONDS);
                     frame.stopLoading();
                     if (resp.isOk()) {
                         JOptionPane.showMessageDialog(self, "Course created successfully.");
                     } else {
                         JOptionPane.showMessageDialog(self, (String) resp.getBody());
                     }
+                } catch (TimeoutException err) {
+                    frame.showTimeoutDialog();
                 } catch (Exception err) {
                     err.printStackTrace();
                 }
@@ -77,7 +81,7 @@ public class PanelCreateCourse extends PanelBase {
             @Override
             protected void done() {
                 try {
-                    var resp = get();
+                    var resp = get(3, TimeUnit.SECONDS);
                     if (resp.isOk()) {
                         var cs = (Course[]) resp.getBody();
                         courses = Arrays.stream(cs)
@@ -88,9 +92,11 @@ public class PanelCreateCourse extends PanelBase {
                                 .toArray(new String[0]);
                         refreshPanel();
                     } else {
-                        System.out.println("Uh oh");
+                        courses = new String[0];
                     }
                     frame.stopLoading();
+                } catch (TimeoutException err) {
+                    frame.showTimeoutDialog();
                 } catch (Exception err) {
                     err.printStackTrace();
                 }
@@ -145,7 +151,7 @@ public class PanelCreateCourse extends PanelBase {
 
                 var worker = createCourseWorker(course);
                 worker.execute();
-                frame.showLoading();
+                // frame.showLoading();
             }
         });
         JPanel formPanel = courseForm.getPanel();
@@ -190,7 +196,7 @@ public class PanelCreateCourse extends PanelBase {
         var worker = getCoursesWorker();
         worker.execute();
         add(courseForm.getPanel());
-        frame.showLoading();
+        // frame.showLoading();
     }
 
     @Override

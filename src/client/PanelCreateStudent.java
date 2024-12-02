@@ -78,7 +78,7 @@ public class PanelCreateStudent extends PanelBase {
                     };
                 };
                 worker.execute();
-                frame.showLoading();
+                // frame.showLoading();
             }
         });
         

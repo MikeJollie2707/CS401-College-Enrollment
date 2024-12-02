@@ -7,6 +7,8 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import javax.swing.*;
@@ -76,7 +78,7 @@ public class CourseEditForm {
             @Override
             protected void done() {
                 try {
-                    var resp = get();
+                    var resp = get(3, TimeUnit.SECONDS);
                     if (resp.isOk()) {
                         var cs = (Course[]) resp.getBody();
                         courses = Arrays.stream(cs)
@@ -89,9 +91,13 @@ public class CourseEditForm {
                         panel.revalidate();
                         panel.repaint();
                     } else {
-                        System.out.println("Uh oh");
+                        courses = new String[0];
                     }
-                } catch (Exception err) {
+                } 
+                catch (TimeoutException err) {
+                    JOptionPane.showMessageDialog(null, "Operation aborted: It's taking longer than it should be.");
+                }
+                catch (Exception err) {
                     err.printStackTrace();
                 }
             }
