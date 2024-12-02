@@ -1,5 +1,6 @@
 package client;
 
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -49,6 +50,7 @@ public class ComponentCourseAdmin {
         courseHeader.add(courseLabel);
 
         JButton editCourseBtn = new JButton("Edit Course");
+        editCourseBtn.setBackground(new Color(53, 190, 240));
         editCourseBtn.addActionListener(e -> {
             CourseEditForm courseForm = new CourseEditForm(course, ostream, istream);
             int result = JOptionPane.showConfirmDialog(null, new JScrollPane(courseForm.getPanel()), "Edit Course",
@@ -59,6 +61,7 @@ public class ComponentCourseAdmin {
             }
         });
         JButton deleteCourseBtn = new JButton("Delete Course");
+        deleteCourseBtn.setBackground(new Color(232, 85, 79));
         deleteCourseBtn.addActionListener(e -> {
             int result = JOptionPane.showConfirmDialog(null,
                     "This will delete ALL active sections, are you sure to continue?",
@@ -103,6 +106,7 @@ public class ComponentCourseAdmin {
             }
 
             JButton editButton = new JButton("Edit Section");
+            editButton.setBackground(new Color(53, 190, 240));
             editButton.addActionListener(e -> {
                 SectionEditForm form = new SectionEditForm(section);
                 int result = JOptionPane.showConfirmDialog(null, new JScrollPane(form.getPanel()), "Edit Section",
@@ -122,6 +126,7 @@ public class ComponentCourseAdmin {
             sectionButtons.add(editButton);
 
             JButton deleteButton = new JButton("Delete Section");
+            deleteButton.setBackground(new Color(232, 85, 79));
             deleteButton.addActionListener(e -> {
                 int result = JOptionPane.showConfirmDialog(null,
                         "This will drop ALL students and instructors from this section, are you sure to continue?",
