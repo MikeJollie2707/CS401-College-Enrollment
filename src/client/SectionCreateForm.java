@@ -131,11 +131,12 @@ public class SectionCreateForm {
                 String toM = toMinute.get(i).getText();
 
                 String location = locations.get(i).getText();
+                System.out.println(location);
                 boolean isSync = syncs.get(i).isSelected();
                 items.add(String.format("%s,%s,%s,%s,%s,%s,%s", dayOfWeek, fromH, fromM, toH, toM, location,
                         isSync ? "s" : "a"));
             }
-            return String.join(" ", items);
+            return String.join("\n", items);
         });
 
         form.getPanel().setLayout(new BoxLayout(form.getPanel(), BoxLayout.Y_AXIS));
@@ -193,7 +194,7 @@ public class SectionCreateForm {
         locationPanel.add(new JLabel("Location:"));
         locationPanel.add(locationField);
         entryPanel.add(locationPanel);
-        
+
         entryPanel.add(isSyncField);
         return entryPanel;
     }
@@ -212,7 +213,7 @@ public class SectionCreateForm {
      *                               string is provided.
      * @throws DateTimeException     If one of the date entry is out of bound.
      */
-    public Section getEditedSection(Course course) {
+    public Section getNewSection(Course course) {
         var results = form.getResults();
         String rawNumber = results.get(0);
         String rawCapacity = results.get(1);
@@ -225,7 +226,7 @@ public class SectionCreateForm {
 
         // Process schedule shenanigans
         ArrayList<ScheduleEntry> entries = new ArrayList<>();
-        String[] parts = rawSchedule.split(" ");
+        String[] parts = rawSchedule.split("\n");
         for (var part : parts) {
             String[] p = part.split(",");
             String rawDayOfWeek = p[0];
