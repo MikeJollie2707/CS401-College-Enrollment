@@ -110,8 +110,22 @@ public class AdminSessionHandler extends SessionHandler {
          * Cuz for each section entry the client want to know what course is it, who's
          * teaching,
          * what's the time and format. That's basically a simplified view of a section.
+         * 
+         * Sample:
+         * Course count: 2
+         * Section count: 3
+         * 
+         * CS 101 - Subject
+         * CS-101-1: 20/35 0/5 (Prof A)
+         * CS-101-2: 35/35 2/5 (Prof B)
+         * 
+         * CS 201 - Subject
+         * CS-201-1: 11/35 0/5 (Prof A)
          */
-        return null;
+
+        var courses = university.getAllCourses();
+        BodyReport report = new BodyReport(courses);
+        return ServerMsg.asOK(report);
     }
 
     private synchronized ServerMsg fetchStudents(ClientMsg req) {
