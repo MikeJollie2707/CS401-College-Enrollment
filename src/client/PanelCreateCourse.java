@@ -1,5 +1,7 @@
 package client;
 
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.ObjectInputStream;
@@ -108,10 +110,10 @@ public class PanelCreateCourse extends PanelBase {
     }
 
     void initForm() {
-        JTextField prefixField = new JTextField(10);
-        JTextField numberField = new JTextField(10);
-        JTextField nameField = new JTextField(10);
-        JTextField descField = new JTextField(10);
+        JTextField prefixField = new JTextField(15);
+        JTextField numberField = new JTextField(15);
+        JTextField nameField = new JTextField(15);
+        JTextField descField = new JTextField(15);
 
         courseForm.addEntry(new JLabel("Prefix:"), prefixField, () -> prefixField.getText());
         courseForm.addEntry(new JLabel("Number:"), numberField, () -> numberField.getText());
@@ -131,6 +133,8 @@ public class PanelCreateCourse extends PanelBase {
         });
 
         JButton submitBtn = new JButton("Submit");
+        submitBtn.setBackground(Color.GREEN);
+        submitBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         submitBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -157,6 +161,7 @@ public class PanelCreateCourse extends PanelBase {
             }
         });
         JPanel formPanel = courseForm.getPanel();
+        formPanel.add(Box.createVerticalStrut(25));
         formPanel.add(submitBtn);
     }
 
