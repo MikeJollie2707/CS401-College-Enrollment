@@ -362,6 +362,11 @@ public class AdminSessionHandler extends SessionHandler {
             }
             newCourse.insertPrereq(prereqCourse);
         }
+        // Move sections from old to new course.
+        for (var section : course.getSections()) {
+            section.setCourse(newCourse);
+            newCourse.insertSection(section);
+        }
 
         try {
             university.editCourse(newCourse);

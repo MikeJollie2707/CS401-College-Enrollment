@@ -183,6 +183,10 @@ public class Section implements Serializable {
         return schedule;
     }
 
+    public synchronized void setCourse(Course course) {
+        this.course = course;
+    }
+
     public synchronized void setNumber(String num) {
         this.number = num;
     }
