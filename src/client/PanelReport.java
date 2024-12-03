@@ -1,5 +1,6 @@
 package client;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -44,6 +45,7 @@ public class PanelReport extends PanelBase {
                         reportDump.setEditable(false);
                         add(reportDump);
                         JButton downloadBtn = new JButton("Save report");
+                        downloadBtn.setBackground(new Color(146, 140, 237));
                         downloadBtn.addActionListener(new ActionListener() {
                             public void actionPerformed(ActionEvent e) {
                                 JFileChooser fileChooser = new JFileChooser();

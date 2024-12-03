@@ -9,6 +9,7 @@ import java.util.concurrent.TimeoutException;
 import javax.swing.*;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.*;
@@ -62,12 +63,14 @@ public class GUILogin extends JPanel {
 
         loginMessage.setFont(new Font("Arial", Font.BOLD, 30));
         loginMessage.setForeground(Color.BLUE);
+        loginMessage.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
         formPanel.add(loginMessage);
-        formPanel.add(Box.createVerticalStrut(100));
-
+        formPanel.add(Box.createVerticalStrut(200));
+        
         form.addEntry(new JLabel("Choose a university:"), uniDropdown, () -> (String) uniDropdown.getSelectedItem());
         formPanel.add(Box.createVerticalStrut(10));
-
+        
         form.addEntry(new JLabel("Login ID:"), loginID, () -> loginID.getText());
         formPanel.add(Box.createVerticalStrut(10));
 
@@ -76,6 +79,8 @@ public class GUILogin extends JPanel {
 
         submitBtn.setBackground(Color.GREEN);
         submitBtn.setForeground(Color.BLACK);
+        submitBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
         submitBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 var results = form.getResults();
