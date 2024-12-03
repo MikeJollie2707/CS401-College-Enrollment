@@ -68,13 +68,31 @@ public class StudentSessionHandler extends SessionHandler {
             }
         } catch (IOException err) {
             err.printStackTrace();
+        } finally {
+        	closeResources();
         }
     }
 
     private ServerMsg logout(ClientMsg req) {
-        return ServerMsg.asOK("logout");
+        try {
+        	socket.close();
+        	return ServerMsg.asOK("logout");
+        } catch (IOException e) {
+        	return ServerMsg.asERR("Failed to close socket during logout.");
+        }
+    	
     }
-
+    
+    private void closeResources() {
+    	try {
+    		istream.close();
+    		ostream.close();
+    		socket.close();
+    	} catch (IOException err) {
+    		System.err.println("Failed to close resources properly.");
+    		err.printStackTrace();
+    	}
+    }
     /**
      * The handler for {@code GET courses} requests.
      * 

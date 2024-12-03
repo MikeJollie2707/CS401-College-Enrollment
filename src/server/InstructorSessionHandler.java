@@ -60,13 +60,31 @@ public class InstructorSessionHandler extends SessionHandler {
             }
         } catch (IOException err) {
             err.printStackTrace();
+        } finally {
+        	closeResources();
         }
     }
 
     private ServerMsg logout(ClientMsg req) {
-        return ServerMsg.asOK("logout");
+        try {
+        	socket.close();
+        	return ServerMsg.asOK("logout");
+        } catch (IOException e) {
+        	return ServerMsg.asERR("Failed to close socket during logout.");
+        }
+    	
     }
-
+    
+    private void closeResources() {
+    	try {
+    		istream.close();
+    		ostream.close();
+    		socket.close();
+    	} catch (IOException err) {
+    		System.err.println("Failed to close resources properly.");
+    		err.printStackTrace();
+    	}
+    }
     private synchronized ServerMsg viewSections(ClientMsg req) {
         var teaching = instructor.getTeaching().toArray(new Section[0]);
         return ServerMsg.asOK(teaching);
