@@ -47,6 +47,17 @@ public class Util {
          * different course) then the check will fail with CS 201 as an unfulfilled
          * prereq.
          */
+        var iter = course.getPrerequisites().iterator();
+        // Need to remove non existent pre-reqs before checking enrollments so they don't stay
+        while (iter.hasNext()) {
+            String prereqID = iter.next();
+            Course prereqCourse = university.getCourseByID(prereqID);
+            // Non-existent prerequisite.
+            if (prereqCourse == null) {
+                unfulfilledPrereqs.remove(prereqID);
+                iter.remove();
+            }
+        }
         for (var pastSection : student.getPastEnrollments()) {
             // Just to make sure it's the latest object.
             Course pastCourse = university.getCourseByID(pastSection.getCourse().getID());
@@ -56,7 +67,7 @@ public class Util {
                 pastCourse = pastSection.getCourse();
             }
 
-            var iter = course.getPrerequisites().iterator();
+            iter = course.getPrerequisites().iterator();
             while (iter.hasNext()) {
                 String prereqID = iter.next();
                 Course prereqCourse = university.getCourseByID(prereqID);
