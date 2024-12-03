@@ -222,11 +222,13 @@ public class AdminSessionHandler extends SessionHandler {
                 .filter((i) -> i.getName().equals(clientInstructor.getName()))
                 .collect(Collectors.toList())
                 .toArray(new Instructor[0]);
+        Instructor instructor = null;
         if (found.length < 1) {
-            return ServerMsg.asERR(String.format("Instructor '%s' not found.", clientInstructor.getName()));
+            // return ServerMsg.asERR(String.format("Instructor '%s' not found.", clientInstructor.getName()));
+            instructor = new Instructor(clientInstructor.getName(), null);
         }
 
-        Instructor instructor = found[0];
+        instructor = found[0];
 
         var conflictedSection = Util.findOverlap(section, instructor.getTeaching());
         if (conflictedSection != null) {
