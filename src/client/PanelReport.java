@@ -1,9 +1,6 @@
 package client;
 
-<<<<<<< HEAD
-=======
 import java.awt.Color;
->>>>>>> finalcheck1
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;

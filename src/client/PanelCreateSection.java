@@ -123,7 +123,7 @@ public class PanelCreateSection extends PanelBase {
             @Override
             public void actionPerformed(ActionEvent e) {
                 selectedCourse = courseMap.get(courseDropdown.getSelectedItem());
-                Section newSection = form.getEditedSection(selectedCourse);
+                Section newSection = form.getNewSection(selectedCourse);
                 SwingWorker<ServerMsg, Void> worker = new SwingWorker<ServerMsg, Void>() {
                     @Override
                     protected ServerMsg doInBackground() throws Exception {

@@ -139,7 +139,7 @@ public class SectionEditForm {
                 items.add(String.format("%s,%s,%s,%s,%s,%s,%s", dayOfWeek, fromH, fromM, toH, toM, location,
                         isSync ? "s" : "a"));
             }
-            return String.join(" ", items);
+            return String.join("\n", items);
         });
 
         form.getPanel().setLayout(new BoxLayout(form.getPanel(), BoxLayout.Y_AXIS));
@@ -208,7 +208,7 @@ public class SectionEditForm {
 
         // Process schedule shenanigans
         ArrayList<ScheduleEntry> entries = new ArrayList<>();
-        String[] parts = rawSchedule.split(" ");
+        String[] parts = rawSchedule.split("\n");
         for (var part : parts) {
             String[] p = part.split(",");
             String rawDayOfWeek = p[0];
