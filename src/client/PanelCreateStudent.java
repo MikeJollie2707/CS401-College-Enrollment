@@ -1,6 +1,8 @@
 package client;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.ObjectInputStream;
@@ -28,15 +30,17 @@ public class PanelCreateStudent extends PanelBase {
     }
 
     void initForm() {
-        JTextField nameField = new JTextField(10);
-        JTextField loginField = new JTextField(10);
-        JTextField pwField = new JTextField(10);
+        JTextField nameField = new JTextField(15);
+        JTextField loginField = new JTextField(15);
+        JTextField pwField = new JTextField(15);
 
         createForm.addEntry(new JLabel("Name:"), nameField, () -> nameField.getText());
         createForm.addEntry(new JLabel("Login ID:"), loginField, () -> loginField.getText());
         createForm.addEntry(new JLabel("Password:"), pwField, () -> pwField.getText());
 
-        JButton submitBtn = new JButton("Create");
+        JButton submitBtn = new JButton("Create student");
+        submitBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        submitBtn.setBackground(Color.GREEN);
         submitBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -84,6 +88,7 @@ public class PanelCreateStudent extends PanelBase {
         });
         
         JPanel panel = createForm.getPanel();
+        panel.add(Box.createVerticalStrut(25));
         panel.add(submitBtn, BorderLayout.CENTER);
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
     }

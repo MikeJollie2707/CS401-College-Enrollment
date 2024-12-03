@@ -2,6 +2,7 @@ package client;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -99,10 +100,10 @@ public class PanelCatalog extends PanelBase {
     }
 
     void initForm() {
-        JTextField prefixField = new JTextField(10);
-        JTextField numberField = new JTextField(10);
-        JTextField nameField = new JTextField(10);
-        JTextField instructorField = new JTextField(10);
+        JTextField prefixField = new JTextField(15);
+        JTextField numberField = new JTextField(15);
+        JTextField nameField = new JTextField(15);
+        JTextField instructorField = new JTextField(15);
 
         searchForm.addEntry(new JLabel("Course prefix:"), prefixField, () -> prefixField.getText());
         searchForm.addEntry(new JLabel("Course number:"), numberField, () -> numberField.getText());
@@ -110,6 +111,8 @@ public class PanelCatalog extends PanelBase {
         searchForm.addEntry(new JLabel("Instructor:"), instructorField, () -> instructorField.getText());
 
         JButton searchBtn = new JButton("Search");
+        searchBtn.setBackground(new Color(108, 238, 245));
+        searchBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         searchBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
