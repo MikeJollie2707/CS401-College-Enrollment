@@ -35,6 +35,7 @@ public class ServerMain {
             }
 
         } catch (IOException err) {
+            System.out.println("No connection between server and client");
             err.printStackTrace();
         }
     }
