@@ -227,8 +227,10 @@ public class AdminSessionHandler extends SessionHandler {
             // return ServerMsg.asERR(String.format("Instructor '%s' not found.", clientInstructor.getName()));
             instructor = new Instructor(clientInstructor.getName(), null);
         }
+        else {
+            instructor = found[0];
+        }
 
-        instructor = found[0];
 
         var conflictedSection = Util.findOverlap(section, instructor.getTeaching());
         if (conflictedSection != null) {
