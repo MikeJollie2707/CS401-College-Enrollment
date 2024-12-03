@@ -1,9 +1,11 @@
 package server;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 
 import objects.*;
 
@@ -29,6 +31,9 @@ public class StudentSessionHandler extends SessionHandler {
                 } catch (ClassNotFoundException err) {
                     ostream.writeObject(ServerMsg.asERR("Conversion failed, 'ClientMsg' expected."));
                     continue;
+                } catch(EOFException | SocketException err) {
+                    System.err.println("Lost connection with client.");
+                    break;
                 }
 
                 if (req.isEndpoint("CREATE", "logout")) {

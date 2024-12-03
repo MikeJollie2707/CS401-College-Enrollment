@@ -7,6 +7,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 
 import objects.Account;
 import objects.BodyLogin;
@@ -91,8 +92,8 @@ public class ClientHandler implements Runnable {
             } catch (ClassNotFoundException err) {
                 System.err.println("Casting failed.");
                 err.printStackTrace();
-            } catch (Exception err) {
-                err.printStackTrace();
+            } catch(EOFException | SocketException err) {
+                System.err.println("Lost connection with client.");
             }
         } 
         catch (EOFException err) {
